@@ -8,73 +8,78 @@ import AddContent from "@/ModalPages/Resources/Add";
 import ContentInfo from "@/ModalPages/Resources/ContentInfo";
 import DeleteResource from "@/ModalPages/Resources/Delete";
 import EditResource from "@/ModalPages/Resources/Edit";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function Modal({ usage }) {
+export default function Modal() {
+  const searchParams = useSearchParams();
+  const usage = searchParams.get("modal");
+
   const router = useRouter();
   const onClose = () => {
     router.back();
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 1000,
-        overflow: "auto",
-        padding: 100,
-        paddingTop: "10%",
-      }}
-      onClick={onClose}
-    >
-      {usage === "notifications" ? (
+    <>
+      {usage && (
         <div
-          className="bg-base-white p-4 md:p-8 rounded-xl absolute top-16"
           style={{
-            width: "80%",
-            maxWidth: "400px",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+            overflow: "auto",
+            padding: 100,
+            paddingTop: "10%",
           }}
-          onClick={(e) => e.stopPropagation()}
+          onClick={onClose}
         >
-          <div className="float-right">
-            <button className="text-2xl text-gray-700" onClick={onClose}>
-              &times;
-            </button>
-          </div>
-          <Notifications />
-        </div>
-      ) : (
-        <div
-          className="bg-base-white p-4 md:p-8 rounded-xl"
-          style={{
-            width: "80%",
-            maxWidth:
-              usage.startsWith("delete") || usage.startsWith("suspend")
-                ? "500px"
-                : "750px",
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="float-right">
-            <button className="text-2xl text-gray-700" onClick={onClose}>
-              &times;
-            </button>
-          </div>
+          {usage === "notifications" ? (
+            <div
+              className="bg-base-white p-4 md:p-8 rounded-xl absolute top-16"
+              style={{
+                width: "80%",
+                maxWidth: "400px",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="float-right">
+                <button className="text-2xl text-gray-700" onClick={onClose}>
+                  &times;
+                </button>
+              </div>
+              <Notifications />
+            </div>
+          ) : (
+            <div
+              className="bg-base-white p-4 md:p-8 rounded-xl"
+              style={{
+                width: "80%",
+                maxWidth:
+                  usage.startsWith("delete") || usage.startsWith("suspend")
+                    ? "500px"
+                    : "750px",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="float-right">
+                <button className="text-2xl text-gray-700" onClick={onClose}>
+                  &times;
+                </button>
+              </div>
 
-          <div className="clear-both">
-            <ModalContent usage={usage} />
-          </div>
-        </div>
-      )}
-      {/* <div
+              <div className="clear-both">
+                <ModalContent usage={usage} />
+              </div>
+            </div>
+          )}
+          {/* <div
         className="bg-base-white p-4 md:p-8 rounded-xl"
         style={{
           width: "80%",
@@ -95,7 +100,9 @@ export default function Modal({ usage }) {
           <ModalContent usage={usage} />
         </div>
       </div> */}
-    </div>
+        </div>
+      )}
+    </>
   );
 }
 

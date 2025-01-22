@@ -1,6 +1,5 @@
-"use client";
-import Image from "next/image";
 import React from "react";
+import Image from "next/image";
 import { Bounce, ToastContainer } from "react-toastify";
 import logo from "@/assets/images/logo.png";
 

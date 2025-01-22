@@ -1,13 +1,16 @@
-"use client";
-import { ToastContext, useMessageContext } from "@/contexts/toast";
+import React, { Suspense } from "react";
+
 import Nav from "@/components/setup/Nav";
 import OtpVerification from "@/components/setup/otpEntry";
+import { ToastContext } from "@/contexts/toast";
 
 function OtpEntry() {
   return (
     <ToastContext>
-      <Nav active="otp" />
-      <OtpVerification />
+      <Suspense fallback={<div>Loading...</div>}>
+        <Nav active="otp" />
+        <OtpVerification />
+      </Suspense>
     </ToastContext>
   );
 }
