@@ -1,4 +1,3 @@
-import Link from "next/link";
 import React, { useState } from "react";
 import InputField from "@/components/elements/TextField";
 import Button from "@/components/elements/Button";
@@ -7,9 +6,24 @@ function AddAdmin() {
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isDisabled = firstname === "" || lastname === "" || email === "";
   const [activeTab, setActiveTab] = useState("profile");
+  const [error, setError] = useState("");
+
+  const submitUser = async () => {
+    setIsSubmitting(true);
+    if (firstname == "" || lastname == "" || email == "") {
+      setError("User name cannot be left empty");
+      return;
+    }
+    try {
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div>
@@ -38,18 +52,21 @@ function AddAdmin() {
               setValue={setFirstname}
               label={"First Name"}
               placeholder={"Enter user Firstname"}
+              error={error}
             />
             <InputField
               value={lastname}
               setValue={setLastname}
               label={"Last Name"}
               placeholder={"Enter user Last name"}
+              error={error}
             />
             <InputField
               value={email}
               setValue={setEmail}
               label={"Email Address"}
               placeholder={"admin@example.com"}
+              error={error}
             />
           </div>
 
@@ -171,9 +188,9 @@ function AddAdmin() {
             </div>
             <div className="flex-1 px-2">
               <Button
-                title={"Invite User"}
+                title={isSubmitting ? "Sending Invite" : "Invite User"}
                 disabled={isDisabled}
-                onClick={() => {}}
+                onClick={() => submitUser()}
               />
             </div>
           </div>
