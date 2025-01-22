@@ -19,3 +19,29 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@layer base {
+  @font-face {
+    font-family: "Rubik_Regular";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(../assets/fonts/Rubik-Regular.ttf) format("woff2");
+  }
+
+  @font-face {
+    font-family: "Rubik_Medium";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url(../assets/fonts/Rubik-Medium.ttf) format("woff2");
+  }
+
+  @font-face {
+    font-family: "Rubik_Bold";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url(../assets/fonts/Rubik-Bold.ttf) format("woff2");
+  }
+}

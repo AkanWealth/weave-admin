@@ -1,0 +1,40 @@
+.banner {
+  background: url("../assets/images/banner.png") no-repeat center;
+  background-size: cover;
+}
+
+tr {
+  border-bottom: 1px solid #ddd;
+}
+td,
+th {
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.dot {
+  min-width: 8;
+  min-height: 8;
+  border: 2px solid #111;
+  border-radius: 4;
+  margin: 3px auto;
+}
+
+.dropdown-menu {
+  display: none;
+  z-index: 10;
+}
+
+.dropdown:hover .dropdown-menu,
+.dropdown:focus .dropdown-menu {
+  display: block;
+}
+
+.tag {
+  font-size: 12;
+  border-radius: 8px;
+  padding: 4px 8px;
+  background: #c7e2e3;
+  display: inline-block;
+  margin-right: 8px;
+}
