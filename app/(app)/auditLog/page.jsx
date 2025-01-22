@@ -1,13 +1,10 @@
 "use client";
 import React, { useState } from "react";
-import growthFrame from "@/assets/images/Frame-3.png";
 import Image from "next/image";
+import growthFrame from "@/assets/images/Frame-3.png";
 import auditLogs from "@/dummyData/auditLogs";
-import { notFound } from "next/navigation";
 
 export default function Page() {
-  if (!auditLogs) return { notFound: true };
-
   return (
     <div>
       <h1 className="text-2xl">
@@ -67,25 +64,24 @@ export default function Page() {
                 <th>Action Type</th>
                 <th> Affected Data </th>
               </tr>
-              {auditLogs &&
-                auditLogs.map((audit) => (
-                  <tr key={Math.random()}>
-                    <td className="text-left px-6 py-4">{audit.date}</td>
-                    <td className="text-left px-6">
-                      <h6 className="font-rubikMedium text-black">
-                        {audit.admin_user}
-                      </h6>
-                      <h6 className="text-sm text-gray-500">
-                        {audit.admin_role}
-                      </h6>
-                    </td>
-                    <td className="text-xs pl-6 text-left">
-                      {audit.description}
-                    </td>
-                    <td>{audit.actionType}</td>
-                    <td>{audit.affectedData}</td>
-                  </tr>
-                ))}
+              {auditLogs.map((audit) => (
+                <tr key={Math.random()}>
+                  <td className="text-left px-6 py-4">{audit.date}</td>
+                  <td className="text-left px-6">
+                    <h6 className="font-rubikMedium text-black">
+                      {audit.admin_user}
+                    </h6>
+                    <h6 className="text-sm text-gray-500">
+                      {audit.admin_role}
+                    </h6>
+                  </td>
+                  <td className="text-xs pl-6 text-left">
+                    {audit.description}
+                  </td>
+                  <td>{audit.actionType}</td>
+                  <td>{audit.affectedData}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         )}

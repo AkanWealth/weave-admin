@@ -36,7 +36,7 @@ export default function FeedbackRender() {
       </div>
 
       {/* resources section */}
-      {feedbacks.length === 0 ? (
+      {feedbacks && feedbacks.length === 0 ? (
         <div className="flex flex-col text-center justify-center py-12 max-w-[350px] mx-auto">
           <Image
             src={growthFrame}
