@@ -43,9 +43,9 @@ function Layout({ children }) {
             User Management
           </Link>
           <Link
-            href={"/contents-management"}
+            href={"/contentsManagement"}
             className={
-              (pathname.startsWith("/contents-management")
+              (pathname.startsWith("/contentsManagement")
                 ? "bg-weave-primary text-base-white "
                 : "text-gray-600 ") + "rounded-md p-3 px-5"
             }
@@ -54,9 +54,9 @@ function Layout({ children }) {
             Content Management
           </Link>
           <Link
-            href={"/audit-log"}
+            href={"/auditLog"}
             className={
-              (pathname.startsWith("/audit-log")
+              (pathname.startsWith("/auditLog")
                 ? "bg-weave-primary text-base-white "
                 : "text-gray-600 ") + "rounded-md p-3 px-5"
             }

@@ -36,7 +36,7 @@ export default function ResourcesRender() {
       <div className="rounded-2xl bg-white p-4 my-4">
         <h3 className="text-xl font-rubikMedium">Resource Library</h3>
 
-        {resources.length === 0 ? (
+        {resources && resources.length === 0 ? (
           <div className="flex flex-col text-center justify-center py-12 max-w-[350px] mx-auto">
             <Image
               src={growthFrame}

@@ -5,12 +5,12 @@ import { cookies } from "next/headers";
 const protectedRoutes = [
   "/dashboard",
   "/dashboard/users",
-  "/contents-management",
+  "/contentsManagement",
   "/users",
   "/users/manage-roles",
   "/users/manage-roles/add",
   "/settings",
-  "/audit-logs",
+  "/auditLogs",
 ];
 const publicRoutes = ["/login", "/setup", "/"];
 

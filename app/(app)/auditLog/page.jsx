@@ -3,8 +3,11 @@ import React, { useState } from "react";
 import growthFrame from "@/assets/images/Frame-3.png";
 import Image from "next/image";
 import auditLogs from "@/dummyData/auditLogs";
+import { notFound } from "next/navigation";
 
 export default function Page() {
+  if (!auditLogs) return { notFound: true };
+
   return (
     <div>
       <h1 className="text-2xl">
@@ -39,7 +42,7 @@ export default function Page() {
       <div className="rounded-2xl bg-white p-4 my-4">
         <h3 className="text-xl font-rubikMedium">Audit Logs </h3>
 
-        {auditLogs.length === 0 ? (
+        {auditLogs && auditLogs.length === 0 ? (
           <div className="flex flex-col text-center justify-center py-12 max-w-[350px] mx-auto my-16">
             <Image
               src={growthFrame}
