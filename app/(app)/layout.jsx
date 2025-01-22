@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { Suspense } from "react";
 
 import logo from "@/assets/images/logo.png";
 import placeholderAvatar from "@/assets/images/3d_avatar_1.png";
@@ -129,7 +129,7 @@ function Layout({ children }) {
         </section>
       </main>
 
-      {modal && <Modal usage={modal} />}
+      <Suspense>{modal && <Modal usage={modal} />}</Suspense>
     </div>
   );
 }
