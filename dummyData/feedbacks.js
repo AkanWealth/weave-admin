@@ -1,4 +1,4 @@
-export default feedbacks = [
+const feedbacks = [
     {
         rating: 4,
         date: "10-12-2024",
@@ -60,3 +60,5 @@ export default feedbacks = [
             "Congratulations on setting up CKEditor! To make the most of it, visit the CKEditor documentationfor comprehensive guidance on how to fully customize and integrate the editor.",
     },
 ];
+
+export default feedbacks

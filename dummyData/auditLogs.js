@@ -1,4 +1,4 @@
-export default auditLogs = [
+const auditLogs = [
     {
         date: "2025-01-01T21:54:34.087Z",
         admin_user: "Joy Grace",
@@ -64,3 +64,5 @@ export default auditLogs = [
         affectedData: "WA 1234",
     },
 ];
+
+export default auditLogs
