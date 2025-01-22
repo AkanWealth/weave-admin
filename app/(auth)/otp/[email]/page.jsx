@@ -1,9 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import TextField from "@/components/elements/TextField";
-import Button from "@/components/elements/Button";
-import OtpEntry, { OtpVerification } from "@/app/setup/verify-otp/page";
-import { useRouter } from "next/router";
+import OtpVerification from "@/components/setup/otpEntry";
 import { ToastContext } from "@/contexts/toast";
 
 function Otp() {
