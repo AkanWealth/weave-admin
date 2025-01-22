@@ -4,7 +4,7 @@ import growthFrame from "@/assets/images/Frame-3.png";
 import Image from "next/image";
 import auditLogs from "@/dummyData/auditLogs";
 
-function Page() {
+export default function Page() {
   return (
     <div>
       <h1 className="text-2xl">
@@ -131,5 +131,3 @@ function Page() {
     </div>
   );
 }
-
-export default Page;
