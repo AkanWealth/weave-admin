@@ -2,75 +2,9 @@
 import React, { useState } from "react";
 import growthFrame from "@/assets/images/Frame-3.png";
 import Image from "next/image";
+import auditLogs from "@/dummyData/auditLogs";
 
 function Page() {
-  const auditLogs = [
-    {
-      date: "2025-01-01T21:54:34.087Z",
-      admin_user: "Joy Grace",
-      admin_role: "Admin",
-      description: "Admin Logged In",
-      actionType: "Login",
-      affectedData: "NOne",
-    },
-    {
-      date: "2025-01-01T21:54:34.087Z",
-      admin_user: "Joy Grace",
-      admin_role: "Content Manager",
-      description: "User Logged In",
-      actionType: "Signup",
-      affectedData: "WA 1234",
-    },
-    {
-      date: "2025-01-01T21:54:34.087Z",
-      admin_user: "Joy Grace",
-      admin_role: "Admin",
-      description: "Admin Logged In",
-      actionType: "Login",
-      affectedData: "NOne",
-    },
-    {
-      date: "2025-01-01T21:54:34.087Z",
-      admin_user: "Joy Grace",
-      admin_role: "Content Manager",
-      description: "User Logged In",
-      actionType: "Signup",
-      affectedData: "WA 1234",
-    },
-    {
-      date: "2025-01-01T21:54:34.087Z",
-      admin_user: "Joy Grace",
-      admin_role: "Admin",
-      description: "Admin Logged In",
-      actionType: "Login",
-      affectedData: "NOne",
-    },
-    {
-      date: "2025-01-01T21:54:34.087Z",
-      admin_user: "Joy Grace",
-      admin_role: "Content Manager",
-      description: "User Logged In",
-      actionType: "Signup",
-      affectedData: "WA 1234",
-    },
-    {
-      date: "2025-01-01T21:54:34.087Z",
-      admin_user: "Joy Grace",
-      admin_role: "Admin",
-      description: "Admin Logged In",
-      actionType: "Login",
-      affectedData: "NOne",
-    },
-    {
-      date: "2025-01-01T21:54:34.087Z",
-      admin_user: "Joy Grace",
-      admin_role: "Content Manager",
-      description: "User Logged In",
-      actionType: "Signup",
-      affectedData: "WA 1234",
-    },
-  ];
-
   return (
     <div>
       <h1 className="text-2xl">
@@ -130,24 +64,25 @@ function Page() {
                 <th>Action Type</th>
                 <th> Affected Data </th>
               </tr>
-              {auditLogs.map((audit) => (
-                <tr key={Math.random()}>
-                  <td className="text-left px-6 py-4">{audit.date}</td>
-                  <td className="text-left px-6">
-                    <h6 className="font-rubikMedium text-black">
-                      {audit.admin_user}
-                    </h6>
-                    <h6 className="text-sm text-gray-500">
-                      {audit.admin_role}
-                    </h6>
-                  </td>
-                  <td className="text-xs pl-6 text-left">
-                    {audit.description}
-                  </td>
-                  <td>{audit.actionType}</td>
-                  <td>{audit.affectedData}</td>
-                </tr>
-              ))}
+              {auditLogs &&
+                auditLogs.map((audit) => (
+                  <tr key={Math.random()}>
+                    <td className="text-left px-6 py-4">{audit.date}</td>
+                    <td className="text-left px-6">
+                      <h6 className="font-rubikMedium text-black">
+                        {audit.admin_user}
+                      </h6>
+                      <h6 className="text-sm text-gray-500">
+                        {audit.admin_role}
+                      </h6>
+                    </td>
+                    <td className="text-xs pl-6 text-left">
+                      {audit.description}
+                    </td>
+                    <td>{audit.actionType}</td>
+                    <td>{audit.affectedData}</td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         )}
