@@ -3,70 +3,9 @@ import Image from "next/image";
 import growthFrame from "@/assets/images/Frame-2.png";
 import Link from "next/link";
 import axios from "axios";
+import feedbacks from "@/dummyData/feedbacks";
 
-function FeedbackRender() {
-  const feedbacks = [
-    {
-      rating: 4,
-      date: "10-12-2024",
-      feedback:
-        "Congratulations on setting up CKEditor! To make the most of it, visit the CKEditor documentationfor comprehensive guidance on how to fully customize and integrate the editor.",
-    },
-    {
-      date: "10-12-2024",
-      rating: 2,
-      feedback:
-        "Congratulations on setting up CKEditor! To make the most of it, visit the CKEditor documentationfor comprehensive guidance on how to fully customize and integrate the editor.",
-    },
-    {
-      date: "10-12-2024",
-      rating: 5,
-      feedback:
-        "Congratulations on setting up CKEditor! To make the most of it, visit the CKEditor documentationfor comprehensive guidance on how to fully customize and integrate the editor.",
-    },
-    {
-      rating: 1,
-      date: "10-12-2024",
-      feedback:
-        "Congratulations on setting up CKEditor! To make the most of it, visit the CKEditor documentationfor comprehensive guidance on how to fully customize and integrate the editor.",
-    },
-    {
-      rating: 2,
-      date: "10-12-2024",
-      feedback:
-        "Congratulations on setting up CKEditor! To make the most of it, visit the CKEditor documentationfor comprehensive guidance on how to fully customize and integrate the editor.",
-    },
-    {
-      rating: 3,
-      date: "10-12-2024",
-      feedback:
-        "Congratulations on setting up CKEditor! To make the most of it, visit the CKEditor documentationfor comprehensive guidance on how to fully customize and integrate the editor.",
-    },
-    {
-      rating: 5,
-      date: "10-12-2024",
-      feedback:
-        "Congratulations on setting up CKEditor! To make the most of it, visit the CKEditor documentationfor comprehensive guidance on how to fully customize and integrate the editor.",
-    },
-    {
-      rating: 1,
-      date: "10-12-2024",
-      feedback:
-        "Congratulations on setting up CKEditor! To make the most of it, visit the CKEditor documentationfor comprehensive guidance on how to fully customize and integrate the editor.",
-    },
-    {
-      rating: 2,
-      date: "10-12-2024",
-      feedback:
-        "Congratulations on setting up CKEditor! To make the most of it, visit the CKEditor documentationfor comprehensive guidance on how to fully customize and integrate the editor.",
-    },
-    {
-      rating: 2,
-      date: "10-12-2024",
-      feedback:
-        "Congratulations on setting up CKEditor! To make the most of it, visit the CKEditor documentationfor comprehensive guidance on how to fully customize and integrate the editor.",
-    },
-  ];
+export default function FeedbackRender() {
   // const getFeedBack= async()=>{
   //     const feedBack = await axios.get(
   //       "https://the-weave-server-3ekl.onrender.com/api"
@@ -183,5 +122,3 @@ function FeedbackRender() {
     </>
   );
 }
-
-export default FeedbackRender;

@@ -4,7 +4,7 @@ import ResourcesRender from "./resoucesRender";
 import FeedbackRender from "./feedBackRender";
 import Link from "next/link";
 
-function Page() {
+export default function Page() {
   const [activeTab, setActiveTab] = useState("resources");
 
   return (
@@ -70,5 +70,3 @@ function Page() {
     </div>
   );
 }
-
-export default Page;

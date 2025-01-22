@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { resources } from "@/dummyData/resources";
 
-function ResourcesRender() {
+export default function ResourcesRender() {
   return (
     <>
       {/* search pane */}
@@ -171,5 +171,3 @@ function ResourcesRender() {
     </>
   );
 }
-
-export default ResourcesRender;

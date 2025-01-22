@@ -2,7 +2,7 @@ import Button from "@/components/elements/Button";
 import Link from "next/link";
 import React from "react";
 
-function Page() {
+export default function Page() {
   return (
     <div>
       <h1 className="text-2xl font-rubikMedium my-2">
@@ -350,5 +350,3 @@ function Page() {
     </div>
   );
 }
-
-export default Page;

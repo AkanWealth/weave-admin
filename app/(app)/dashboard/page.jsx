@@ -4,7 +4,7 @@ import growthFrame from "@/assets/images/Frame.png";
 import signupFrame from "@/assets/images/signupFrame.png";
 import Link from "next/link";
 
-function Dashboard() {
+export default function Dashboard() {
   return (
     <div>
       <h1 className="text-2xl">
@@ -119,5 +119,3 @@ function Dashboard() {
     </div>
   );
 }
-
-export default Dashboard;

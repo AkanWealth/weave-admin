@@ -6,7 +6,7 @@ import TextField from "@/components/elements/TextField";
 import Button from "@/components/elements/Button";
 import PasswordField from "@/components/elements/PasswordField";
 
-function Page() {
+export default function Page() {
   const [isLoading, setIsLoading] = useState(false);
 
   // inputs
@@ -150,5 +150,3 @@ function Page() {
     </div>
   );
 }
-
-export default Page;
