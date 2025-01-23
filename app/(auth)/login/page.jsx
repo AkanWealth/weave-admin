@@ -4,13 +4,48 @@ import TextField from "@/components/elements/TextField";
 import PasswordField from "@/components/elements/PasswordField";
 import Button from "@/components/elements/Button";
 import Link from "next/link";
+import api from "@/lib/api";
+import { ToastContext, useMessageContext } from "@/contexts/toast";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
+export default function Page() {
+  return (
+    <ToastContext>
+      <Login />
+    </ToastContext>
+  );
+}
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { showMessage } = useMessageContext();
+  const router = useRouter();
 
   const btnDisabled = email === "" || password === "" || isLoading;
+  const login = async () => {
+    setIsLoading(true);
+    try {
+      const resp = await api.post("/super-admin/login", {
+        email,
+        password,
+      });
+
+      if (resp.status === 201) {
+        localStorage.setItem("token", resp.data.token);
+        Cookies.set("session", resp.data.token);
+        router.push("/dashboard");
+        return;
+      }
+
+      showMessage("Error Logging in, check credentials and retry", "error");
+    } catch (err) {
+      showMessage(err.message, "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -36,7 +71,7 @@ function Login() {
         <Button
           title={isLoading ? "Logging in..." : "Login"}
           disabled={btnDisabled}
-          onClick={() => {}}
+          onClick={() => login()}
         />
       </div>
 
@@ -46,5 +81,3 @@ function Login() {
     </div>
   );
 }
-
-export default Login;

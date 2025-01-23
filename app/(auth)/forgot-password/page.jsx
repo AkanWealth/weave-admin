@@ -2,29 +2,32 @@
 import React, { useState } from "react";
 import TextField from "@/components/elements/TextField";
 import Button from "@/components/elements/Button";
-// import { useRouter } from "next/router";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import api from "@/lib/api";
+import { ToastContext, useMessageContext } from "@/contexts/toast";
 
-function Login() {
+function PasswordReset() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  // const router = useRouter();
+  const { showMessage } = useMessageContext();
+  const router = useRouter();
 
   const btnDisabled = email === "" || isLoading;
 
-  const requestOtp = () => {
+  const requestOtp = async () => {
     try {
-      // router.push({
-      //   pathname: "/otp",
-      //   param: {
-      //     email,
-      //   },
-      // });
+      const response = await api.post("/super-admin/forgot-password", {
+        email,
+      });
+      if (response.status === 200) {
+        showMessage("Otp sent to email successfully", "success");
+        router.push(`/otp?email=${email}`);
+      }
     } catch (error) {
+      showMessage(error.message, "error");
     } finally {
       setIsLoading(false);
     }
-    redirect(`/otp/${email}`);
   };
 
   return (
@@ -57,4 +60,10 @@ function Login() {
   );
 }
 
-export default Login;
+export default function Page() {
+  return (
+    <ToastContext>
+      <PasswordReset />
+    </ToastContext>
+  );
+}

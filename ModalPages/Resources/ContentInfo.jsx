@@ -1,6 +1,6 @@
 "use client";
 import InputField from "@/components/elements/TextField";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 import Image from "next/image";
@@ -9,25 +9,87 @@ import articleIcon from "@/assets/images/article 3.png";
 import audioIcon from "@/assets/images/audio 1.png";
 import fileIcon from "@/assets/images/file-document 1.png";
 import RichTextEditor from "@/components/elements/RichTextEditor";
+import { useModalContext } from "@/components/elements/Modal";
+import api from "@/lib/api";
 
 function ContentInfo() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const contentType = searchParams.get("contentType");
   const [activeTab, setActiveTab] = useState("info");
   const [title, setTitle] = useState("");
   const [thumbnail, setThumbnail] = useState("");
   const [articleBody, setArticleBody] = useState("");
+  const { showMessage } = useModalContext();
+  const [loadingThumbnail, setLoadingThumbnail] = useState(false);
+  const [thumbnails, setThumbnails] = useState([]);
+
+  const [thumbNailSelected, setThumbnailSelected] = useState(null);
+  const [isUploadingThumbnail, setIsuploadingThumbnail] = useState(false);
   useEffect(() => {
-    console.log(articleBody);
-  }, [articleBody]);
+    readAndUploadThumbnail();
+  }, [thumbNailSelected]);
+
+  const readAndUploadThumbnail = async () => {
+    if (!thumbNailSelected) return;
+    setIsuploadingThumbnail(true);
+    const fileReader = new FileReader();
+    fileReader.readAsArrayBuffer(thumbNailSelected);
+    fileReader.onload = (e) => {
+      console.log(e.target.result);
+      api
+        .post("/thumbnails", { file: e.target.result })
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+
+        .finally(() => {
+          setIsuploadingThumbnail(false);
+        });
+    };
+  };
+
+  const getThumbnails = async () => {
+    setLoadingThumbnail(true);
+    try {
+      const response = await api.get("/thumbnails");
+
+      console.log(response.data.thumbnails);
+      if (response.status === 200) {
+        setThumbnails(response?.data.thumbnails);
+      }
+    } catch (error) {
+      showMessage(error.message, "error");
+    } finally {
+      setLoadingThumbnail(false);
+    }
+  };
+
+  useEffect(() => {
+    getThumbnails();
+  }, []);
+
+  const submitForm = () => {
+    const form = document.forms["content-form"];
+    const category = form["category"].value;
+    console.log(category);
+  };
 
   return (
-    <div>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        submitForm();
+      }}
+      name="content-form"
+    >
       <h5 className="capitalize font-rubikBold text-xl">{contentType}</h5>
       <p className="text-sm text-gray-500 my-2">
         Fill in the details below to add new content to the resource library.
       </p>
-
       <div className="w-2/3 my-6">
         <button
           className="text-gray-500 pr-6 "
@@ -46,228 +108,223 @@ function ContentInfo() {
           Content Details
         </button>
       </div>
+      <div className={activeTab === "info" ? "" : "hidden"}>
+        <InputField
+          nae
+          label={"Content Title"}
+          value={title}
+          setValue={setTitle}
+        />
 
-      {activeTab === "info" ? (
-        <div>
-          <InputField
-            label={"Content Title"}
-            value={title}
-            setValue={setTitle}
-          />
-
-          <div className="my-4">
-            <label htmlFor="" className="font-rubikMedium">
-              Category
+        <div className="my-4">
+          <label htmlFor="" className="font-rubikMedium">
+            Category
+          </label>
+          <br />
+          <div className="inline-block">
+            <label>
+              <input
+                type="radio"
+                name="category"
+                value={"Sleep"}
+                className="mx-2"
+              />{" "}
+              Sleep
             </label>
-            <br />
-            <div className="inline-block">
-              <label>
-                <input
-                  type="radio"
-                  name="category"
-                  value={"Sleep"}
-                  className="mx-2"
-                />{" "}
-                Sleep
-              </label>
-            </div>
-            <div className="inline-block">
-              <label>
-                <input
-                  type="radio"
-                  name="category"
-                  value={"Happiness"}
-                  className="mx-2"
-                />{" "}
-                Happiness
-              </label>
-            </div>
-            <div className="inline-block">
-              <label>
-                <input
-                  type="radio"
-                  name="category"
-                  value={"Concentration"}
-                  className="mx-2"
-                />{" "}
-                Concentration
-              </label>
-            </div>
-            <div className="inline-block">
-              <label>
-                <input
-                  type="radio"
-                  name="category"
-                  value={"Energy"}
-                  className="mx-2"
-                />{" "}
-                Energy
-              </label>
-            </div>
           </div>
-
-          <div className="">Thumbnail/Illustration</div>
-          <div className="border border-gray-500 p-4 my-4 rounded-xl">
-            <div className="flex" style={{ gap: 10 }}>
-              <label
-                className={`border border-${
-                  contentType === "video" ? "weave-primary" : "gray-500"
-                } rounded-md p-6 w-1/4`}
-              >
-                <Image src={videoIcon} width={80} height={80} alt="Icon" />
-                <input
-                  type="radio"
-                  name="type"
-                  value={"video"}
-                  className="mr-2"
-                  onChange={(e) => setThumbnail(e.target.value)}
-                />
-                Video
-              </label>
-              <label
-                className={`border border-${
-                  contentType === "article" ? "weave-primary" : "gray-500"
-                } rounded-md p-6 w-1/4`}
-              >
-                <Image src={articleIcon} width={80} height={80} alt="Icon" />
-                <input
-                  type="radio"
-                  name="type"
-                  value={"article"}
-                  className="mr-2"
-                  onChange={(e) => setThumbnail(e.target.value)}
-                />
-                Article
-              </label>
-              <label
-                className={`border border-${
-                  contentType === "audio" ? "weave-primary" : "gray-500"
-                } rounded-md p-6 w-1/4`}
-              >
-                <Image src={audioIcon} width={80} height={80} alt="Icon" />
-                <input
-                  type="radio"
-                  name="type"
-                  value={"audio"}
-                  className="mr-2"
-                  onChange={(e) => setThumbnail(e.target.value)}
-                />
-                Audio
-              </label>
-              <label
-                className={`border border-${
-                  contentType === "document" ? "weave-primary" : "gray-500"
-                } rounded-md p-6 w-1/4`}
-              >
-                <Image src={fileIcon} width={80} height={80} alt="Icon" />
-                <input
-                  type="radio"
-                  name="type"
-                  value={"document"}
-                  className="mr-2"
-                  onChange={(e) => setThumbnail(e.target.value)}
-                />
-                File
-              </label>
-            </div>
-            <div className="mt-4 text-center">
-              <button className="border border-2 border-black rounded-xl mx-auto p-2 w-[300px] text-md font-rubikMedium">
-                Add New Thumbnail
-              </button>
-            </div>
+          <div className="inline-block">
+            <label>
+              <input
+                type="radio"
+                name="category"
+                value={"Happiness"}
+                className="mx-2"
+              />{" "}
+              Happiness
+            </label>
           </div>
-          <div className="flex" style={{ gap: 20 }}>
-            <div className="flex-1"> </div>
-            <div className="flex-1">
-              <button className="border border-black py-2 w-full font-rubikMedium rounded-md">
-                Back
-              </button>
-            </div>
-            <div className="flex-1">
-              <button className="bg-gray-300 text-black py-2 w-full font-rubikMedium rounded-md">
-                Save as Draft
-              </button>
-            </div>
-            <div className="flex-1">
-              <button
-                className="bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md"
-                onClick={() => setActiveTab("file")}
-              >
-                Continue
-              </button>
-            </div>
+          <div className="inline-block">
+            <label>
+              <input
+                type="radio"
+                name="category"
+                value={"Concentration"}
+                className="mx-2"
+              />
+              Concentration
+            </label>
+          </div>
+          <div className="inline-block">
+            <label>
+              <input
+                type="radio"
+                name="category"
+                value={"Energy"}
+                className="mx-2"
+              />
+              Energy
+            </label>
           </div>
         </div>
-      ) : (
-        <div>
-          {contentType === "article" ? (
-            <>
-              <h6 className="text-xl font-rubikBold my-2 capitalize">
-                Content Body
-              </h6>
 
-              <div className="mb-4">
-                <RichTextEditor setValue={setArticleBody} />
+        <div className="">Thumbnail/Illustration</div>
+        <div className="border border-gray-500 p-4 my-4 rounded-xl">
+          <div className="flex flex-wrap">
+            {loadingThumbnail ? (
+              <div className="text-center p-6 font-rubikMedium w-full">
+                Loading thumbnails...
               </div>
-
-              <InputField label={"Author"} placeholder={"Enter your name"} />
-            </>
-          ) : (
-            <>
-              <h6 className="text-xl font-rubikBold my-2 capitalize">
-                {contentType} File Upload
-              </h6>
-
-              <form action="" encType="multipart/formdata">
-                <input type="file" name="file" id="file" className="hidden" />
-                <label
-                  htmlFor="file"
-                  className="rounded-xl flex flex-col text-center"
-                  style={{
-                    padding: "2rem",
-                    border: "2px dashed #777",
-                    gap: 4,
-                    margin: "15px auto",
-                  }}
-                >
-                  <span>Drag or and drop your audio file here</span>
-                  <span className="text-gray-500">MP3, WAV</span>
-                  <span>
-                    <span className="inline-block px-4 py-2 text-md text-base-white bg-weave-primary rounded-xl">
-                      Select File
-                    </span>
-                  </span>
-                </label>
-
-                <InputField label={"Duration"} placeholder={"e.g. 3:45"} />
-              </form>
-            </>
-          )}
-
-          <div className="flex" style={{ gap: 20, marginTop: 20 }}>
-            <div className="flex-1"> </div>
-            <div className="flex-1">
-              <button
-                className="border border-black py-2 w-full font-rubikMedium rounded-md"
-                onClick={() => setActiveTab("info")}
-              >
-                Back
-              </button>
-            </div>
-            <div className="flex-1">
-              <button className="bg-gray-300 text-black py-2 w-full font-rubikMedium rounded-md">
-                Save as Draft
-              </button>
-            </div>
-            <div className="flex-1">
-              <button className="bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md">
-                Continue
-              </button>
-            </div>
+            ) : thumbnails.length !== 0 ? (
+              thumbnails.map((item) => (
+                <div className=" w-1/4 p-1" key={item.id}>
+                  <label
+                    className={`border border-${
+                      thumbnail === item.fileUrl ? "weave-primary" : "gray-500"
+                    } rounded-md p-6  flex flex-col h-full`}
+                  >
+                    <img
+                      src={`${item.fileUrl}`}
+                      className="w-full my-auto h-3/4"
+                      alt="Icon"
+                    />
+                    <div className=".h-1/4 text-center">
+                      <input
+                        type="radio"
+                        name="thumbnail"
+                        value={item.fileUrl}
+                        className="mr-2"
+                        onChange={(e) => setThumbnail(e.target.value)}
+                      />
+                    </div>
+                  </label>
+                </div>
+              ))
+            ) : (
+              <div className="text-center p-6 font-rubikMedium w-full">
+                No thumbnail found
+              </div>
+            )}
+          </div>
+          <div className="mt-4 text-center">
+            <input
+              type="file"
+              className="hidden"
+              id="thumbnail-input"
+              onChange={(e) => setThumbnailSelected(e.target.files[0])}
+            />
+            <label
+              htmlFor="thumbnail-input"
+              className="border border-2 border-black rounded-xl mx-auto p-2 px-4 w-[300px] text-md font-rubikMedium"
+            >
+              {isUploadingThumbnail
+                ? "Uploading thumbnail..."
+                : "Add New Thumbnail"}
+            </label>
           </div>
         </div>
-      )}
-    </div>
+        <div className="flex" style={{ gap: 20 }}>
+          <div className="flex-1"></div>
+          <div className="flex-1">
+            <button
+              className="border border-black py-2 w-full font-rubikMedium rounded-md"
+              onClick={() => router.back()}
+              type="button"
+            >
+              Back
+            </button>
+          </div>
+          <div className="flex-1">
+            <button
+              className="bg-gray-300 text-black py-2 w-full font-rubikMedium rounded-md"
+              type="button"
+            >
+              Save as Draft
+            </button>
+          </div>
+          <div className="flex-1">
+            <button
+              className="bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md"
+              onClick={() => setActiveTab("file")}
+              type="button"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className={activeTab === "info" ? "hidden" : ""}>
+        {contentType === "article" ? (
+          <>
+            <h6 className="text-xl font-rubikBold my-2 capitalize">
+              Content Body
+            </h6>
+
+            <div className="mb-4">
+              <RichTextEditor setValue={setArticleBody} />
+            </div>
+
+            <InputField label={"Author"} placeholder={"Enter your name"} />
+          </>
+        ) : (
+          <>
+            <h6 className="text-xl font-rubikBold my-2 capitalize">
+              {contentType} File Upload
+            </h6>
+
+            <input type="file" name="file" id="file" className="hidden" />
+            <label
+              htmlFor="file"
+              className="rounded-xl flex flex-col text-center"
+              style={{
+                padding: "2rem",
+                border: "2px dashed #777",
+                gap: 4,
+                margin: "15px auto",
+              }}
+            >
+              <span>Drag or and drop your audio file here</span>
+              <span className="text-gray-500">MP3, WAV</span>
+              <span>
+                <span className="inline-block px-4 py-2 text-md text-base-white bg-weave-primary rounded-xl">
+                  Select File
+                </span>
+              </span>
+            </label>
+
+            <InputField label={"Duration"} placeholder={"e.g. 3:45"} />
+          </>
+        )}
+
+        <div className="flex" style={{ gap: 20, marginTop: 20 }}>
+          <div className="flex-1"> </div>
+          <div className="flex-1">
+            <button
+              className="border border-black py-2 w-full font-rubikMedium rounded-md"
+              onClick={() => setActiveTab("info")}
+              type="button"
+            >
+              Back
+            </button>
+          </div>
+          <div className="flex-1">
+            <button
+              className="bg-gray-300 text-black py-2 w-full font-rubikMedium rounded-md"
+              type="button"
+            >
+              Save as Draft
+            </button>
+          </div>
+          <div className="flex-1">
+            <button
+              type="submit"
+              className="bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
   );
 }
 

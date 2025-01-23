@@ -13,11 +13,23 @@ export default function OtpVerification() {
   const [isError, setIsError] = useState(false);
   const params = useSearchParams();
   const email = params.get("email");
+  const btnDisabled = otp === "" || isLoading;
+  const usage = params.get("usage");
 
   const verifyOtp = async () => {
+    setIsLoading(true);
+
     try {
-      const resp = await api.post("/");
-      console.log(resp.data);
+      const resp = await api.post("/super-admin/verify-otp", { email, otp });
+      if (resp.status === 200) {
+        if (usage == "signup") {
+          redirect("/welcome");
+        } else if (usage == "reset-password") {
+          redirect("/reset-password");
+        } else {
+          redirect("/setup/password");
+        }
+      }
     } catch (err) {
       showMessage(JSON.stringify(err), "error");
       setIsError(true);
@@ -26,7 +38,7 @@ export default function OtpVerification() {
       // setIsError(false)
     }
 
-    redirect("/setup/message");
+    // redirect("/setup/message");
   };
 
   useEffect(() => {
@@ -61,6 +73,7 @@ export default function OtpVerification() {
 
         <div className="my-6 mb-8 flex justify-center text-center">
           <OTPInput
+            inputType="number"
             value={otp}
             onChange={setOtp}
             numInputs={noOfEntry}
@@ -78,14 +91,13 @@ export default function OtpVerification() {
           {otp.length < noOfEntry || isLoading ? (
             <button
               className="py-2 bg-base-secondary text-base-white w-full rounded-xl"
-              disabled={true}
+              disabled={btnDisabled}
             >
               {isLoading ? "Verifying Otp..." : "Verify Otp"}
             </button>
           ) : (
             <button
               onClick={() => {
-                setIsLoading(true);
                 verifyOtp();
               }}
               className="py-2 bg-weave-primary text-base-white w-full rounded-xl"

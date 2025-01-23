@@ -57,7 +57,7 @@ function PageContent() {
       showMessage(response?.data.message, "success");
 
       if (response.status === 201) {
-        router.push(`/setup/verify-otp/${email}`);
+        router.push(`/otp?email=${email}`);
       }
     } catch (error) {
       showMessage(error.message, "error");

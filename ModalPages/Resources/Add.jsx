@@ -85,7 +85,10 @@ function AddContent() {
       <div className="w-2/3 mx-auto">
         <div className="flex" style={{ gap: 20 }}>
           <div className="flex-1">
-            <button className="border border-black py-2 w-full font-rubikMedium rounded-md">
+            <button
+              className="border border-black py-2 w-full font-rubikMedium rounded-md"
+              onClick={() => router.back()}
+            >
               Cancel
             </button>
           </div>

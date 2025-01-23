@@ -9,8 +9,33 @@ import ContentInfo from "@/ModalPages/Resources/ContentInfo";
 import DeleteResource from "@/ModalPages/Resources/Delete";
 import EditResource from "@/ModalPages/Resources/Edit";
 import { useRouter, useSearchParams } from "next/navigation";
+import { createContext, useContext } from "react";
+import { Bounce, toast, ToastContainer } from "react-toastify";
+
+const ModalContext = createContext();
 
 export default function Modal() {
+  const showMessage = (message, status) => {
+    console.log(message);
+    let toastOptions = {
+      position: "top-right",
+      autoClose: 8000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+    };
+
+    if (status === "success") {
+      toast.success(message, toastOptions);
+    } else if (status === "error") {
+      toast.error(message, toastOptions);
+    } else toast(message, toastOptions);
+  };
+
   const searchParams = useSearchParams();
   const usage = searchParams.get("modal");
 
@@ -20,7 +45,7 @@ export default function Modal() {
   };
 
   return (
-    <>
+    <ModalContext.Provider value={{ showMessage }}>
       {usage && (
         <div
           style={{
@@ -102,7 +127,21 @@ export default function Modal() {
       </div> */}
         </div>
       )}
-    </>
+
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
+    </ModalContext.Provider>
   );
 }
 
@@ -117,3 +156,5 @@ const ModalContent = ({ usage, params }) => {
   if (usage === "edit-resource") return <EditResource />;
   if (usage === "add-notification") return <AddNotification />;
 };
+
+export const useModalContext = () => useContext(ModalContext);
