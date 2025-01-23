@@ -1,23 +1,65 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import growthFrame from "@/assets/images/Frame.png";
 import Link from "next/link";
+import api from "@/lib/api";
+import { ToastContext, useMessageContext } from "@/contexts/toast";
+function ResourcesRender() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [resources, setResources] = useState([]);
+  const [filteredResources, setFilteredResources] = useState([]);
+  const [searchKey, setSearchKey] = useState("");
+  const { showMessage } = useMessageContext;
 
-import { resources } from "@/dummyData/resources";
+  const fetchResources = async () => {
+    try {
+      const response = await api.get("/resource-library/resources");
 
-export default function ResourcesRender() {
+      if (response.status === 200) {
+        setResources(response.data.resources);
+      }
+    } catch (err) {
+      showMessage(err.response.message, "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchResources();
+  }, []);
+
+  useEffect(() => {
+    setFilteredResources(resources);
+  }, [resources]);
+
+  useEffect(() => {
+    if (searchKey === "") return;
+
+    const matchResources = resources.filter((resource) =>
+      Object.values(resource)
+        .join(" ")
+        .toLowerCase()
+        .includes(searchKey.toLowerCase())
+    );
+
+    setFilteredResources(matchResources);
+  }, [searchKey]);
+
   return (
     <>
       {/* search pane */}
       <div className="flex my-4">
         <div className="w-3/5">
-          <form action="" className="bg-white border px-8 py-2 rounded-md">
+          <div className="bg-white border px-8 py-2 rounded-md">
             <input
               type="text"
               className="bg-[#f5f6fa] rounded-md w-full px-4 py-2"
               placeholder="Search here"
+              value={searchKey}
+              onChange={(e) => setSearchKey(e.target.value)}
             />
-          </form>
+          </div>
         </div>
         <div className="w-1/5"></div>
         <div className="w-1/5">
@@ -36,7 +78,19 @@ export default function ResourcesRender() {
       <div className="rounded-2xl bg-white p-4 my-4">
         <h3 className="text-xl font-rubikMedium">Resource Library</h3>
 
-        {resources && resources.length === 0 ? (
+        {isLoading ? (
+          <>
+            {/* Table Rows Placeholder */}
+            <div className="space-y-2">
+              {[...Array(5)].map((_, index) => (
+                <div
+                  key={index}
+                  className="h-6 bg-gray-200 rounded w-full"
+                ></div>
+              ))}
+            </div>
+          </>
+        ) : resources && filteredResources.length === 0 ? (
           <div className="flex flex-col text-center justify-center py-12 max-w-[350px] mx-auto">
             <Image
               src={growthFrame}
@@ -76,8 +130,11 @@ export default function ResourcesRender() {
                     </h6>
                   </td>
                   <td className="text-xs pl-6 text-left">
-                    <span className="tag">Sleep</span>
-                    <span className="tag">Sleep</span>
+                    {resource.tags.map((tag) => (
+                      <span key={tag} className="tag m-1">
+                        {tag}
+                      </span>
+                    ))}
                   </td>
                   <td>{resource.resourceType}</td>
                   <td>
@@ -126,10 +183,12 @@ export default function ResourcesRender() {
             </tbody>
           </table>
         )}
+
+        {}
       </div>
 
       {/* pagination activity tab */}
-      <div className="rounded-md bg-white p-4 my-4 md:flex md:justify-end">
+      {/* <div className="rounded-md bg-white p-4 my-4 md:flex md:justify-end">
         <div className="md:min-w-1/2 flex space-x-2">
           <p className="my-auto">Page 1 of 20</p>
           <button className="rounded-full w-[30px] h-[30px] bg-weave-primary text-base-white flex justify-center">
@@ -167,7 +226,15 @@ export default function ResourcesRender() {
             </span>
           </button>
         </div>
-      </div>
+      </div> */}
     </>
+  );
+}
+
+export default function Page() {
+  return (
+    <ToastContext>
+      <ResourcesRender />
+    </ToastContext>
   );
 }

@@ -1,9 +1,9 @@
 "use client";
 import React from "react";
 
-function InputField({ label, placeholder, value, setValue, error }) {
+function InputField({ label, placeholder, value, setValue, error, className }) {
   return (
-    <div className="flex-column space-y-2">
+    <div className={`flex-column space-y-2 ${className && className}`}>
       <label htmlFor={label} className="capitalize font-rubikMedium">
         {label}
       </label>
@@ -15,7 +15,7 @@ function InputField({ label, placeholder, value, setValue, error }) {
           (error && error !== ""
             ? "border-red-500 focus:border-red-500 "
             : "") +
-          "w-full p-2 border border-base-black focus:border-weave-primary focus:outline-none rounded-md font-rubikRegular"
+          `w-full p-2 border border-base-black focus:border-weave-primary focus:outline-none rounded-md font-rubikRegular `
         }
         value={value}
         onChange={(e) => setValue(e.target.value)}

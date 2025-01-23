@@ -11,18 +11,40 @@ import fileIcon from "@/assets/images/file-document 1.png";
 import RichTextEditor from "@/components/elements/RichTextEditor";
 import { useModalContext } from "@/components/elements/Modal";
 import api from "@/lib/api";
+import Cookies from "js-cookie";
 
 function ContentInfo() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const contentType = searchParams.get("contentType");
   const [activeTab, setActiveTab] = useState("info");
+
   const [title, setTitle] = useState("");
   const [thumbnail, setThumbnail] = useState("");
   const [articleBody, setArticleBody] = useState("");
+  const [author, setAuthor] = useState("");
+  const [duration, setDuration] = useState("");
+  const [tags, setTags] = useState([]);
+
+  const addToTag = (tag) => {
+    if (tag == "") return;
+    const tagExist = tags.find(
+      (item) => item.toLowerCase() === tag.toLowerCase()
+    );
+    if (!tagExist) setTags([...tags, tag]);
+  };
+
+  const removeFromTag = (tag) => {
+    const otherTags = tags.filter((item) => item !== tag);
+    setTags(otherTags);
+  };
+
   const { showMessage } = useModalContext();
+
   const [loadingThumbnail, setLoadingThumbnail] = useState(false);
   const [thumbnails, setThumbnails] = useState([]);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [thumbNailSelected, setThumbnailSelected] = useState(null);
   const [isUploadingThumbnail, setIsuploadingThumbnail] = useState(false);
@@ -35,21 +57,44 @@ function ContentInfo() {
     setIsuploadingThumbnail(true);
     const fileReader = new FileReader();
     fileReader.readAsArrayBuffer(thumbNailSelected);
-    fileReader.onload = (e) => {
-      console.log(e.target.result);
-      api
-        .post("/thumbnails", { file: e.target.result })
-        .then((response) => {
-          console.log(response);
-        })
-        .catch((err) => {
-          console.log(err);
-        })
+    const accessToken = Cookies.get("session");
+    let formdata = new FormData();
+    formdata.append("file", thumbNailSelected);
+    try {
+      const resp = await fetch(
+        "https://the-weave-server-3ekl.onrender.com/api/v1/thumbnails",
+        {
+          body: formdata,
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            contentType: "multipart/formdata",
+          },
+        }
+      );
 
-        .finally(() => {
-          setIsuploadingThumbnail(false);
-        });
-    };
+      const respBody = await resp.json();
+      showMessage(respBody.message, "success");
+    } catch (e) {
+      showMessage(e.message, "error");
+    } finally {
+      setIsuploadingThumbnail(false);
+    }
+    // fileReader.onload = (e) => {
+    //   console.log(e.target.result);
+    //   api
+    //     .post("/thumbnails", { file: e.target.result })
+    //     .then((response) => {
+    //       console.log(response);
+    //     })
+    //     .catch((err) => {
+    //       console.log(err);
+    //     })
+
+    //     .finally(() => {
+    //       setIsuploadingThumbnail(false);
+    //     });
+    // };
   };
 
   const getThumbnails = async () => {
@@ -57,7 +102,6 @@ function ContentInfo() {
     try {
       const response = await api.get("/thumbnails");
 
-      console.log(response.data.thumbnails);
       if (response.status === 200) {
         setThumbnails(response?.data.thumbnails);
       }
@@ -72,20 +116,36 @@ function ContentInfo() {
     getThumbnails();
   }, []);
 
-  const submitForm = () => {
+  const submitForm = async (status) => {
+    setIsSubmitting(true);
     const form = document.forms["content-form"];
     const category = form["category"].value;
-    console.log(category);
+    const thumbnailUrl = form["thumbnail"].value;
+
+    try {
+      const resp = await api.post("/resource-library/article", {
+        title,
+        category,
+        thumbnailUrl,
+        author,
+        content: articleBody,
+        description: articleBody,
+        duration,
+        tags,
+        status,
+      });
+
+      showMessage(resp.data.message, "success");
+    } catch (err) {
+      console.log(err.response);
+      showMessage(err.message, "error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        submitForm();
-      }}
-      name="content-form"
-    >
+    <form name="content-form" onSubmit={(e) => e.preventDefault()}>
       <h5 className="capitalize font-rubikBold text-xl">{contentType}</h5>
       <p className="text-sm text-gray-500 my-2">
         Fill in the details below to add new content to the resource library.
@@ -96,13 +156,17 @@ function ContentInfo() {
           onClick={() => {
             setActiveTab("info");
           }}
+          type="button"
         >
           <i className="fa fa-file mx-2"></i> Content Information
         </button>
 
         <button
           className="text-gray-500 px-4"
-          onClick={() => setActiveTab("file")}
+          onClick={() => {
+            setActiveTab("file");
+          }}
+          type="button"
         >
           <i className="fa fa-copy mx-2"></i>
           Content Details
@@ -223,28 +287,32 @@ function ContentInfo() {
           </div>
         </div>
         <div className="flex" style={{ gap: 20 }}>
-          <div className="flex-1"></div>
+          <div className="flex-2"></div>
           <div className="flex-1">
             <button
               className="border border-black py-2 w-full font-rubikMedium rounded-md"
-              onClick={() => router.back()}
+              onClick={() => {
+                router.back();
+              }}
               type="button"
             >
               Back
             </button>
           </div>
-          <div className="flex-1">
+          {/* <div className="flex-1">
             <button
               className="bg-gray-300 text-black py-2 w-full font-rubikMedium rounded-md"
               type="button"
             >
               Save as Draft
             </button>
-          </div>
+          </div> */}
           <div className="flex-1">
             <button
               className="bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md"
-              onClick={() => setActiveTab("file")}
+              onClick={() => {
+                setActiveTab("file");
+              }}
               type="button"
             >
               Continue
@@ -263,7 +331,47 @@ function ContentInfo() {
               <RichTextEditor setValue={setArticleBody} />
             </div>
 
-            <InputField label={"Author"} placeholder={"Enter your name"} />
+            <InputField
+              label={"Author"}
+              placeholder={"Enter Author name"}
+              value={author}
+              setValue={setAuthor}
+              className="mb-2"
+            />
+            <InputField
+              label={"Duration"}
+              placeholder={"e.g 3min 4sec"}
+              value={duration}
+              setValue={setDuration}
+              className="mb-3"
+            />
+            <div className="border border-weave-primary rounded-md p-2 flex flex-row flex-wrap my-2">
+              {tags.length > 0 ? (
+                tags.map((tag) => (
+                  <div
+                    key={tag}
+                    className="bg-gray-200 rounded-md text-gray-700 p-1 text-sm mr-2"
+                  >
+                    {tag}
+                    <button
+                      onClick={(e) => {
+                        removeFromTag(tag);
+                      }}
+                      type="button"
+                    >
+                      <span className="fa fa-remove ml-2"></span>
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <></>
+              )}
+              <input
+                type="text"
+                className="focus:outline-none flex-1 px-2"
+                onBlur={(e) => addToTag(e.target.value)}
+              />
+            </div>
           </>
         ) : (
           <>
@@ -300,7 +408,9 @@ function ContentInfo() {
           <div className="flex-1">
             <button
               className="border border-black py-2 w-full font-rubikMedium rounded-md"
-              onClick={() => setActiveTab("info")}
+              onClick={() => {
+                setActiveTab("info");
+              }}
               type="button"
             >
               Back
@@ -310,6 +420,9 @@ function ContentInfo() {
             <button
               className="bg-gray-300 text-black py-2 w-full font-rubikMedium rounded-md"
               type="button"
+              onClick={() => {
+                submitForm("Draft");
+              }}
             >
               Save as Draft
             </button>
@@ -318,8 +431,14 @@ function ContentInfo() {
             <button
               type="submit"
               className="bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md"
+              disabled={isSubmitting}
+              onSubmit={(e) => {
+                e.preventDefault;
+
+                submitForm("Published");
+              }}
             >
-              Continue
+              {isSubmitting ? "Please wait..." : "Continue"}
             </button>
           </div>
         </div>

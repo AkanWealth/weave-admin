@@ -48,7 +48,12 @@ function Login() {
   };
 
   return (
-    <div>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        login();
+      }}
+    >
       <h1 className="text-4xl font-rubikBold"> Login as the Weave Admin </h1>
       <p className="text-md my-4 mb-8">
         Enter your account correct login below
@@ -78,6 +83,6 @@ function Login() {
       <Link href={"/forgot-password"} className="text-weave-primary">
         Forgot Password
       </Link>
-    </div>
+    </form>
   );
 }
