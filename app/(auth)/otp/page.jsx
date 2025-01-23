@@ -2,12 +2,15 @@
 import React, { useState } from "react";
 import OtpVerification from "@/components/setup/otpEntry";
 import { ToastContext } from "@/contexts/toast";
+import SuspendAdmin from "@/ModalPages/Admin/Suspend";
 
 function Otp() {
   return (
-    <ToastContext>
-      <OtpVerification />
-    </ToastContext>
+    <SuspendAdmin>
+      <ToastContext>
+        <OtpVerification />
+      </ToastContext>
+    </SuspendAdmin>
   );
 }
 
