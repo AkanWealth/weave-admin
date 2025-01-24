@@ -3,13 +3,13 @@ import Image from "next/image";
 import growthFrame from "@/assets/images/Frame.png";
 import Link from "next/link";
 import api from "@/lib/api";
-import { ToastContext, useMessageContext } from "@/contexts/toast";
-function ResourcesRender() {
+import { useMessageContext } from "@/contexts/toast";
+export default function ResourcesRender() {
   const [isLoading, setIsLoading] = useState(true);
   const [resources, setResources] = useState([]);
   const [filteredResources, setFilteredResources] = useState([]);
   const [searchKey, setSearchKey] = useState("");
-  const { showMessage } = useMessageContext;
+  const { showMessage } = useMessageContext();
 
   const fetchResources = async () => {
     try {
@@ -19,7 +19,7 @@ function ResourcesRender() {
         setResources(response.data.resources);
       }
     } catch (err) {
-      showMessage(err.response.message, "error");
+      showMessage("Unable to fetch resources", "error");
     } finally {
       setIsLoading(false);
     }
@@ -228,13 +228,5 @@ function ResourcesRender() {
         </div>
       </div> */}
     </>
-  );
-}
-
-export default function Page() {
-  return (
-    <ToastContext>
-      <ResourcesRender />
-    </ToastContext>
   );
 }

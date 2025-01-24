@@ -1,17 +1,13 @@
 "use client";
 import InputField from "@/components/elements/TextField";
-import { useRouter, useSearchParams } from "next/navigation";
+import { redirect, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-import Image from "next/image";
-import videoIcon from "@/assets/images/video 1.png";
-import articleIcon from "@/assets/images/article 3.png";
-import audioIcon from "@/assets/images/audio 1.png";
-import fileIcon from "@/assets/images/file-document 1.png";
 import RichTextEditor from "@/components/elements/RichTextEditor";
 import { useModalContext } from "@/components/elements/Modal";
 import api from "@/lib/api";
 import Cookies from "js-cookie";
+import { baseUrl } from "@/lib/envfile";
 
 function ContentInfo() {
   const router = useRouter();
@@ -25,6 +21,8 @@ function ContentInfo() {
   const [author, setAuthor] = useState("");
   const [duration, setDuration] = useState("");
   const [tags, setTags] = useState([]);
+  const [tagname, setTagName] = useState("");
+  const [fileUploadContent, setFileUploadContent] = useState(null);
 
   const addToTag = (tag) => {
     if (tag == "") return;
@@ -32,6 +30,7 @@ function ContentInfo() {
       (item) => item.toLowerCase() === tag.toLowerCase()
     );
     if (!tagExist) setTags([...tags, tag]);
+    setTagName("");
   };
 
   const removeFromTag = (tag) => {
@@ -61,17 +60,14 @@ function ContentInfo() {
     let formdata = new FormData();
     formdata.append("file", thumbNailSelected);
     try {
-      const resp = await fetch(
-        "https://the-weave-server-3ekl.onrender.com/api/v1/thumbnails",
-        {
-          body: formdata,
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            contentType: "multipart/formdata",
-          },
-        }
-      );
+      const resp = await fetch(`${baseUrl}/thumbnails`, {
+        body: formdata,
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          contentType: "multipart/formdata",
+        },
+      });
 
       const respBody = await resp.json();
       showMessage(respBody.message, "success");
@@ -106,7 +102,7 @@ function ContentInfo() {
         setThumbnails(response?.data.thumbnails);
       }
     } catch (error) {
-      showMessage(error.message, "error");
+      showMessage("Unable to fetch thumbnails", "error");
     } finally {
       setLoadingThumbnail(false);
     }
@@ -123,22 +119,53 @@ function ContentInfo() {
     const thumbnailUrl = form["thumbnail"].value;
 
     try {
-      const resp = await api.post("/resource-library/article", {
-        title,
-        category,
-        thumbnailUrl,
-        author,
-        content: articleBody,
-        description: articleBody,
-        duration,
-        tags,
-        status,
-      });
+      if (contentType === "article") {
+        const resp = await api.post("/resource-library/article", {
+          title,
+          category,
+          thumbnailUrl,
+          author,
+          content: articleBody,
+          description: articleBody,
+          duration,
+          tags,
+          status,
+        });
 
-      showMessage(resp.data.message, "success");
+        showMessage(resp.data.message, "success");
+        redirect("/contentsManagement");
+      } else {
+        let formdata = new FormData();
+        formdata.append("file", fileUploadContent);
+        formdata.append("title", title);
+        formdata.append("category", category);
+        formdata.append("thumbnailUrl", thumbnailUrl);
+        formdata.append("author", author);
+        formdata.append("content", articleBody);
+        formdata.append("description", articleBody);
+        formdata.append("duration", duration);
+        formdata.append("tags", tags);
+        formdata.append("status", status);
+
+        const response = await fetch(`${baseUrl}/resource-library`, {
+          method: "POST",
+          body: formdata,
+          headers: {
+            "Content-Type": "multipart/formdata",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        const respbody = await response.json();
+        const respstatus = await response.status();
+        console.log({ respstatus });
+        console.log(respbody);
+
+        showMessage(respbody.message, "success");
+        redirect("/contentsManagement");
+      }
     } catch (err) {
-      console.log(err.response);
-      showMessage(err.message, "error");
+      console.log(err);
+      showMessage("Error uploading content", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -212,10 +239,10 @@ function ContentInfo() {
               <input
                 type="radio"
                 name="category"
-                value={"Concentration"}
+                value={"Meditation"}
                 className="mx-2"
               />
-              Concentration
+              Meditation
             </label>
           </div>
           <div className="inline-block">
@@ -223,10 +250,10 @@ function ContentInfo() {
               <input
                 type="radio"
                 name="category"
-                value={"Energy"}
+                value={"Sophrology"}
                 className="mx-2"
               />
-              Energy
+              Sophrology
             </label>
           </div>
         </div>
@@ -345,6 +372,8 @@ function ContentInfo() {
               setValue={setDuration}
               className="mb-3"
             />
+
+            <label className="capitalize font-rubikMedium">Tags </label>
             <div className="border border-weave-primary rounded-md p-2 flex flex-row flex-wrap my-2">
               {tags.length > 0 ? (
                 tags.map((tag) => (
@@ -369,6 +398,8 @@ function ContentInfo() {
               <input
                 type="text"
                 className="focus:outline-none flex-1 px-2"
+                value={tagname}
+                onChange={(e) => setTagName(e.target.value)}
                 onBlur={(e) => addToTag(e.target.value)}
               />
             </div>
@@ -379,7 +410,15 @@ function ContentInfo() {
               {contentType} File Upload
             </h6>
 
-            <input type="file" name="file" id="file" className="hidden" />
+            <input
+              type="file"
+              name="file"
+              id="file"
+              className="hidden"
+              onChange={(e) => {
+                setFileUploadContent(e.target.files[0]);
+              }}
+            />
             <label
               htmlFor="file"
               className="rounded-xl flex flex-col text-center"
@@ -420,23 +459,23 @@ function ContentInfo() {
             <button
               className="bg-gray-300 text-black py-2 w-full font-rubikMedium rounded-md"
               type="button"
+              disabled={isSubmitting}
               onClick={() => {
                 submitForm("Draft");
               }}
             >
-              Save as Draft
+              {isSubmitting ? "Please wait..." : "Save as Draft"}
             </button>
           </div>
           <div className="flex-1">
             <button
-              type="submit"
+              type="button"
               className="bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md"
-              disabled={isSubmitting}
-              onSubmit={(e) => {
-                e.preventDefault;
-
+              onClick={(e) => {
+                e.preventDefault();
                 submitForm("Published");
               }}
+              disabled={isSubmitting}
             >
               {isSubmitting ? "Please wait..." : "Continue"}
             </button>

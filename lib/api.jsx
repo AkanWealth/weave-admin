@@ -1,11 +1,12 @@
 import axios from "axios";
 
 import Cookies from "js-cookie";
+import { baseUrl } from "./envfile";
 
 // const accessToken =
 //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlOTJkNzA2OS0xYzYwLTQ4YmYtOTE2ZS1lZjVlNWI3ZmMwYjQiLCJlbWFpbCI6Im53YWJ1ZXplYW1hcmFjaGkyOEBnbWFpbC5jb20iLCJpYXQiOjE3Mzc1Njc5ODUsImV4cCI6MTczNzU4NTk4NX0.vLGqLgfj3xPVWnfCNzjqFcLTDyABuRbREN7jtkY1w9Y";
 const api = axios.create({
-  baseURL: "https://the-weave-server-3ekl.onrender.com/api/v1/", // Replace with your API base URL
+  baseURL: baseUrl, // Replace with your API base URL
   timeout: 20000,
   headers: {
     "Content-Type": "application/json",

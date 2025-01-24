@@ -22,6 +22,7 @@ function PasswordField({ label, placeholder, value, setValue, error }) {
       />
       <button
         className="absolute right-5 top-7"
+        type="button"
         onClick={() => setIsVisible(!isVisible)}
       >
         {isVisible ? (

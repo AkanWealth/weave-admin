@@ -34,14 +34,19 @@ function Login() {
 
       if (resp.status === 201) {
         localStorage.setItem("token", resp.data.token);
-        Cookies.set("session", resp.data.token);
+        Cookies.set("session", resp.data.token, { expires: 1 / 24 });
         router.push("/dashboard");
         return;
       }
 
       showMessage("Error Logging in, check credentials and retry", "error");
     } catch (err) {
-      showMessage(err.message, "error");
+      showMessage(
+        err.message
+          ? err.message
+          : "Error loggin in, check credentials and retry",
+        "error"
+      );
     } finally {
       setIsLoading(false);
     }

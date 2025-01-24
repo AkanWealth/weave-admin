@@ -48,7 +48,7 @@ function AddContent() {
             className="mr-2"
             onChange={(e) => setContentType(e.target.value)}
           />
-          Article
+          Guide
         </label>
         <label
           className={`border border-${
@@ -65,7 +65,7 @@ function AddContent() {
           />
           Audio
         </label>
-        <label
+        {/* <label
           className={`border border-${
             contentType === "document" ? "weave-primary" : "gray-500"
           } rounded-md p-6`}
@@ -79,7 +79,7 @@ function AddContent() {
             onChange={(e) => setContentType(e.target.value)}
           />
           File
-        </label>
+        </label> */}
       </div>
 
       <div className="w-2/3 mx-auto">

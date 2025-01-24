@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import growthFrame from "@/assets/images/Frame-2.png";
 import Link from "next/link";
 import axios from "axios";
 import feedbacks from "@/dummyData/feedbacks";
+import { useMessageContext } from "@/contexts/toast";
+import api from "@/lib/api";
 
 export default function FeedbackRender() {
   // const getFeedBack= async()=>{
@@ -11,6 +13,29 @@ export default function FeedbackRender() {
   //       "https://the-weave-server-3ekl.onrender.com/api"
   //     );
   // }
+  const [isLoading, setIsLoading] = useState(true);
+  const [feedbacks, setFeedBacks] = useState([]);
+  const { showMessage } = useMessageContext();
+
+  const fetchFeedback = async () => {
+    try {
+      const response = await api.get("/app-rating");
+
+      if (response.status === 200) {
+        console.log(response);
+        setFeedBacks(response.data.ratings);
+      }
+    } catch (err) {
+      console.log(err);
+      showMessage("Unable to fetch feedbacks", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFeedback();
+  }, []);
 
   return (
     <>
@@ -36,7 +61,9 @@ export default function FeedbackRender() {
       </div>
 
       {/* resources section */}
-      {feedbacks && feedbacks.length === 0 ? (
+      {isLoading ? (
+        "fetching"
+      ) : feedbacks && feedbacks.length === 0 ? (
         <div className="flex flex-col text-center justify-center py-12 max-w-[350px] mx-auto">
           <Image
             src={growthFrame}
@@ -58,8 +85,12 @@ export default function FeedbackRender() {
                 className="bg-base-white border p-3 rounded-md 
               text-sm"
               >
-                <p className="text-xs text-gray-500 mb-3">{feedback.date}</p>
-                {feedback.feedback}
+                <p className="text-xs text-gray-500 mb-3">
+                  {feedback.created_at}
+                </p>
+                {feedback.feedback !== ""
+                  ? feedback.feedback
+                  : "No feedback sent"}
 
                 <div className="text-xl flex gap-1 mt-2">
                   {[1, 2, 3, 4, 5].map((i) => (
