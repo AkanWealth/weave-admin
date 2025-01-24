@@ -39,6 +39,7 @@ function ContentInfo() {
   };
 
   const { showMessage } = useModalContext();
+  const accessToken = Cookies.get("session");
 
   const [loadingThumbnail, setLoadingThumbnail] = useState(false);
   const [thumbnails, setThumbnails] = useState([]);
@@ -56,7 +57,6 @@ function ContentInfo() {
     setIsuploadingThumbnail(true);
     const fileReader = new FileReader();
     fileReader.readAsArrayBuffer(thumbNailSelected);
-    const accessToken = Cookies.get("session");
     let formdata = new FormData();
     formdata.append("file", thumbNailSelected);
     try {
@@ -365,44 +365,6 @@ function ContentInfo() {
               setValue={setAuthor}
               className="mb-2"
             />
-            <InputField
-              label={"Duration"}
-              placeholder={"e.g 3min 4sec"}
-              value={duration}
-              setValue={setDuration}
-              className="mb-3"
-            />
-
-            <label className="capitalize font-rubikMedium">Tags </label>
-            <div className="border border-weave-primary rounded-md p-2 flex flex-row flex-wrap my-2">
-              {tags.length > 0 ? (
-                tags.map((tag) => (
-                  <div
-                    key={tag}
-                    className="bg-gray-200 rounded-md text-gray-700 p-1 text-sm mr-2"
-                  >
-                    {tag}
-                    <button
-                      onClick={(e) => {
-                        removeFromTag(tag);
-                      }}
-                      type="button"
-                    >
-                      <span className="fa fa-remove ml-2"></span>
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <></>
-              )}
-              <input
-                type="text"
-                className="focus:outline-none flex-1 px-2"
-                value={tagname}
-                onChange={(e) => setTagName(e.target.value)}
-                onBlur={(e) => addToTag(e.target.value)}
-              />
-            </div>
           </>
         ) : (
           <>
@@ -437,10 +399,47 @@ function ContentInfo() {
                 </span>
               </span>
             </label>
-
-            <InputField label={"Duration"} placeholder={"e.g. 3:45"} />
           </>
         )}
+
+        <InputField
+          label={"Duration"}
+          placeholder={"e.g 3min 4sec"}
+          value={duration}
+          setValue={setDuration}
+          className="mb-3"
+        />
+
+        <label className="capitalize font-rubikMedium">Tags </label>
+        <div className="border border-weave-primary rounded-md p-2 flex flex-row flex-wrap my-2">
+          {tags.length > 0 ? (
+            tags.map((tag) => (
+              <div
+                key={tag}
+                className="bg-gray-200 rounded-md text-gray-700 p-1 text-sm mr-2"
+              >
+                {tag}
+                <button
+                  onClick={(e) => {
+                    removeFromTag(tag);
+                  }}
+                  type="button"
+                >
+                  <span className="fa fa-remove ml-2"></span>
+                </button>
+              </div>
+            ))
+          ) : (
+            <></>
+          )}
+          <input
+            type="text"
+            className="focus:outline-none flex-1 px-2"
+            value={tagname}
+            onChange={(e) => setTagName(e.target.value)}
+            onBlur={(e) => addToTag(e.target.value)}
+          />
+        </div>
 
         <div className="flex" style={{ gap: 20, marginTop: 20 }}>
           <div className="flex-1"> </div>
