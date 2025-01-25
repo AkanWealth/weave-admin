@@ -465,7 +465,7 @@ function ContentInfo() {
               }}
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Please wait..." : "Continue"}
+              {isSubmitting ? "Please wait..." : "Publish"}
             </button>
           </div>
         </div>

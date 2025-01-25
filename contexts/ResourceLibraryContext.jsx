@@ -23,12 +23,20 @@ export default function ResourceLibraryProvider({ children }) {
     }
   };
 
+  const getSingleProduct = (resource_id) => {
+    const resource = resources.find((resource) => resource.id === resource_id);
+    console.log(resource);
+    return resource;
+  };
+
   useEffect(() => {
     fetchResources();
   }, []);
 
   return (
-    <ResourceLibraryContext.Provider value={{ resources, isLoading }}>
+    <ResourceLibraryContext.Provider
+      value={{ resources, isLoading, getSingleProduct }}
+    >
       {children}
     </ResourceLibraryContext.Provider>
   );

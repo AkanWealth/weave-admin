@@ -15,29 +15,47 @@ import ResourceLibraryProvider, {
 import Cookies from "js-cookie";
 import { ToastContext, useMessageContext } from "@/contexts/toast";
 import api from "@/lib/api";
+import { readAndUploadThumbnail } from "@/lib/uploadThumbnail";
 
 function EditResource() {
   const searchParams = useSearchParams();
   const resource_id = searchParams.get("resource_id");
   const contentType = searchParams.get("contentType");
   const [activeTab, setActiveTab] = useState("info");
-  const [title, setTitle] = useState("");
+  const [tagName, setTagName] = useState("");
   const [thumbnail, setThumbnail] = useState("");
   const [articleBody, setArticleBody] = useState("");
+  const [resourceFile, setResourceFile] = useState(null);
+
   const { showMessage } = useMessageContext();
   useEffect(() => {
     console.log(articleBody);
   }, [articleBody]);
 
   const [resourceInfo, setResourceInfo] = useState(null);
-  const { resources } = useResourceLibrary();
+  const { resources, getSingleProduct } = useResourceLibrary();
+
+  const addToTag = (tag) => {
+    if (tag == "") return;
+    const tagExist = resourceInfo.tags.find(
+      (item) => item.toLowerCase() === tag.toLowerCase()
+    );
+    if (!tagExist)
+      setResourceInfo({ ...resourceInfo, tags: [...resourceInfo.tags, tag] });
+    setTagName("");
+  };
+
+  const removeFromTag = (tag) => {
+    const otherTags = resourceInfo.tags.filter((item) => item !== tag);
+    setResourceInfo({ ...resourceInfo, tags: otherTags });
+  };
 
   useEffect(() => {
-    const resource = resources.find((resource) => resource.id === resource_id);
+    const resource = getSingleProduct(resource_id);
+    if (!resource) return;
     setResourceInfo(resource);
+    setArticleBody(resource.content);
   }, [resource_id, resources]);
-
-  const accessToken = Cookies.get("session");
 
   const [loadingThumbnail, setLoadingThumbnail] = useState(false);
   const [thumbnails, setThumbnails] = useState([]);
@@ -47,33 +65,17 @@ function EditResource() {
   const [thumbNailSelected, setThumbnailSelected] = useState(null);
   const [isUploadingThumbnail, setIsuploadingThumbnail] = useState(false);
   useEffect(() => {
-    readAndUploadThumbnail();
-  }, [thumbNailSelected]);
-
-  const readAndUploadThumbnail = async () => {
     if (!thumbNailSelected) return;
     setIsuploadingThumbnail(true);
-    let formdata = new FormData();
-    formdata.append("file", thumbNailSelected);
+    const uploadThumbnail = async () =>
+      await readAndUploadThumbnail(thumbNailSelected);
 
-    try {
-      const resp = await fetch(`${baseUrl}/thumbnails`, {
-        body: formdata,
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          contentType: "multipart/formdata",
-        },
-      });
-
-      const respBody = await resp.json();
-      showMessage(respBody.message, "success");
-    } catch (e) {
-      showMessage(e.message, "error");
-    } finally {
-      setIsuploadingThumbnail(false);
+    if (uploadThumbnail.status === "success") {
+      showMessage("Thumbnail uploaded", "success");
+    } else {
+      showMessage("Error uploading thumbail", "error");
     }
-  };
+  }, [thumbNailSelected]);
 
   const getThumbnails = async () => {
     setLoadingThumbnail(true);
@@ -93,6 +95,53 @@ function EditResource() {
   useEffect(() => {
     getThumbnails();
   }, []);
+
+  useEffect(() => {
+    setResourceInfo({ ...resourceInfo, content: articleBody });
+  }, [articleBody]);
+
+  const updateResource = async (status) => {
+    setIsSubmitting(true);
+
+    try {
+      let formdata = new FormData();
+
+      if (resourceFile) formdata.append("file", resourceFile);
+
+      formdata.append("title", resourceInfo.title);
+      formdata.append("category", resourceInfo.category);
+      formdata.append("thumbnailUrl", resourceInfo.thumbnailUrl);
+      formdata.append("author", resourceInfo.author);
+      formdata.append("description", resourceInfo.description);
+      if (contentType === "Article")
+        formdata.append("content", resourceInfo.content);
+
+      formdata.append("tags", resourceInfo.tags);
+      formdata.append("resourceType", resourceInfo.resourceType);
+      formdata.append("status", status);
+
+      const response = await fetch(`${baseUrl}/resource-library`, {
+        method: "POST",
+        body: formdata,
+        headers: {
+          contentType: "multipart/formdata",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const respbody = await response.json();
+      const respstatus = response.status;
+      console.log({ respstatus });
+      console.log(respbody);
+
+      showMessage(respbody.message, "success");
+      router.push("/contentsManagement");
+    } catch (err) {
+      console.log(err);
+      showMessage("Error uploading content", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Suspense>
@@ -160,7 +209,14 @@ function EditResource() {
                       name="category"
                       value={"Sleep"}
                       className="mx-2"
-                    />{" "}
+                      checked={resourceInfo.category === "Sleep"}
+                      onChange={(e) =>
+                        setResourceInfo({
+                          ...resourceInfo,
+                          category: e.target.value,
+                        })
+                      }
+                    />
                     Sleep
                   </label>
                 </div>
@@ -171,7 +227,14 @@ function EditResource() {
                       name="category"
                       value={"Happiness"}
                       className="mx-2"
-                    />{" "}
+                      checked={resourceInfo.category === "Happiness"}
+                      onChange={(e) =>
+                        setResourceInfo({
+                          ...resourceInfo,
+                          category: e.target.value,
+                        })
+                      }
+                    />
                     Happiness
                   </label>
                 </div>
@@ -180,10 +243,17 @@ function EditResource() {
                     <input
                       type="radio"
                       name="category"
-                      value={"Concentration"}
+                      value={"Meditation"}
                       className="mx-2"
-                    />{" "}
-                    Concentration
+                      checked={resourceInfo.category === "Meditation"}
+                      onChange={(e) =>
+                        setResourceInfo({
+                          ...resourceInfo,
+                          category: e.target.value,
+                        })
+                      }
+                    />
+                    Meditation
                   </label>
                 </div>
                 <div className="inline-block">
@@ -191,10 +261,17 @@ function EditResource() {
                     <input
                       type="radio"
                       name="category"
-                      value={"Energy"}
+                      value={"Sophrology"}
                       className="mx-2"
-                    />{" "}
-                    Energy
+                      checked={resourceInfo.category === "Sophrology"}
+                      onChange={(e) =>
+                        setResourceInfo({
+                          ...resourceInfo,
+                          category: e.target.value,
+                        })
+                      }
+                    />
+                    Sophrology
                   </label>
                 </div>
               </div>
@@ -227,7 +304,15 @@ function EditResource() {
                               name="thumbnail"
                               value={item.fileUrl}
                               className="mr-2"
-                              onChange={(e) => setThumbnail(e.target.value)}
+                              checked={
+                                resourceInfo.thumbnailUrl === item.fileUrl
+                              }
+                              onChange={(e) =>
+                                setResourceInfo({
+                                  ...resourceInfo,
+                                  thumbnailUrl: e.target.value,
+                                })
+                              }
                             />
                           </div>
                         </label>
@@ -282,12 +367,25 @@ function EditResource() {
                   </h6>
 
                   <div className="mb-4">
-                    <RichTextEditor setValue={setArticleBody} />
+                    <RichTextEditor
+                      value={articleBody}
+                      setValue={setArticleBody}
+                    />
                   </div>
 
-                  <InputField
-                    label={"Author"}
-                    placeholder={"Enter your name"}
+                  <label className="capitalize font-rubikMedium">
+                    Duration
+                  </label>
+                  <input
+                    type="text"
+                    className={`w-full p-2 border border-base-black focus:border-weave-primary focus:outline-none rounded-md font-rubikRegular mb-3`}
+                    value={resourceInfo.duration}
+                    onChange={(e) =>
+                      setResourceInfo({
+                        ...resourceInfo,
+                        duration: e.target.value,
+                      })
+                    }
                   />
                 </>
               ) : (
@@ -302,6 +400,7 @@ function EditResource() {
                       name="file"
                       id="file"
                       className="hidden"
+                      onChange={(e) => setResourceFile(e.target.files[0])}
                     />
                     <label
                       htmlFor="file"
@@ -321,11 +420,53 @@ function EditResource() {
                         </span>
                       </span>
                     </label>
-
-                    <InputField label={"Duration"} placeholder={"e.g. 3:45"} />
                   </form>
                 </>
               )}
+
+              <label className="capitalize font-rubikMedium">Author</label>
+              <input
+                type="text"
+                className={`w-full p-2 border border-base-black focus:border-weave-primary focus:outline-none rounded-md font-rubikRegular mb-3`}
+                value={resourceInfo.author}
+                onChange={(e) =>
+                  setResourceInfo({
+                    ...resourceInfo,
+                    author: e.target.value,
+                  })
+                }
+              />
+
+              <label className="capitalize font-rubikMedium">Tags </label>
+              <div className="border border-weave-primary rounded-md p-2 flex flex-row flex-wrap my-2">
+                {resourceInfo.tags.length > 0 ? (
+                  resourceInfo.tags.map((tag) => (
+                    <div
+                      key={tag}
+                      className="bg-gray-200 rounded-md text-gray-700 p-1 text-sm mr-2"
+                    >
+                      {tag}
+                      <button
+                        onClick={(e) => {
+                          removeFromTag(tag);
+                        }}
+                        type="button"
+                      >
+                        <span className="fa fa-remove ml-2"></span>
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <></>
+                )}
+                <input
+                  type="text"
+                  className="focus:outline-none flex-1 px-2"
+                  value={tagName}
+                  onChange={(e) => setTagName(e.target.value)}
+                  onBlur={(e) => addToTag(e.target.value)}
+                />
+              </div>
 
               <div className="flex" style={{ gap: 20, marginTop: 20 }}>
                 <div className="flex-1"> </div>
@@ -339,12 +480,17 @@ function EditResource() {
                 </div>
                 <div className="flex-1">
                   <button className="bg-gray-300 text-black py-2 w-full font-rubikMedium rounded-md">
-                    Save as Draft
+                    {isSubmitting ? "Please wait..." : "Save as Draft"}
                   </button>
                 </div>
                 <div className="flex-1">
-                  <button className="bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md">
-                    Continue
+                  <button
+                    className="bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md"
+                    onClick={(e) => {
+                      updateResource("Published");
+                    }}
+                  >
+                    {isSubmitting ? "Please wait..." : "Publish"}
                   </button>
                 </div>
               </div>

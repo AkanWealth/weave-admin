@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import "quill/dist/quill.snow.css"; // Import the Quill stylesheet
 
-const QuillEditor = ({ setValue }) => {
+const QuillEditor = ({ value, setValue }) => {
   const editorRef = useRef(null); // Ref to hold the editor DOM element
 
-  const [content, setContent] = useState(""); // State to track content
+  const [content, setContent] = useState(value || ""); // State to track content
   useEffect(() => {
     setValue(content);
   }, [content]);
