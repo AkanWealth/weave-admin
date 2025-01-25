@@ -4,30 +4,13 @@ import growthFrame from "@/assets/images/Frame.png";
 import Link from "next/link";
 import api from "@/lib/api";
 import { useMessageContext } from "@/contexts/toast";
-export default function ResourcesRender() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [resources, setResources] = useState([]);
+import ResourceLibraryProvider, {
+  useResourceLibrary,
+} from "@/contexts/ResourceLibraryContext";
+function ResourcesRender() {
   const [filteredResources, setFilteredResources] = useState([]);
   const [searchKey, setSearchKey] = useState("");
-  const { showMessage } = useMessageContext();
-
-  const fetchResources = async () => {
-    try {
-      const response = await api.get("/resource-library/resources");
-
-      if (response.status === 200) {
-        setResources(response.data.resources);
-      }
-    } catch (err) {
-      showMessage("Unable to fetch resources", "error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchResources();
-  }, []);
+  const { resources, isLoading } = useResourceLibrary();
 
   useEffect(() => {
     setFilteredResources(resources);
@@ -122,7 +105,7 @@ export default function ResourcesRender() {
                 <th>Status</th>
                 <th></th>
               </tr>
-              {resources.map((resource) => (
+              {filteredResources.map((resource) => (
                 <tr key={resource.id}>
                   <td className="text-left px-6">
                     <h6 className="font-rubikMedium text-black">
@@ -228,5 +211,13 @@ export default function ResourcesRender() {
         </div>
       </div> */}
     </>
+  );
+}
+
+export default function Resources() {
+  return (
+    <ResourceLibraryProvider>
+      <ResourcesRender />
+    </ResourceLibraryProvider>
   );
 }

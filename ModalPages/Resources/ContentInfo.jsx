@@ -1,6 +1,6 @@
 "use client";
 import InputField from "@/components/elements/TextField";
-import { redirect, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 import RichTextEditor from "@/components/elements/RichTextEditor";
@@ -16,6 +16,7 @@ function ContentInfo() {
   const [activeTab, setActiveTab] = useState("info");
 
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [thumbnail, setThumbnail] = useState("");
   const [articleBody, setArticleBody] = useState("");
   const [author, setAuthor] = useState("");
@@ -55,10 +56,9 @@ function ContentInfo() {
   const readAndUploadThumbnail = async () => {
     if (!thumbNailSelected) return;
     setIsuploadingThumbnail(true);
-    const fileReader = new FileReader();
-    fileReader.readAsArrayBuffer(thumbNailSelected);
     let formdata = new FormData();
     formdata.append("file", thumbNailSelected);
+
     try {
       const resp = await fetch(`${baseUrl}/thumbnails`, {
         body: formdata,
@@ -76,21 +76,6 @@ function ContentInfo() {
     } finally {
       setIsuploadingThumbnail(false);
     }
-    // fileReader.onload = (e) => {
-    //   console.log(e.target.result);
-    //   api
-    //     .post("/thumbnails", { file: e.target.result })
-    //     .then((response) => {
-    //       console.log(response);
-    //     })
-    //     .catch((err) => {
-    //       console.log(err);
-    //     })
-
-    //     .finally(() => {
-    //       setIsuploadingThumbnail(false);
-    //     });
-    // };
   };
 
   const getThumbnails = async () => {
@@ -126,14 +111,14 @@ function ContentInfo() {
           thumbnailUrl,
           author,
           content: articleBody,
-          description: articleBody,
+          description,
           duration,
           tags,
           status,
         });
 
         showMessage(resp.data.message, "success");
-        redirect("/contentsManagement");
+        router.push("/contentsManagement");
       } else {
         let formdata = new FormData();
         formdata.append("file", fileUploadContent);
@@ -141,27 +126,26 @@ function ContentInfo() {
         formdata.append("category", category);
         formdata.append("thumbnailUrl", thumbnailUrl);
         formdata.append("author", author);
-        formdata.append("content", articleBody);
-        formdata.append("description", articleBody);
-        formdata.append("duration", duration);
+        formdata.append("description", description);
         formdata.append("tags", tags);
+        formdata.append("resourceType", contentType);
         formdata.append("status", status);
 
         const response = await fetch(`${baseUrl}/resource-library`, {
           method: "POST",
           body: formdata,
           headers: {
-            "Content-Type": "multipart/formdata",
+            contentType: "multipart/formdata",
             Authorization: `Bearer ${accessToken}`,
           },
         });
         const respbody = await response.json();
-        const respstatus = await response.status();
+        const respstatus = response.status;
         console.log({ respstatus });
         console.log(respbody);
 
         showMessage(respbody.message, "success");
-        redirect("/contentsManagement");
+        router.push("/contentsManagement");
       }
     } catch (err) {
       console.log(err);
@@ -201,10 +185,15 @@ function ContentInfo() {
       </div>
       <div className={activeTab === "info" ? "" : "hidden"}>
         <InputField
-          nae
           label={"Content Title"}
           value={title}
           setValue={setTitle}
+          className={"mb-3"}
+        />
+        <InputField
+          label={"Description"}
+          value={description}
+          setValue={setDescription}
         />
 
         <div className="my-4">
@@ -359,11 +348,11 @@ function ContentInfo() {
             </div>
 
             <InputField
-              label={"Author"}
-              placeholder={"Enter Author name"}
-              value={author}
-              setValue={setAuthor}
-              className="mb-2"
+              label={"Duration"}
+              placeholder={"e.g 3min 4sec"}
+              value={duration}
+              setValue={setDuration}
+              className="mb-3"
             />
           </>
         ) : (
@@ -403,11 +392,11 @@ function ContentInfo() {
         )}
 
         <InputField
-          label={"Duration"}
-          placeholder={"e.g 3min 4sec"}
-          value={duration}
-          setValue={setDuration}
-          className="mb-3"
+          label={"Author"}
+          placeholder={"Enter Author name"}
+          value={author}
+          setValue={setAuthor}
+          className="mb-2"
         />
 
         <label className="capitalize font-rubikMedium">Tags </label>

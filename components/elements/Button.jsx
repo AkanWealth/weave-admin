@@ -11,6 +11,7 @@ function Button({ title, disabled, onClick }) {
         " py-2 text-base-white w-full rounded-md"
       }
       disabled={disabled}
+      type="button"
     >
       {title}
     </button>

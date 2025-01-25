@@ -16,7 +16,6 @@ const ModalContext = createContext();
 
 export default function Modal() {
   const showMessage = (message, status) => {
-    console.log(message);
     let toastOptions = {
       position: "top-right",
       autoClose: 8000,

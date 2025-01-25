@@ -1,6 +1,35 @@
-import React from "react";
+import ResourceLibraryProvider, {
+  useResourceLibrary,
+} from "@/contexts/ResourceLibraryContext";
+import { ToastContext, useMessageContext } from "@/contexts/toast";
+import api from "@/lib/api";
+import { useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 
 function DeleteResource() {
+  const searchParams = useSearchParams();
+  const itemId = searchParams.get("resource_id");
+  const [deleting, setDeleting] = useState(false);
+  const { resources } = useResourceLibrary();
+  const [resourceInfo, setResourceInfo] = useState(null);
+  const { showMessage } = useMessageContext();
+
+  useEffect(() => {
+    const resource = resources.find((resource) => resource.id === itemId);
+    setResourceInfo(resource);
+  }, [itemId]);
+
+  const deleteResource = async () => {
+    setDeleting(true);
+    try {
+      const response = await api.delete(`/resource-library/${itemId}`);
+      showMessage(response.data.message, "success");
+    } catch (error) {
+      showMessage("Error deleting resource", "error");
+    } finally {
+      setDeleting(false);
+    }
+  };
   return (
     <div className="text-sm">
       <div className="flex" style={{ gap: 20 }}>
@@ -23,36 +52,46 @@ function DeleteResource() {
           </p>
         </div>
       </div>
-      <div className="text-gray-700 my-4 w-2/3 mx-auto font-rubikRegular text-md">
-        <div className="flex flex-row my-2" style={{ gap: 6 }}>
-          <div className="w-1/6 text-right">
-            {" "}
-            <i className="fa fa-briefcase mr-3"></i> Title:
+      {resourceInfo && (
+        <div className="text-gray-700 my-4 w-2/3 mx-auto font-rubikRegular text-md">
+          <div className="flex flex-row my-2" style={{ gap: 6 }}>
+            <div className="w-1/6 text-right">
+              {" "}
+              <i className="fa fa-briefcase mr-3"></i> Title:
+            </div>
+            <div className="w-5/6">{resourceInfo.title}</div>
           </div>
-          <div className="w-5/6">Creating Bedtime Routine</div>
+          <div className="flex flex-row my-2" style={{ gap: 6 }}>
+            <div className="w-1/6 text-right">
+              {" "}
+              <i className="fa fa-tag mr-3"></i> Type:
+            </div>
+            <div className="w-5/6">{resourceInfo.resourceType}</div>
+          </div>
+          <div className="flex flex-row my-2" style={{ gap: 6 }}>
+            <div className="w-1/6 text-right">
+              {" "}
+              <i className="fa fa-paperclip mr-3"></i> Tags:
+            </div>
+            <div className="w-5/6">
+              {resourceInfo.tags.map((tag) => (
+                <span className="tag" key={tag}>
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="flex flex-row my-2" style={{ gap: 6 }}>
-          <div className="w-1/6 text-right">
-            {" "}
-            <i className="fa fa-tag mr-3"></i> Type:
-          </div>
-          <div className="w-5/6">Article</div>
-        </div>
-        <div className="flex flex-row my-2" style={{ gap: 6 }}>
-          <div className="w-1/6 text-right">
-            {" "}
-            <i className="fa fa-paperclip mr-3"></i> Tags:
-          </div>
-          <div className="w-5/6">
-            <span className="tag">Sleep</span>
-            <span className="tag">Travel</span>
-          </div>
-        </div>
-      </div>
+      )}
       <div className="flex" style={{ gap: 10 }}>
         <div className="flex-1">
-          <button className="bg-red-500 text-base-white py-2 w-full font-rubikMedium rounded-md">
-            Confirm
+          <button
+            className="bg-red-500 text-base-white py-2 w-full font-rubikMedium rounded-md"
+            onClick={() => {
+              deleteResource();
+            }}
+          >
+            {deleting ? "Deleting" : "Confirm"}
           </button>
         </div>
         <div className="flex-1">
@@ -65,4 +104,12 @@ function DeleteResource() {
   );
 }
 
-export default DeleteResource;
+export default function Delete() {
+  return (
+    <ToastContext>
+      <ResourceLibraryProvider>
+        <DeleteResource />
+      </ResourceLibraryProvider>
+    </ToastContext>
+  );
+}

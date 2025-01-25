@@ -22,14 +22,14 @@ function AddContent() {
       <div className="flex flex-row justify-center my-6" style={{ gap: 30 }}>
         <label
           className={`border border-${
-            contentType === "video" ? "weave-primary" : "gray-500"
+            contentType === "Video" ? "weave-primary" : "gray-500"
           } rounded-md p-6`}
         >
           <Image src={videoIcon} width={80} height={80} alt="Icon" />
           <input
             type="radio"
             name="type"
-            value={"video"}
+            value={"Video"}
             className="mr-2"
             onChange={(e) => setContentType(e.target.value)}
           />
@@ -52,14 +52,14 @@ function AddContent() {
         </label>
         <label
           className={`border border-${
-            contentType === "audio" ? "weave-primary" : "gray-500"
+            contentType === "Audio" ? "weave-primary" : "gray-500"
           } rounded-md p-6`}
         >
           <Image src={audioIcon} width={80} height={80} alt="Icon" />
           <input
             type="radio"
             name="type"
-            value={"audio"}
+            value={"Audio"}
             className="mr-2"
             onChange={(e) => setContentType(e.target.value)}
           />
