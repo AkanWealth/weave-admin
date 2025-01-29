@@ -31,6 +31,7 @@ function LoginComp() {
             {" "}
             Signout
           </button>
+          <a href="com.the_weave.theweavewellbeingapp://">Go to app</a>
         </>
       ) : (
         authProvider &&
