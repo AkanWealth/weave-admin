@@ -1,8 +1,9 @@
 "use client";
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
 import growthFrame from "@/assets/images/Frame-3.png";
 import auditLogs from "@/dummyData/auditLogs";
+import api from "@/lib/api";
 
 export default function Page() {
   return (

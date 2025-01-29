@@ -1,13 +1,7 @@
 "use client";
-import InputField from "@/components/elements/TextField";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
 
-import Image from "next/image";
-import videoIcon from "@/assets/images/video 1.png";
-import articleIcon from "@/assets/images/article 3.png";
-import audioIcon from "@/assets/images/audio 1.png";
-import fileIcon from "@/assets/images/file-document 1.png";
 import RichTextEditor from "@/components/elements/RichTextEditor";
 import ResourceLibraryProvider, {
   useResourceLibrary,
@@ -16,6 +10,7 @@ import Cookies from "js-cookie";
 import { ToastContext, useMessageContext } from "@/contexts/toast";
 import api from "@/lib/api";
 import { readAndUploadThumbnail } from "@/lib/uploadThumbnail";
+import { baseUrl } from "@/lib/envfile";
 
 function EditResource() {
   const searchParams = useSearchParams();
@@ -26,6 +21,7 @@ function EditResource() {
   const [thumbnail, setThumbnail] = useState("");
   const [articleBody, setArticleBody] = useState("");
   const [resourceFile, setResourceFile] = useState(null);
+  const router = useRouter();
 
   const { showMessage } = useMessageContext();
   useEffect(() => {
@@ -64,6 +60,8 @@ function EditResource() {
 
   const [thumbNailSelected, setThumbnailSelected] = useState(null);
   const [isUploadingThumbnail, setIsuploadingThumbnail] = useState(false);
+
+  const accessToken = Cookies.get("session");
   useEffect(() => {
     if (!thumbNailSelected) return;
     setIsuploadingThumbnail(true);
@@ -117,24 +115,25 @@ function EditResource() {
         formdata.append("content", resourceInfo.content);
 
       formdata.append("tags", resourceInfo.tags);
-      formdata.append("resourceType", resourceInfo.resourceType);
       formdata.append("status", status);
 
-      const response = await fetch(`${baseUrl}/resource-library`, {
-        method: "POST",
-        body: formdata,
-        headers: {
-          contentType: "multipart/formdata",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `${baseUrl}/resource-library/${resourceInfo.id}`,
+        {
+          method: "PATCH",
+          body: formdata,
+          headers: {
+            contentType: "multipart/formdata",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
       const respbody = await response.json();
-      const respstatus = response.status;
-      console.log({ respstatus });
-      console.log(respbody);
-
       showMessage(respbody.message, "success");
-      router.push("/contentsManagement");
+
+      if (response.status) {
+        router.push("/contentsManagement");
+      }
     } catch (err) {
       console.log(err);
       showMessage("Error uploading content", "error");
@@ -344,7 +343,10 @@ function EditResource() {
               <div className="flex" style={{ gap: 20 }}>
                 <div className="flex-1"> </div>
                 <div className="flex-1">
-                  <button className="border border-black py-2 w-full font-rubikMedium rounded-md">
+                  <button
+                    className="border border-black py-2 w-full font-rubikMedium rounded-md"
+                    onClick={() => router.back()}
+                  >
                     Back
                   </button>
                 </div>
@@ -360,7 +362,7 @@ function EditResource() {
               </div>
             </div>
             <div className={activeTab !== "info" ? "" : "hidden"}>
-              {contentType === "article" ? (
+              {contentType === "Article" ? (
                 <>
                   <h6 className="text-xl font-rubikBold my-2 capitalize">
                     Content Body
@@ -439,7 +441,7 @@ function EditResource() {
 
               <label className="capitalize font-rubikMedium">Tags </label>
               <div className="border border-weave-primary rounded-md p-2 flex flex-row flex-wrap my-2">
-                {resourceInfo.tags.length > 0 ? (
+                {resourceInfo.tags && resourceInfo.tags.length > 0 ? (
                   resourceInfo.tags.map((tag) => (
                     <div
                       key={tag}

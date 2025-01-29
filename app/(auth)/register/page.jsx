@@ -57,7 +57,7 @@ function PageContent() {
       showMessage(response?.data.message, "success");
 
       if (response.status === 201) {
-        router.push(`/otp?email=${email}`);
+        router.push(`/otp?email=${email}&usage=signup`);
       }
     } catch (error) {
       showMessage(error.message, "error");

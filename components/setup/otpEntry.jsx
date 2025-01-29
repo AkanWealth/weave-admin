@@ -31,7 +31,7 @@ export default function OtpVerification() {
         }
       }
     } catch (err) {
-      showMessage(JSON.stringify(err), "error");
+      showMessage("Error verifying otp", "error");
       setIsError(true);
     } finally {
       setIsLoading(false);

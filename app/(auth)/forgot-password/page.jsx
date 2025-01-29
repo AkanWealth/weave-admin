@@ -21,7 +21,7 @@ function PasswordReset() {
       });
       if (response.status === 200) {
         showMessage("Otp sent to email successfully", "success");
-        router.push(`/otp?email=${email}`);
+        router.push(`/otp?email=${email}&usage=reset-password`);
       }
     } catch (error) {
       showMessage(error.message, "error");
