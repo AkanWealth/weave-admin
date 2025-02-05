@@ -3,6 +3,7 @@ import React from "react";
 import users from "@/dummyData/adminUser";
 import Analytics from "@/components/usersList/analytics";
 import AdminList from "@/components/usersList/adminList";
+import { ToastContext } from "@/contexts/toast";
 
 function Page() {
   return (
@@ -58,4 +59,10 @@ function Page() {
   );
 }
 
-export default Page;
+export default function () {
+  return (
+    <ToastContext>
+      <Page />
+    </ToastContext>
+  );
+}

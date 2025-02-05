@@ -44,27 +44,51 @@ function PageContent() {
     password !== confirmPassword;
 
   const signUp = async () => {
+    const splittedname = fullName.split(" ");
+
+    // console.log({
+    //   email,
+    //   password,
+    //   username: fullName,
+    //   firstName: splittedname[1] || "",
+    //   lastName: splittedname[0],
+    //   headshot: "",
+    // });
+    // return;
+
     setIsLoading(true);
 
     try {
-      const response = await api.post("/super-admin/signup", {
-        fullName,
-        username: fullName,
+      const response = await api.post("/auth/seed-admin", {
         email,
         password,
-        confirmPassword,
+        username: fullName,
+        firstName: splittedname[1] || "",
+        lastName: splittedname[0],
+        // headshot: "",
       });
+
+      console.log(response);
       showMessage(response?.data.message, "success");
 
       if (response.status === 201) {
         router.push(`/otp?email=${email}&usage=signup`);
       }
     } catch (error) {
+      console.log(error);
       showMessage(error.message, "error");
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (password !== confirmPassword) {
+      setPasswordError("Passwords does not match");
+    } else {
+      setPasswordError("");
+    }
+  }, [confirmPassword]);
 
   return (
     <div className="my-auto">
@@ -98,6 +122,7 @@ function PageContent() {
           placeholder="••••••••••••"
           value={confirmPassword}
           setValue={setConfirmPassword}
+          error={passwordError}
         />
 
         <div className="text-xs">

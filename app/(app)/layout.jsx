@@ -10,6 +10,11 @@ import Modal from "@/components/elements/Modal";
 
 function Layout({ children }) {
   const pathname = usePathname();
+  let userInfo = localStorage.getItem("userinfo");
+
+  if (userInfo) {
+    userInfo = JSON.parse(userInfo);
+  }
 
   return (
     <Suspense>
@@ -84,7 +89,7 @@ function Layout({ children }) {
           </div>
         </nav>
         <main className="bg-[#F5F6FA] fixed left-[280px] right-0 top-0 bottom-0">
-          <nav className="fixed top-0 right-0 left-[280px] h-[60px] flex bg-white p-2 font-rubikRegular">
+          <nav className="fixed top-0 right-0 left-[280px] h-[60px] flex bg-white p-2 font-rubikRegular overflow-hidden">
             <div className="w-1/2 pl-16">
               <form action="" className="flex">
                 <input
@@ -116,8 +121,10 @@ function Layout({ children }) {
                   alt="User Image"
                 />
                 <div className="relative px-12 text-gray-600">
-                  <h1 className="font-rubikMedium italic">Moni Roy</h1>
-                  <h1>Super Admin</h1>
+                  <h1 className="font-rubikMedium italic">
+                    {userInfo.username}
+                  </h1>
+                  <h1>{userInfo.role.name}</h1>
                 </div>
               </div>
             </div>

@@ -1,6 +1,27 @@
-import React from "react";
+"use client";
+import { useMessageContext } from "@/contexts/toast";
+import api from "@/lib/api";
+import React, { useState, useEffect } from "react";
 
 function Analytics() {
+  const [analytics, setAnalytics] = useState(null);
+  const { showMessage } = useMessageContext();
+
+  const getAnalytics = async () => {
+    try {
+      const getAdminAnalytics = await api.get("/usage-analytics/admin-users");
+
+      if (getAdminAnalytics.status === 200)
+        setAnalytics(getAdminAnalytics.data);
+    } catch (error) {
+      showMessage("Error fetching analytics", "error");
+    }
+  };
+
+  useEffect(() => {
+    getAnalytics();
+  }, []);
+
   return (
     <>
       {/* user summary */}
@@ -8,28 +29,36 @@ function Analytics() {
         <div className="w-1/4 bg-[#f8cf84] p-4 px-6 rounded-2xl">
           <div>
             <h5 className="text-gray-500 mb-1">Super Admin</h5>
-            <h6 className="font-rubikMedium text-2xl">0</h6>
+            <h6 className="font-rubikMedium text-2xl">
+              {analytics ? analytics.super_admin : 0}
+            </h6>
           </div>
         </div>
 
         <div className="w-1/4 bg-[#f8cf84] p-4 px-6 rounded-2xl">
           <div>
             <h5 className="text-gray-500 mb-1">Admin</h5>
-            <h6 className="font-rubikMedium text-2xl">0</h6>
+            <h6 className="font-rubikMedium text-2xl">
+              {analytics ? analytics.admin : 0}
+            </h6>
           </div>
         </div>
 
         <div className="w-1/4 bg-[#f8cf84] p-4 px-6 rounded-2xl">
           <div>
             <h5 className="text-gray-500 mb-1">Content Manager</h5>
-            <h6 className="font-rubikMedium text-2xl">0</h6>
+            <h6 className="font-rubikMedium text-2xl">
+              {analytics ? analytics.content_manager : 0}
+            </h6>
           </div>
         </div>
 
         <div className="w-1/4 bg-[#f8cf84] p-4 px-6 rounded-2xl">
           <div>
             <h5 className="text-gray-500 mb-1">Other Manager</h5>
-            <h6 className="font-rubikMedium text-2xl">0</h6>
+            <h6 className="font-rubikMedium text-2xl">
+              {analytics ? analytics.other_manager : 0}
+            </h6>
           </div>
         </div>
       </div>

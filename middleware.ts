@@ -10,7 +10,7 @@ const protectedRoutes = [
   "/users/manage-roles",
   "/users/manage-roles/add",
   "/settings",
-  "/auditLogs",
+  "/auditLog",
 ];
 const publicRoutes = ["/login", "/setup", "/"];
 
@@ -35,7 +35,7 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
   }
 
-  if (isProtectedRoute && !cookie) {
+  if (isProtectedRoute && (!cookie || cookie === undefined)) {
     return NextResponse.redirect(new URL("/login", req.nextUrl));
   }
 

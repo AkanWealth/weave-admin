@@ -14,8 +14,8 @@ function PasswordField({ label, placeholder, value, setValue, error }) {
         className={
           (error && error !== ""
             ? "border-red-500 focus:border-red-500 "
-            : "") +
-          "w-full p-2 border border-base-black focus:border-weave-primary focus:outline-none rounded-md font-rubikRegular"
+            : "focus:border-weave-primary ") +
+          "w-full p-2 border border-base-black  focus:outline-none rounded-md font-rubikRegular"
         }
         value={value}
         onChange={(e) => setValue(e.target.value)}

@@ -19,7 +19,8 @@ function PasswordReset() {
       const response = await api.post("/super-admin/forgot-password", {
         email,
       });
-      if (response.status === 200) {
+      console.log(response.status);
+      if (response.status === 201) {
         showMessage("Otp sent to email successfully", "success");
         router.push(`/otp?email=${email}&usage=reset-password`);
       }

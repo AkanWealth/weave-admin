@@ -17,6 +17,7 @@ export default function ResourceLibraryProvider({ children }) {
         setResources(response.data.resources);
       }
     } catch (err) {
+      console.log(err);
       showMessage("Unable to fetch resources", "error");
     } finally {
       setIsLoading(false);

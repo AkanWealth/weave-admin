@@ -2,6 +2,9 @@ import AddAdmin from "@/ModalPages/Admin/Add";
 import DeleteAdmin from "@/ModalPages/Admin/Delete";
 import EditAdmin from "@/ModalPages/Admin/Edit";
 import SuspendAdmin from "@/ModalPages/Admin/Suspend";
+import ActivateAppUser from "@/ModalPages/App_User/Activate";
+import DeleteAppUser from "@/ModalPages/App_User/Delete";
+import SuspendAppUser from "@/ModalPages/App_User/Suspend";
 import AddNotification from "@/ModalPages/Notification/Add";
 import Notifications from "@/ModalPages/Notification/List";
 import AddContent from "@/ModalPages/Resources/Add";
@@ -145,6 +148,10 @@ export default function Modal() {
 }
 
 const ModalContent = ({ usage, params }) => {
+  if (usage === "delete-app-user") return <DeleteAppUser />;
+  if (usage === "activate-app-user") return <ActivateAppUser />;
+  if (usage === "suspend-app-user") return <SuspendAppUser />;
+  if (usage === "add-admin") return <AddAdmin />;
   if (usage === "add-admin") return <AddAdmin />;
   if (usage === "delete-admin") return <DeleteAdmin />;
   if (usage === "edit-admin") return <EditAdmin />;

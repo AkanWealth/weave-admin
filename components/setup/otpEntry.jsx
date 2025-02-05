@@ -1,7 +1,7 @@
 "use client";
 import { useMessageContext } from "@/contexts/toast";
 import api from "@/lib/api";
-import { redirect, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import OTPInput from "react-otp-input";
 
@@ -15,22 +15,33 @@ export default function OtpVerification() {
   const email = params.get("email");
   const btnDisabled = otp === "" || isLoading;
   const usage = params.get("usage");
+  const router = useRouter();
 
   const verifyOtp = async () => {
     setIsLoading(true);
 
     try {
-      const resp = await api.post("/super-admin/verify-otp", { email, otp });
+      const requestEndpoint =
+        usage === "signup"
+          ? "/auth/validate-otp"
+          : "/super-admin/verify-passcode";
+      const resp = await api.post(requestEndpoint, {
+        email,
+        otp,
+      });
+
+      console.log(resp);
       if (resp.status === 200) {
         if (usage == "signup") {
-          redirect("/welcome");
+          router.push("/welcome");
         } else if (usage == "reset-password") {
-          redirect("/reset-password");
+          router.push("/reset-password");
         } else {
-          redirect("/setup/password");
+          router.push("/setup/password");
         }
       }
     } catch (err) {
+      console.log(err);
       showMessage("Error verifying otp", "error");
       setIsError(true);
     } finally {

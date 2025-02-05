@@ -27,15 +27,21 @@ function Login() {
   const login = async () => {
     setIsLoading(true);
     try {
-      const resp = await api.post("/super-admin/login", {
+      const resp = await api.post("/auth/login", {
         email,
         password,
       });
 
-      if (resp.status === 201) {
-        localStorage.setItem("token", resp.data.token);
-        Cookies.set("session", resp.data.token, { expires: 1 / 24 });
-        router.push("/dashboard");
+      console.log(resp);
+
+      if (resp.status === 200) {
+        if (resp.data.user.verified) {
+          localStorage.setItem("userinfo", JSON.stringify(resp.data.user));
+          Cookies.set("session", resp.data.accessToken, { expires: 1 / 24 });
+          router.push("/dashboard");
+        } else {
+          router.push(`/otp?email=${email}&usage=signup`);
+        }
         return;
       }
 

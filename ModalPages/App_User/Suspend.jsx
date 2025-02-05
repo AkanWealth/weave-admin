@@ -3,7 +3,7 @@ import api from "@/lib/api";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 
-function SuspendAdmin() {
+function SuspendAppUser() {
   const params = useSearchParams();
   const userId = params.get("id");
   const { showMessage } = useModalContext();
@@ -13,15 +13,20 @@ function SuspendAdmin() {
   const invokeSuspension = async () => {
     setIsLoading(true);
     try {
-      const response = await api.patch("/usage-analytics/deactivate/{userId}");
+      const response = await api.patch(`/usage-analytics/deactivate/${userId}`);
+      console.log(response);
       if (response.status === 200) {
-        showMessage("User suspended successfully", "success");
+        showMessage(
+          "User suspended successfully, refresh to see changes",
+          "success"
+        );
         router.back();
         return;
       }
 
       showMessage("Error executing action", "error");
     } catch (err) {
+      console.log(err);
       showMessage("Error executing action", "error");
     } finally {
       setIsLoading(false);
@@ -44,11 +49,10 @@ function SuspendAdmin() {
           <i className="fa fa-user-plus m-auto"></i>
         </div>
         <div className="">
-          <h4 className="font-rubikMedium text-xl">Suspend User</h4>
+          <h4 className="font-rubikMedium text-xl">Deactivate User</h4>
           <p className="text-gray-500 my-2">
-            Are you sure you want to suspend this admin user? While suspended,
-            they will lose access to all admin privileges and will not be able
-            to log into the platform.
+            Deactivating this user will restrict their access to the App. You
+            can reactivate their account later if needed.
           </p>
         </div>
       </div>
@@ -60,7 +64,7 @@ function SuspendAdmin() {
             onClick={() => invokeSuspension()}
             disabled={loading}
           >
-            {loading ? "Please wait" : "Suspend"}
+            {loading ? "Please wait" : "Deactivate"}
           </button>
         </div>
         <div className="flex-1">
@@ -76,4 +80,4 @@ function SuspendAdmin() {
   );
 }
 
-export default SuspendAdmin;
+export default SuspendAppUser;

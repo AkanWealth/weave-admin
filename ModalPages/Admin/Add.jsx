@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import InputField from "@/components/elements/TextField";
 import Button from "@/components/elements/Button";
 import api from "@/lib/api";
+import { useModalContext } from "@/components/elements/Modal";
 
 function AddAdmin() {
   const [firstname, setFirstname] = useState("");
@@ -13,6 +14,7 @@ function AddAdmin() {
   const [activeTab, setActiveTab] = useState("profile");
   const [error, setError] = useState("");
   const [permissions, setPermissions] = useState([]);
+  const { showMessage } = useModalContext();
 
   const checkPermission = (elem) => {
     if (elem.target.checked) {
@@ -74,6 +76,7 @@ function AddAdmin() {
       console.log(response.data);
     } catch (error) {
       console.log(error);
+      showMessage("Error sending invite", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -81,10 +84,11 @@ function AddAdmin() {
 
   const fetchRoles = async () => {
     try {
-      const response = await api.get("/roles");
+      const response = await api.get("/role");
       console.log(response.data);
     } catch (error) {
       console.log(error);
+      showMessage("Unable to fetch available roles", "error");
     }
   };
 
