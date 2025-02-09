@@ -7,6 +7,7 @@ import logo from "@/assets/images/logo.png";
 import placeholderAvatar from "@/assets/images/3d_avatar_1.png";
 import { usePathname, useSearchParams } from "next/navigation";
 import Modal from "@/components/elements/Modal";
+import LogoutBtn from "./LogoutBtn";
 
 function Layout({ children }) {
   const pathname = usePathname();
@@ -82,10 +83,7 @@ function Layout({ children }) {
               <i className="fa fa-cog mr-4 text-xl"></i>
               Settings
             </Link>
-            <Link href={"/login"} className="text-red-600 rounded-md p-3 px-5">
-              <i className="fa fa-lock mr-4 text-xl"></i>
-              Logout
-            </Link>
+            <LogoutBtn />
           </div>
         </nav>
         <main className="bg-[#F5F6FA] fixed left-[280px] right-0 top-0 bottom-0">

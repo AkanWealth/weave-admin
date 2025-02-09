@@ -8,7 +8,7 @@ import OTPInput from "react-otp-input";
 export default function OtpVerification() {
   const { showMessage } = useMessageContext();
   const [otp, setOtp] = useState("");
-  const noOfEntry = 4;
+
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const params = useSearchParams();
@@ -17,12 +17,14 @@ export default function OtpVerification() {
   const usage = params.get("usage");
   const router = useRouter();
 
+  const noOfEntry = usage === "reset-password" ? 6 : 4;
+
   const verifyOtp = async () => {
     setIsLoading(true);
 
     try {
       const requestEndpoint =
-        usage === "signup"
+        usage === "signup" || usage === "reset-password"
           ? "/auth/validate-otp"
           : "/super-admin/verify-passcode";
       const resp = await api.post(requestEndpoint, {
@@ -35,7 +37,7 @@ export default function OtpVerification() {
         if (usage == "signup") {
           router.push("/welcome");
         } else if (usage == "reset-password") {
-          router.push("/reset-password");
+          router.push(`/reset-password?token=${otp}`);
         } else {
           router.push("/setup/password");
         }
@@ -62,7 +64,7 @@ export default function OtpVerification() {
   const resendOtp = async () => {
     setSendingOtp(true);
     try {
-      const response = await api.post("/super-admin/resend-otp", {
+      const response = await api.post("/auth/resend-otp", {
         email,
       });
       showMessage(response?.data.message, "success");

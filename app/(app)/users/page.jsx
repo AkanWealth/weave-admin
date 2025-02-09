@@ -31,28 +31,6 @@ function Page() {
       <Analytics />
 
       {/* search pane */}
-      <div className="flex my-4">
-        <div className="w-3/5">
-          <form action="" className="bg-white border px-8 py-2 rounded-md">
-            <input
-              type="text"
-              className="bg-[#f5f6fa] rounded-md w-full px-4 py-2"
-              placeholder="Search here"
-            />
-          </form>
-        </div>
-        <div className="w-1/5"></div>
-        <div className="w-1/5">
-          <button className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium">
-            Export
-            <i className="fa fa-window-maximize ml-2"></i>
-          </button>
-          <button className="border p-2 px-4 rounded-md font-rubikMedium">
-            Filter
-            <i className="fa fa-list ml-2"></i>
-          </button>
-        </div>
-      </div>
 
       <AdminList />
     </div>

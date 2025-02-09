@@ -21,8 +21,10 @@ function DeleteAdmin() {
         return;
       }
 
+      console.log(response);
       showMessage("Error deleting user", "error");
     } catch (error) {
+      console.log(error);
       showMessage("Error deleting the user", "error");
     } finally {
       setLoading(false);

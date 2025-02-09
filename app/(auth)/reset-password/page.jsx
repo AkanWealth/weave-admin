@@ -3,7 +3,8 @@ import React, { useState } from "react";
 import PasswordField from "@/components/elements/PasswordField";
 import Button from "@/components/elements/Button";
 import { ToastContext, useMessageContext } from "@/contexts/toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import api from "@/lib/api";
 
 function ResetPassword() {
   const router = useRouter();
@@ -13,15 +14,21 @@ function ResetPassword() {
   const btnDisabled =
     newPassword == "" || confirmNewPassword == "" || isLoading;
   const { showMessage } = useMessageContext();
+  const params = useSearchParams();
+  const token = params.get("token");
 
   const resetPassword = async () => {
     setIsloading(true);
     try {
-      const response = await api.post("/super-admin/reset-password", {});
+      const response = await api.post("/super-admin/reset-password", {
+        token,
+        newPassword,
+      });
       if (response.status === 200) {
         router.push("/dashboard");
       }
     } catch (error) {
+      console.log(error);
       showMessage(error.message, "error");
     } finally {
       setIsloading(false);

@@ -13,8 +13,8 @@ th {
 }
 
 .dot {
-  min-width: 8;
-  min-height: 8;
+  width: 8;
+  height: 8;
   border: 2px solid #111;
   border-radius: 4;
   margin: 3px auto;
@@ -58,4 +58,76 @@ th {
   to {
     transform: rotate(1turn);
   }
+}
+
+.error-message {
+  background-color: #ffcccc;
+  color: #a94442;
+  padding: 15px;
+  border: 1px solid #a94442;
+  border-radius: 5px;
+  margin: auto;
+}
+
+.pagination ul {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  font-family: Arial, sans-serif;
+  width: 100%;
+}
+
+.pagination span {
+  font-size: 14px;
+}
+
+.pagination a {
+  text-decoration: none;
+  color: black;
+  padding: 6px 10px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.pagination a.active {
+  background-color: #4a9ea8; /* Blue-green active button */
+  color: white;
+  font-weight: bold;
+}
+
+.pagination a:hover {
+  background-color: #e0e0e0;
+}
+
+.pagination .previous,
+.pagination .next {
+  background-color: #4a9ea8; /* Blue-green color */
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pagination .previous:hover,
+.pagination .next:hover {
+  background-color: #3a7f8a;
+}
+
+.pagination .previous a,
+.pagination .next a {
+  color: white;
+}
+
+.pagination .previous a:hover,
+.pagination .next a:hover {
+  background-color: unset;
+}
+
+.pagination .previous:disabled,
+.pagination .next:disabled {
+  background-color: #b0bec5;
+  cursor: not-allowed;
 }

@@ -1,7 +1,15 @@
 "use client";
 import React from "react";
 
-function InputField({ label, placeholder, value, setValue, error, className }) {
+function InputField({
+  label,
+  placeholder,
+  value,
+  setValue,
+  error,
+  className,
+  disabled,
+}) {
   return (
     <div className={`flex-column space-y-2 ${className && className}`}>
       <label htmlFor={label} className="capitalize font-rubikMedium">
@@ -19,6 +27,7 @@ function InputField({ label, placeholder, value, setValue, error, className }) {
         }
         value={value}
         onChange={(e) => setValue(e.target.value)}
+        disabled={disabled}
       />
       {error && error !== "" && <p className="text-red-400">{error}</p>}
     </div>
