@@ -3,13 +3,15 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import api from "@/lib/api";
 import EmptyList from "@/components/elements/EmptyList";
+import { useRouter } from "next/navigation";
 
 function NewSignups() {
   const [newSignups, setNewSignups] = useState([]);
+  const router = useRouter();
   const getNewSignups = async () => {
     try {
       const newsignups = await api.get("/usage-analytics/new-signups");
-      console.log(newsignups.data);
+      // console.log(newsignups.data);
       if (newsignups.status == 200) {
         setNewSignups(newsignups.data);
       }
@@ -80,7 +82,10 @@ function NewSignups() {
 
                     <div className="absolute right-0 rounded-md p-2 shadow bg-white text-xs w-[200px]  dropdown-menu">
                       <div className="flex flex-col text-left">
-                        <button className="px-3 py-1">
+                        <button
+                          className="px-3 py-1"
+                          onClick={() => router.push("?modal")}
+                        >
                           {" "}
                           <i className="fa fa-user-times mr-2"></i> Deactivate
                         </button>

@@ -25,6 +25,7 @@ function DeleteResource() {
       const response = await api.delete(`/resource-library/${itemId}`);
       showMessage(response.data.message, "success");
     } catch (error) {
+      console.log(error);
       showMessage("Error deleting resource", "error");
     } finally {
       setDeleting(false);
@@ -46,7 +47,7 @@ function DeleteResource() {
         </div>
         <div className="">
           <h4 className="font-rubikMedium text-xl">Delete Resource</h4>
-          <p className="text-gray-500">
+          <p className="text-gray-500 my-4">
             Are you sure you want to delete this resource? This action cannot be
             undone.
           </p>

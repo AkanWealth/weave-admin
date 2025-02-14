@@ -13,40 +13,44 @@ function AddAdmin() {
   const isDisabled = firstname === "" || lastname === "" || email === "";
   const [activeTab, setActiveTab] = useState("profile");
   const [error, setError] = useState("");
+  const [selectedRole, setSelectedRole] = useState("");
   const [permissions, setPermissions] = useState([]);
+  const [selectedPermissions, setSelectedPermissions] = useState([]);
   const { showMessage } = useModalContext();
+  const [availableRoles, setAvailableRoles] = useState([]);
 
-  const checkPermission = (elem) => {
+  useEffect(() => {
+    const matchRole = availableRoles.find((role) => role.id === selectedRole);
+    if (matchRole) setPermissions(matchRole.permissions);
+    // console.log(matchRole);
+  }, [selectedRole]);
+
+  const addTopermission = (elem) => {
+    console.log(elem.target.checked);
     if (elem.target.checked) {
-      let inPerms = permissions.find((item) => elem.target.value === item);
-      if (!inPerms) setPermissions([...permissions, elem.target.value]);
+      let inPerms = selectedPermissions.find(
+        (item) => elem.target.value === item
+      );
+      if (!inPerms) setSelectedPermissions([...permissions, elem.target.value]);
     } else {
-      setPermissions(permissions.filter((item) => item !== elem.target.value));
+      setSelectedPermissions(
+        selectedPermissions.filter((item) => item !== elem.target.value)
+      );
     }
   };
 
   const checkInPerm = (perm) => {
-    return permissions.find((item) => item === perm) || false;
+    console.log(perm);
+    return selectedPermissions.find((item) => item === perm) || false;
   };
 
   const checkAllPerms = (e) => {
+    console.log(e.target.value);
     if (e.target.checked) {
-      setPermissions([
-        "VIEW_DASHBOARD",
-        "MANAGE_DASHBOARD",
-        "EXPORT_DASHBOARD",
-        "VIEW_USERS",
-        "MANAGE_USERS",
-        "EXPORT_USERS",
-        "VIEW_CONTENT",
-        "MANAGE_CONTENT",
-        "EXPORT_CONTENT",
-        "VIEW_AUDIT",
-        "MANAGE_AUDIT",
-        "EXPORT_AUDIT",
-      ]);
+      const perms = permissions.map((perm) => perm.id);
+      setSelectedPermissions([...perms]);
     } else {
-      setPermissions([]);
+      setSelectedPermissions([]);
     }
   };
 
@@ -55,9 +59,6 @@ function AddAdmin() {
   }, [permissions]);
 
   const submitUser = async () => {
-    console.log(permissions);
-    return;
-
     setIsSubmitting(true);
     if (firstname == "" || lastname == "" || email == "") {
       setError("User name cannot be left empty");
@@ -65,15 +66,18 @@ function AddAdmin() {
     }
     try {
       const data = {
-        fullName: `${firstname} ${lastname}`,
-        userName: email,
+        // fullName: `${firstname} ${lastname}`,
+        // userName: email,
         email,
-        roleIds: [],
-        permissionIds: permissions,
+        roleId: selectedRole,
+        permissionIds: selectedPermissions,
       };
 
       const response = await api.post("/super-admin/invite", data);
-      console.log(response.data);
+      if (response.status === 201)
+        return showMessage("User invite sent successfully", "success");
+
+      showMessage("Error sending invite", "error");
     } catch (error) {
       console.log(error);
       showMessage("Error sending invite", "error");
@@ -85,7 +89,7 @@ function AddAdmin() {
   const fetchRoles = async () => {
     try {
       const response = await api.get("/role");
-      console.log(response.data);
+      setAvailableRoles(response.data);
     } catch (error) {
       console.log(error);
       showMessage("Unable to fetch available roles", "error");
@@ -173,10 +177,20 @@ function AddAdmin() {
                 <select
                   name=""
                   className="text-sm p-2 rounded-md font-rubikRegular"
+                  onChange={(e) => {
+                    setSelectedRole(e.target.value);
+                  }}
                 >
-                  <option value="">Super Admin</option>
-                  <option value="">Admin</option>
-                  <option value="">Content Management</option>
+                  <option value=""> Select Role </option>
+                  {availableRoles.map((role) => (
+                    <option
+                      value={role.id}
+                      key={role.id}
+                      className="capitalize"
+                    >
+                      {role.name}
+                    </option>
+                  ))}
                 </select>
               </h5>
             </div>
@@ -187,7 +201,7 @@ function AddAdmin() {
                   Enable All{" "}
                   <input
                     type="checkbox"
-                    name=""
+                    value={"enable_all"}
                     onChange={(e) => checkAllPerms(e)}
                   />
                 </div>
@@ -205,6 +219,40 @@ function AddAdmin() {
           </div>
         </div>
         <table className="w-full">
+          <tbody>
+            <tr>
+              <th>Name</th>
+              <th></th>
+            </tr>
+
+            {permissions.length > 0 ? (
+              permissions.map((permission) => (
+                <tr key={permission.id}>
+                  <td>{permission.name}</td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      value={permission.id}
+                      onChange={(e) => addTopermission(e)}
+                      checked={
+                        selectedPermissions.find(
+                          (perm) => perm === permission.id
+                        )
+                          ? true
+                          : false
+                      }
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={2}>No permissions here</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+        {/* <table className="w-full">
           <tbody>
             <tr className="border">
               <th className="p-4 border">Action</th>
@@ -262,7 +310,7 @@ function AddAdmin() {
                   type="checkbox"
                   onChange={(e) => checkPermission(e)}
                   value="EXPORT_USERS"
-                  checked={checkInPerm("EXPORT_USERS")}
+                  checked={(e)=>checkInPerm("EXPORT_USERS")}
                 />
               </td>
             </tr>
@@ -321,7 +369,7 @@ function AddAdmin() {
               </td>
             </tr>
           </tbody>
-        </table>
+        </table> */}
 
         <div className="flex my-4">
           <div className="flex-1 px-2">

@@ -16,6 +16,7 @@ export default function OtpVerification() {
   const btnDisabled = otp === "" || isLoading;
   const usage = params.get("usage");
   const router = useRouter();
+  const token = params.get("token");
 
   const noOfEntry = usage === "reset-password" ? 6 : 4;
 
@@ -27,10 +28,17 @@ export default function OtpVerification() {
         usage === "signup" || usage === "reset-password"
           ? "/auth/validate-otp"
           : "/super-admin/verify-passcode";
-      const resp = await api.post(requestEndpoint, {
-        email,
-        otp,
-      });
+      const data =
+        usage === "signup" || usage === "reset-password"
+          ? {
+              email,
+              otp,
+            }
+          : {
+              token,
+              passcode: otp,
+            };
+      const resp = await api.post(requestEndpoint, data);
 
       console.log(resp);
       if (resp.status === 200) {
