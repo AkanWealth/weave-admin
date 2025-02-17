@@ -155,6 +155,24 @@ function ContentInfo() {
     }
   };
 
+  const [thumbnailToDelete, setThumbnailToDelete] = useState("");
+  const [isDeletingThumbnail, setIsdeletingThumbnail] = useState(false);
+
+  const deleteThumbnail = async () => {
+    setIsdeletingThumbnail(true);
+    try {
+      const response = await api.delete(`/thumbnails/${thumbNailSelected}`);
+      showMessage(response.data.message, "success");
+    } catch (error) {
+      showMessage(
+        error.response.data.message || "Error deleting thumbnail",
+        "error"
+      );
+    } finally {
+      setIsdeletingThumbnail(false);
+    }
+  };
+
   return (
     <form name="content-form" onSubmit={(e) => e.preventDefault()}>
       <h5 className="capitalize font-rubikBold text-xl">{contentType}</h5>
@@ -249,6 +267,37 @@ function ContentInfo() {
 
         <div className="">Thumbnail/Illustration</div>
         <div className="border border-gray-500 p-4 my-4 rounded-xl">
+          <div
+            className="flex flex-row p-2 px-4 text-sm text-red-500 rounded-xl"
+            style={{
+              background: "#f2fbf7",
+              display: thumbnailToDelete === "" ? "none" : "flex",
+            }}
+          >
+            <p className="flex-1 my-auto">
+              Are you sure to delete this thumbnail
+            </p>
+            <div className="my-auto">
+              {isDeletingThumbnail ? (
+                <div className="p-2">Please wait</div>
+              ) : (
+                <>
+                  <button
+                    className="p-2 border-base-secondary rounded-md mr-4"
+                    onClick={() => setThumbnailToDelete("")}
+                  >
+                    <span className="fa fa-remove"></span> No
+                  </button>
+                  <button
+                    className="p-2 text-weave-primary rounded-md"
+                    onClick={() => deleteThumbnail()}
+                  >
+                    <span className="fa fa-check"></span> Yes
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
           <div className="flex flex-wrap">
             {loadingThumbnail ? (
               <div className="text-center p-6 font-rubikMedium w-full">
@@ -260,8 +309,14 @@ function ContentInfo() {
                   <label
                     className={`border border-${
                       thumbnail === item.fileUrl ? "weave-primary" : "gray-500"
-                    } rounded-md p-6  flex flex-col h-full`}
+                    } rounded-md p-6  flex flex-col h-full relative`}
                   >
+                    <button
+                      className="absolute right-0 top-0 p-2 text-red-500 rounded-md"
+                      onClick={() => setThumbnailToDelete(item.id)}
+                    >
+                      <span className="fa fa-trash"></span>
+                    </button>
                     <img
                       src={`${item.fileUrl}`}
                       className="w-full my-auto h-3/4"

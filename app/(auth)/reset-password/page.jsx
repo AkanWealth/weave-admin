@@ -5,14 +5,21 @@ import Button from "@/components/elements/Button";
 import { ToastContext, useMessageContext } from "@/contexts/toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/lib/api";
+import PasswordStrengthMeter from "@/components/elements/passwordStrenghtMeter";
 
 function ResetPassword() {
   const router = useRouter();
   const [isLoading, setIsloading] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [passwordStrong, setPasswordStrong] = useState(false);
   const btnDisabled =
-    newPassword == "" || confirmNewPassword == "" || isLoading;
+    newPassword == "" ||
+    confirmNewPassword == "" ||
+    isLoading ||
+    !passwordStrong ||
+    newPassword !== confirmNewPassword;
+
   const { showMessage } = useMessageContext();
   const params = useSearchParams();
   const token = params.get("token");
@@ -29,7 +36,10 @@ function ResetPassword() {
       }
     } catch (error) {
       console.log(error);
-      showMessage(error.message, "error");
+      showMessage(
+        error.response.data.message || "Error resetting password",
+        "error"
+      );
     } finally {
       setIsloading(false);
     }
@@ -51,6 +61,11 @@ function ResetPassword() {
           placeholder="Confirm Password"
           value={confirmNewPassword}
           setValue={setConfirmNewPassword}
+        />
+        <PasswordStrengthMeter
+          password={newPassword}
+          passwordStrong={passwordStrong}
+          setPasswordStrong={setPasswordStrong}
         />
       </div>
       <div>

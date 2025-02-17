@@ -11,7 +11,7 @@ import LogoutBtn from "./LogoutBtn";
 
 function Layout({ children }) {
   const pathname = usePathname();
-  let userInfo = localStorage.getItem("userinfo");
+  let userInfo = window.localStorage.getItem("userinfo");
 
   if (userInfo) {
     userInfo = JSON.parse(userInfo);

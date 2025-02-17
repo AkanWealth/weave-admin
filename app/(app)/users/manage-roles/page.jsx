@@ -1,7 +1,27 @@
+"use client";
+import { ToastContext, useMessageContext } from "@/contexts/toast";
+import api from "@/lib/api";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 function Page() {
+  const { showMessage } = useMessageContext();
+  const [availableRoles, setAvailableRoles] = useState([]);
+
+  const fetchRoles = async () => {
+    try {
+      const response = await api.get("/role");
+      setAvailableRoles(response.data);
+    } catch (error) {
+      console.log(error);
+      showMessage("Unable to fetch available roles", "error");
+    }
+  };
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+
   return (
     <div>
       <h1 className="text-xl font-rubikMedium my-2">
@@ -37,9 +57,12 @@ function Page() {
                   id=""
                   className="text-sm p-2 rounded-md font-rubikRegular"
                 >
-                  <option value="">Super Admin</option>
-                  <option value="">Admin</option>
-                  <option value="">Content Management</option>
+                  <option value="">Select Role</option>
+                  {availableRoles.map((role) => (
+                    <option key={role.id} value={role.id}>
+                      {role.name}
+                    </option>
+                  ))}
                 </select>
               </h5>
             </div>
@@ -122,4 +145,10 @@ function Page() {
   );
 }
 
-export default Page;
+export default function () {
+  return (
+    <ToastContext>
+      <Page />
+    </ToastContext>
+  );
+}

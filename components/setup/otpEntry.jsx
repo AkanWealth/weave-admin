@@ -24,42 +24,37 @@ export default function OtpVerification() {
     setIsLoading(true);
 
     try {
-      const requestEndpoint =
-        usage === "signup" || usage === "reset-password"
-          ? "/auth/validate-otp"
-          : "/super-admin/verify-passcode";
-      const data =
-        usage === "signup" || usage === "reset-password"
-          ? {
-              email,
-              otp,
-            }
-          : {
-              token,
-              passcode: otp,
-            };
-      const resp = await api.post(requestEndpoint, data);
+      if (usage === "signup" || usage === "reset-password") {
+        const resp = await api.post("/auth/validate-otp", {
+          email,
+          otp,
+        });
 
-      console.log(resp);
-      if (resp.status === 200) {
-        if (usage == "signup") {
-          router.push("/welcome");
-        } else if (usage == "reset-password") {
-          router.push(`/reset-password?token=${otp}`);
-        } else {
-          router.push("/setup/password");
+        if (resp.status === 200) {
+          if (usage == "signup") {
+            router.push("/welcome");
+          } else if (usage == "reset-password") {
+            router.push(`/reset-password?token=${otp}`);
+          }
+        }
+      } else {
+        const resp = await api.post("/super-admin/verify-passcode", {
+          token,
+          passcode: otp,
+        });
+
+        if (resp.status === 201) {
+          showMessage(resp.data.message, "success");
+          router.push(`/setup/password?token=${token}&email=${email}`);
         }
       }
     } catch (err) {
-      console.log(err);
-      showMessage("Error verifying otp", "error");
+      if (err.response.status === 400) router.push("/setup/message");
+      showMessage(err.response.data.message || "Error verifying otp", "error");
       setIsError(true);
     } finally {
       setIsLoading(false);
-      // setIsError(false)
     }
-
-    // redirect("/setup/message");
   };
 
   useEffect(() => {
@@ -77,7 +72,10 @@ export default function OtpVerification() {
       });
       showMessage(response?.data.message, "success");
     } catch (error) {
-      showMessage(error.message, "error");
+      showMessage(
+        error.response.data.message || "Error Resending otp",
+        "error"
+      );
     } finally {
       setSendingOtp(false);
     }

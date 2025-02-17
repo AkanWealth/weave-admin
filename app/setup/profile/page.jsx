@@ -1,6 +1,5 @@
 "use client";
-import { redirect } from "next/navigation";
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 
 import { ToastContext, useMessageContext } from "@/contexts/toast";
@@ -8,6 +7,8 @@ import Nav from "@/components/setup/Nav";
 import avatar from "@/assets/images/3d_avatar_1.png";
 import TextField from "@/components/elements/TextField";
 import Button from "@/components/elements/Button";
+import api from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 function ProfileSetup() {
   return (
@@ -21,6 +22,7 @@ function ProfileForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [fileSelected, setFileSelected] = useState(null);
   const [image, setImage] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     setImageView();
@@ -37,23 +39,33 @@ function ProfileForm() {
   };
 
   // inputs
-  const [firstname, setFirstname] = useState("");
+  const [firstName, setFirstName] = useState("");
 
-  const [lastname, setLastname] = useState("");
+  const [lastName, setLastName] = useState("");
 
-  let isDisabled = firstname === "" || lastname === "" || isLoading;
+  let isDisabled = firstName === "" || lastName === "" || isLoading;
 
   const saveInfo = async () => {
     try {
-      const resp = await axios.post("/");
-      console.log(resp.data);
+      const resp = await api.post("/super-admin/profile-setup", {
+        firstName,
+        lastName,
+      });
+
+      console.log(resp);
+      if (resp.status === 201) {
+        showMessage("Profile Setup complete", "success");
+        router.push("/welcome");
+        return;
+      }
+
+      showMessage("Error setting up, login and complete setup", "error");
     } catch (err) {
-      showMessage(JSON.stringify(err), "error");
+      console.log(err);
+      showMessage("Error setting up, login and complete setup", "error");
     } finally {
       setIsLoading(false);
     }
-
-    redirect("/welcome");
   };
 
   return (
@@ -102,15 +114,15 @@ function ProfileForm() {
       <div className="flex-column space-y-4">
         <TextField
           label={"First Name"}
-          placeholder={"Enter your first name"}
-          value={firstname}
-          setValue={setFirstname}
+          placeholder={"Enter your first Name"}
+          value={firstName}
+          setValue={setFirstName}
         />
         <TextField
           label={"Last Name"}
-          placeholder={"Enter your last name"}
-          value={lastname}
-          setValue={setLastname}
+          placeholder={"Enter your last Name"}
+          value={lastName}
+          setValue={setLastName}
         />
       </div>
       <div className="my-8">

@@ -35,24 +35,36 @@ function Login() {
       console.log(resp);
 
       if (resp.status === 200) {
-        if (resp.data.user.verified) {
-          localStorage.setItem("userinfo", JSON.stringify(resp.data.user));
-          Cookies.set("session", resp.data.accessToken, { expires: 1 / 24 });
-          router.push("/dashboard");
-        } else {
-          router.push(`/otp?email=${email}&usage=signup`);
+        if (resp.data.user.role === null) {
+          showMessage("Authorised personnels only", "error");
+          return;
         }
+        if (!resp.data.user.verified) {
+          router.push(`/otp?email=${email}&usage=signup`);
+          return;
+        }
+
+        localStorage.setItem("userinfo", JSON.stringify(resp.data.user));
+        Cookies.set("session", resp.data.accessToken, {
+          expires: 1 / 24,
+        });
+
+        if (
+          resp.data.user.firstName === null &&
+          resp.data.user.lastName === null
+        ) {
+          router.push("/setup/profile");
+          return;
+        }
+
+        router.push("/dashboard");
+
         return;
       }
 
       showMessage("Error Logging in, check credentials and retry", "error");
     } catch (err) {
-      showMessage(
-        err.message
-          ? err.message
-          : "Error loggin in, check credentials and retry",
-        "error"
-      );
+      showMessage("Error loggin in, check credentials and retry", "error");
     } finally {
       setIsLoading(false);
     }

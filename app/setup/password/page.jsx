@@ -1,11 +1,12 @@
 "use client";
-import { redirect } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState, useEffect } from "react";
-import { passwordStrength } from "check-password-strength";
 
 import { ToastContext, useMessageContext } from "@/contexts/toast";
 import Nav from "@/components/setup/Nav";
 import PasswordField from "@/components/elements/PasswordField";
+import PasswordStrengthMeter from "@/components/elements/passwordStrenghtMeter";
+import api from "@/lib/api";
 
 function PasswordSetup() {
   return (
@@ -14,7 +15,9 @@ function PasswordSetup() {
     </ToastContext>
   );
 }
+
 function PasswordForm() {
+  const params = useSearchParams();
   const { showMessage } = useMessageContext();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -23,6 +26,11 @@ function PasswordForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [confirmPasswordError, setconfirmPasswordError] = useState("");
   let [passwordStrong, setPasswordStrong] = useState(false);
+  const btnDisabled =
+    !passwordStrong || isLoading || password !== confirmPassword;
+
+  const token = params.get("token");
+  const router = useRouter();
 
   const savePassword = async () => {
     try {
@@ -33,30 +41,30 @@ function PasswordForm() {
           "Password does not match Confirm Password"
         );
 
-      const resp = await axios.post("/");
-      console.log(resp.data);
+      const resp = await api.post("/super-admin/password-setup", {
+        token,
+        password,
+      });
+
+      if (resp.status === 201) {
+        showMessage(
+          "User setup successful, please login to complete profile",
+          "success"
+        );
+        router.push("/login");
+        // redirect("/setup/profile");
+      }
+      showMessage(resp.data.message, "error");
     } catch (err) {
-      showMessage(JSON.stringify(err), "error");
+      console.log(err);
+      showMessage("Error setting up password, please retry", "error");
     } finally {
       setIsLoading(false);
       // setIsError(false)
     }
 
-    redirect("/setup/profile");
+    // redirect("/setup/profile");
   };
-
-  useEffect(() => {
-    setPasswordError("");
-    if (passwordStrength(password).contains.length === 4) {
-      setPasswordStrong(true);
-    } else {
-      setPasswordStrong(false);
-    }
-  }, [password]);
-
-  useEffect(() => {
-    if (confirmPassword === password) setconfirmPasswordError("");
-  }, [confirmPassword]);
 
   return (
     <div>
@@ -76,34 +84,31 @@ function PasswordForm() {
           placeholder={"Confirm Password"}
           value={confirmPassword}
           setValue={setConfirmPassword}
-          error={confirmPasswordError}
+          error={
+            password !== confirmPassword
+              ? "Password does not match"
+              : confirmPasswordError
+          }
         />
       </div>
-      <div className="text-xs">
-        Minimum of 8 characters <br />
-        At least one capital letter <br />
-        One Number <br />
-        One special character
-      </div>
+      <PasswordStrengthMeter
+        password={password}
+        passwordStrong={passwordStrong}
+        setPasswordStrong={setPasswordStrong}
+      />
       <div>
-        {!passwordStrong || isLoading ? (
-          <button
-            className="py-2 bg-base-secondary text-base-white w-full rounded-xl"
-            disabled={true}
-          >
-            {isLoading ? "Saving..." : "Continue"}
-          </button>
-        ) : (
-          <button
-            onClick={() => {
-              setIsLoading(true);
-              savePassword();
-            }}
-            className="py-2 bg-weave-primary text-base-white w-full rounded-xl"
-          >
-            Set Password
-          </button>
-        )}
+        <button
+          onClick={() => {
+            setIsLoading(true);
+            savePassword();
+          }}
+          className={`py-2 ${
+            btnDisabled ? "bg-base-secondary" : "bg-weave-primary"
+          } text-base-white w-full rounded-xl`}
+          disabled={btnDisabled}
+        >
+          {isLoading ? "Saving..." : "Set Password"}
+        </button>
       </div>
     </div>
   );

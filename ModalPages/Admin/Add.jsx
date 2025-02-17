@@ -10,7 +10,8 @@ function AddAdmin() {
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const isDisabled = firstname === "" || lastname === "" || email === "";
+  const isDisabled = email === "";
+  // const isDisabled = firstname === "" || lastname === "" || email === "";
   const [activeTab, setActiveTab] = useState("profile");
   const [error, setError] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
@@ -79,8 +80,10 @@ function AddAdmin() {
 
       showMessage("Error sending invite", "error");
     } catch (error) {
-      console.log(error);
-      showMessage("Error sending invite", "error");
+      showMessage(
+        error.response.data.message || "Error sending invite",
+        "error"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -128,8 +131,8 @@ function AddAdmin() {
         </button>
       </div>
       <div className={activeTab === "profile" ? "" : "hidden"}>
-        <div className="flex flex-col space-y-4">
-          <InputField
+        <div className="flex flex-col space-y-6">
+          {/* <InputField
             value={firstname}
             setValue={setFirstname}
             label={"First Name"}
@@ -142,13 +145,14 @@ function AddAdmin() {
             label={"Last Name"}
             placeholder={"Enter user Last name"}
             error={error}
-          />
+          /> */}
           <InputField
             value={email}
             setValue={setEmail}
             label={"Email Address"}
             placeholder={"admin@example.com"}
             error={error}
+            className={"mb-4"}
           />
         </div>
 

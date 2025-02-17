@@ -3,10 +3,10 @@ import React, { useEffect, useState } from "react";
 import TextField from "@/components/elements/TextField";
 import PasswordField from "@/components/elements/PasswordField";
 import Button from "@/components/elements/Button";
-import { passwordStrength } from "check-password-strength";
 import api from "@/lib/api";
 import { ToastContext, useMessageContext } from "@/contexts/toast";
 import { useRouter } from "next/navigation";
+import PasswordStrengthMeter from "@/components/elements/passwordStrenghtMeter";
 
 const Register = () => {
   return (
@@ -23,15 +23,9 @@ function PageContent() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
-  const [passwordStrong, setPasswordStrong] = useState(false);
-  const passwordColors = ["#eb4a4a", "#f8965d", "#7eed87", "#22972c"];
   const { showMessage } = useMessageContext();
   const router = useRouter();
-
-  useEffect(() => {
-    setPasswordError("");
-    setPasswordStrong(passwordStrength(password).contains.length);
-  }, [password]);
+  const [passwordStrong, setPasswordStrong] = useState(false);
 
   const btnDisabled =
     email === "" ||
@@ -125,27 +119,13 @@ function PageContent() {
           error={passwordError}
         />
 
-        <div className="text-xs">
-          <div className="flex flex-row gap-3">
-            <div className="bg-gray-300 rounded-md w-3/4 h-2 mb-2 my-auto">
-              <div
-                className="h-2 rounded-md"
-                // className="bg-red-500 h-2 rounded-md"
-                style={{
-                  width: `${(passwordStrong / 4) * 100}%`,
-                  backgroundColor: passwordColors[passwordStrong - 1],
-                }}
-              ></div>
-            </div>
-            <div className="w-1/4 my-auto">Password Strength</div>
-          </div>
-          Minimum of 8 characters <br />
-          At least one capital letter <br />
-          One Number <br />
-          One special character
-        </div>
+        <PasswordStrengthMeter
+          password={password}
+          passwordStrong={passwordStrong}
+          setPasswordStrong={setPasswordStrong}
+        />
       </div>
-      <div className="my-8">
+      <div>
         <Button
           title={isLoading ? "Creating Account..." : "Create Account"}
           disabled={btnDisabled}
