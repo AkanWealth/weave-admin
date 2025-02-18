@@ -11,11 +11,14 @@ import LogoutBtn from "./LogoutBtn";
 
 function Layout({ children }) {
   const pathname = usePathname();
-  let userInfo = window.localStorage.getItem("userinfo");
+  let userInfo = null;
+  try {
+    userInfo = localStorage.getItem("userinfo");
 
-  if (userInfo) {
-    userInfo = JSON.parse(userInfo);
-  }
+    if (userInfo) {
+      userInfo = JSON.parse(userInfo);
+    }
+  } catch (error) {}
 
   return (
     <Suspense>
@@ -120,9 +123,9 @@ function Layout({ children }) {
                 />
                 <div className="relative px-12 text-gray-600">
                   <h1 className="font-rubikMedium italic">
-                    {userInfo.username}
+                    {userInfo && userInfo.username}
                   </h1>
-                  <h1>{userInfo.role.name}</h1>
+                  <h1>{userInfo && userInfo.role.name}</h1>
                 </div>
               </div>
             </div>
