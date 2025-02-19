@@ -14,7 +14,8 @@ function DeleteAdmin() {
   const invokeDelete = async () => {
     setLoading(true);
     try {
-      const response = await api.delete("/usage-analytics/delete/{userId}");
+      const response = await api.delete("/users/delete/{userId}");
+      // const response = await api.delete("/usage-analytics/delete/{userId}");
 
       if (response.status === 200) {
         showMessage("User deleted safely", "success");

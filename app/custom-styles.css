@@ -9,7 +9,7 @@ tr {
 td,
 th {
   padding: 0.75rem;
-  text-align: center;
+  text-align: left;
 }
 
 .dot {

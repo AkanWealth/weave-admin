@@ -84,6 +84,7 @@ function ContentInfo() {
       const response = await api.get("/thumbnails");
 
       if (response.status === 200) {
+        console.log(response.data.thumbnails);
         setThumbnails(response?.data.thumbnails);
       }
     } catch (error) {
@@ -161,9 +162,12 @@ function ContentInfo() {
   const deleteThumbnail = async () => {
     setIsdeletingThumbnail(true);
     try {
-      const response = await api.delete(`/thumbnails/${thumbNailSelected}`);
+      console.log(thumbnailToDelete);
+      const response = await api.delete(`/thumbnails/${thumbnailToDelete}`);
       showMessage(response.data.message, "success");
+      getThumbnails();
     } catch (error) {
+      console.log(error);
       showMessage(
         error.response.data.message || "Error deleting thumbnail",
         "error"

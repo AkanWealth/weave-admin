@@ -80,10 +80,10 @@ function AdminList() {
             <tbody>
               <tr className="bg-[#f5f6fa] ">
                 <th className="text-left px-16">Username</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Role</th>
-                <th></th>
+                <th className="text-left">Date</th>
+                <th className="text-left">Status</th>
+                <th className="text-left">Role</th>
+                <th className="text-left"></th>
               </tr>
 
               {filteredList.map((user) => {

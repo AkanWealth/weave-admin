@@ -5,19 +5,19 @@ function UserRender({ info, date }) {
   return (
     <tr>
       <td className="text-left px-6">
-        <h6 className="font-rubikMedium text-black">{info.username}</h6>
+        <h6 className="font-rubikMedium text-black px-6">{info.username}</h6>
         <span className="text-gray-500 text-sm">{info.email}</span>
         <button className="mx-2 p-1">
           <i className="fa fa-copy"></i>
         </button>
       </td>
-      <td>
+      <td className="text-left">
         <h6>{`${date.getFullYear()}-${
           date.getMonth() + 1
         }-${date.getDate()}`}</h6>
         <h6>{`${date.getHours()}:${date.getMinutes()}`}</h6>
       </td>
-      <td>
+      <td className="text-left">
         <span
           className={`${
             info.isActive ? "bg-[#28A745]" : "bg-red-500"
@@ -26,7 +26,7 @@ function UserRender({ info, date }) {
           {info.isActive ? "Active" : "Inactive"}
         </span>
       </td>
-      <td>
+      <td className="text-left">
         <h6>{info.role.name}</h6>
       </td>
       <td>
