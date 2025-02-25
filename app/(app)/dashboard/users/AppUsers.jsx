@@ -167,7 +167,14 @@ function AppUsers() {
                           <i className="fa fa-user-times mr-2"></i>{" "}
                           {user.isActive ? "Deactivate" : "Activate"}
                         </a>
-                        <a className="px-3 py-1">
+                        <a
+                          onClick={() =>
+                            router.push(
+                              `?modal=send-message&id=${user.id}&name=${user.username}`
+                            )
+                          }
+                          className="px-3 py-1"
+                        >
                           {" "}
                           <i className="fa fa-envelope mr-2"></i> Send Message
                         </a>

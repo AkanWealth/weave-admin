@@ -4,6 +4,7 @@ import EditAdmin from "@/ModalPages/Admin/Edit";
 import SuspendAdmin from "@/ModalPages/Admin/Suspend";
 import ActivateAppUser from "@/ModalPages/App_User/Activate";
 import DeleteAppUser from "@/ModalPages/App_User/Delete";
+import SendMessage from "@/ModalPages/App_User/SendMessage";
 import SuspendAppUser from "@/ModalPages/App_User/Suspend";
 import AddNotification from "@/ModalPages/Notification/Add";
 import Notifications from "@/ModalPages/Notification/List";
@@ -161,6 +162,7 @@ const ModalContent = ({ usage, params }) => {
   if (usage === "add-content-info") return <ContentInfo />;
   if (usage === "edit-resource") return <EditResource />;
   if (usage === "add-notification") return <AddNotification />;
+  if (usage === "send-message") return <SendMessage />;
 };
 
 export const useModalContext = () => useContext(ModalContext);
