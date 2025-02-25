@@ -6,11 +6,15 @@ import TextField from "@/components/elements/TextField";
 import Button from "@/components/elements/Button";
 import PasswordField from "@/components/elements/PasswordField";
 import api from "@/lib/api";
+import { ToastContext, useMessageContext } from "@/contexts/toast";
 
-export default function Page() {
+function SettingPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isupdatinginfo, setIsupdatinginfo] = useState(false);
+  const [isupdatingpassword, setIsupdatingpassword] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [isFetching, setIsFetching] = useState(true);
+  const { showMessage } = useMessageContext();
 
   // inputs
   const [initialPassword, setInitialPassword] = useState("");
@@ -48,14 +52,32 @@ export default function Page() {
   }, [userProfile]);
 
   const updateUserPassword = async () => {
+    setIsupdatingpassword(true);
     try {
       const response = await api.patch("/users/change-password", {
-        currentPassword,
+        currentPassword: initialPassword,
         newPassword,
       });
       console.log(response);
+      showMessage(response.data.message, "sucess");
     } catch (error) {
       console.log(error);
+      showMessage(
+        error.response.data.message || "Error updating password",
+        "error"
+      );
+    } finally {
+      setIsupdatingpassword(false);
+    }
+  };
+
+  const updateUserProfile = async () => {
+    setIsupdatinginfo(true);
+
+    try {
+    } catch (error) {
+    } finally {
+      setIsupdatinginfo(false);
     }
   };
 
@@ -161,10 +183,10 @@ export default function Page() {
               <div className="my-8">
                 <div className="">
                   <Button
-                    title={isLoading ? "Saving..." : "Finish"}
+                    title={isupdatinginfo ? "Saving..." : "Finish"}
                     disabled={isDisabled}
                     onClick={() => {
-                      setIsLoading(true);
+                      updateUserProfile();
                     }}
                   />
                 </div>
@@ -212,10 +234,10 @@ export default function Page() {
           <div className="my-8">
             <div className="">
               <Button
-                title={isLoading ? "Saving..." : "Finish"}
+                title={isupdatingpassword ? "Saving..." : "Finish"}
                 disabled={pswdBtnDisabled}
                 onClick={() => {
-                  setIsLoading(true);
+                  updateUserPassword();
                 }}
               />
             </div>
@@ -223,5 +245,13 @@ export default function Page() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <ToastContext>
+      <SettingPage />
+    </ToastContext>
   );
 }

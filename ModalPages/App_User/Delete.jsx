@@ -47,7 +47,7 @@ function DeleteAppUser() {
           <i className="fa fa-trash m-auto"></i>
         </div>
         <div className="">
-          <h4 className="font-rubikMedium text-xl">Delete Admin User</h4>
+          <h4 className="font-rubikMedium text-xl">Delete User</h4>
           <p className="text-gray-500">
             Are you sure you want to delete this account? This user will be
             deleted from the system

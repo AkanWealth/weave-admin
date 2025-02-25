@@ -39,16 +39,21 @@ export default function OtpVerification() {
         }
       } else {
         const resp = await api.post("/super-admin/verify-passcode", {
+          email,
           token,
           passcode: otp,
         });
 
+        console.log(resp);
         if (resp.status === 201) {
           showMessage(resp.data.message, "success");
-          router.push(`/setup/password?token=${token}&email=${email}`);
+          router.push(
+            `/setup/password?token=${resp.data.setupToken}&email=${email}`
+          );
         }
       }
     } catch (err) {
+      console.log(err);
       if (err.response.status === 400) router.push("/setup/message");
       showMessage(err.response.data.message || "Error verifying otp", "error");
       setIsError(true);

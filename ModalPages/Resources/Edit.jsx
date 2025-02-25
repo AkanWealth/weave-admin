@@ -100,6 +100,10 @@ function EditResource() {
 
   const updateResource = async (status) => {
     setIsSubmitting(true);
+    let btn = document.getElementById(`${status.toLowerCase()}-btn`);
+    let btnTitle = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Please wait...";
 
     try {
       let formdata = new FormData();
@@ -139,6 +143,8 @@ function EditResource() {
       showMessage("Error uploading content", "error");
     } finally {
       setIsSubmitting(false);
+      btn.disabled = false;
+      btn.textContent = btnTitle;
     }
   };
 
@@ -333,20 +339,21 @@ function EditResource() {
                     </div>
                   ) : thumbnails.length !== 0 ? (
                     thumbnails.map((item) => (
-                      <div className=" w-1/4 p-1" key={item.id}>
+                      <div className=" w-1/4 p-1 relative" key={item.id}>
+                        <button
+                          className="absolute right-0 top-0 p-2 text-red-500 rounded-md w-24"
+                          onClick={() => setThumbnailToDelete(item.id)}
+                        >
+                          <span className="fa fa-trash"></span>
+                        </button>
+
                         <label
                           className={`border border-${
                             thumbnail === item.fileUrl
                               ? "weave-primary"
                               : "gray-500"
-                          } rounded-md p-6  flex flex-col h-full relative`}
+                          } rounded-md p-6  flex flex-col h-full`}
                         >
-                          <button
-                            className="absolute right-0 top-0 p-2 text-red-500 rounded-md"
-                            onClick={() => setThumbnailToDelete(item.id)}
-                          >
-                            <span className="fa fa-trash"></span>
-                          </button>
                           <img
                             src={`${item.fileUrl}`}
                             className="w-full my-auto h-3/4"
@@ -536,8 +543,13 @@ function EditResource() {
                   </button>
                 </div>
                 <div className="flex-1">
-                  <button className="bg-gray-300 text-black py-2 w-full font-rubikMedium rounded-md">
-                    {isSubmitting ? "Please wait..." : "Save as Draft"}
+                  <button
+                    className="bg-gray-300 text-black py-2 w-full font-rubikMedium rounded-md"
+                    onClick={() => updateResource("Draft")}
+                    id="draft-btn"
+                  >
+                    Save as Draft
+                    {/* {isSubmitting ? "Please wait..." : "Save as Draft"} */}
                   </button>
                 </div>
                 <div className="flex-1">
@@ -546,8 +558,10 @@ function EditResource() {
                     onClick={(e) => {
                       updateResource("Published");
                     }}
+                    id="published-btn"
                   >
-                    {isSubmitting ? "Please wait..." : "Publish"}
+                    Publish
+                    {/* {isSubmitting ? "Please wait..." : "Publish"} */}
                   </button>
                 </div>
               </div>

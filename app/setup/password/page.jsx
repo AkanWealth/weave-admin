@@ -46,13 +46,14 @@ function PasswordForm() {
         password,
       });
 
+      console.log(resp);
       if (resp.status === 201) {
-        showMessage(
-          "User setup successful, please login to complete profile",
-          "success"
-        );
-        router.push("/login");
+        showMessage(resp.data.message, "success");
+        router.push(`/setup/profile?token=${resp.data.profileToken}`);
+        // router.push("/login");
+        // 016978b21a78b29f3caeff94c705682f1548ff886e35919eb7dec0b9321d48f4
         // redirect("/setup/profile");
+        return;
       }
       showMessage(resp.data.message, "error");
     } catch (err) {

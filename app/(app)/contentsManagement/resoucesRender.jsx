@@ -105,64 +105,73 @@ function ResourcesRender() {
                 <th>Status</th>
                 <th></th>
               </tr>
-              {filteredResources.map((resource) => (
-                <tr key={resource.id}>
-                  <td className="text-left px-6">
-                    <h6 className="font-rubikMedium text-black">
-                      {resource.title}
-                    </h6>
-                  </td>
-                  <td className="text-xs pl-6 text-left">
-                    {resource.tags.map((tag) => (
-                      <span key={tag} className="tag m-1">
-                        {tag}
-                      </span>
-                    ))}
-                  </td>
-                  <td>{resource.resourceType}</td>
-                  <td>
-                    <h6>{resource.created_at}</h6>
-                    <h6>08:30 AM</h6>
-                  </td>
-                  <td>
-                    <button
-                      className={`${
-                        resource.status.toLowerCase() === "published"
-                          ? "bg-[#28A745] text-base-white"
-                          : "bg-[#B5B5B5]"
-                      } px-4 rounded-full py-1 text-sm`}
-                    >
-                      {resource.status}
-                    </button>
-                  </td>
-                  <td>
-                    <button className="relative px-2 py-1 mr-8 dropdown">
-                      <div className="dot"></div>
-                      <div className="dot"></div>
-                      <div className="dot"></div>
+              {filteredResources.map((resource) => {
+                const date = new Date(resource.created_at);
+                const day = `${date.getFullYear()} ${
+                  date.getMonth() + 1
+                } ${date.getDate()}`;
 
-                      <div className="absolute right-0 rounded-md p-2 shadow bg-white text-xs w-[200px]  dropdown-menu">
-                        <div className="flex flex-col text-left">
-                          <Link
-                            href={`?modal=edit-resource&resource_id=${resource.id}&contentType=${resource.resourceType}`}
-                            className="px-3 py-1"
-                          >
-                            {" "}
-                            <i className="fa fa-pencil mr-2"></i> Edit Content
-                          </Link>
-                          <Link
-                            href={`?modal=delete-resource&resource_id=${resource.id}`}
-                            className="text-red-500 px-3 py-1"
-                          >
-                            {" "}
-                            <i className="fa fa-trash mr-2"></i> Delete
-                          </Link>
+                const time = `${date.getHours()}:${date.getMinutes()}`;
+
+                return (
+                  <tr key={resource.id}>
+                    <td className="text-left px-6">
+                      <h6 className="font-rubikMedium text-black">
+                        {resource.title}
+                      </h6>
+                    </td>
+                    <td className="text-xs pl-6 text-left">
+                      {resource.tags.map((tag) => (
+                        <span key={tag} className="tag m-1">
+                          {tag}
+                        </span>
+                      ))}
+                    </td>
+                    <td>{resource.resourceType}</td>
+                    <td>
+                      <h6>{day}</h6>
+                      <h6>{time}</h6>
+                    </td>
+                    <td>
+                      <button
+                        className={`${
+                          resource.status.toLowerCase() === "published"
+                            ? "bg-[#28A745] text-base-white"
+                            : "bg-[#B5B5B5]"
+                        } px-4 rounded-full py-1 text-sm`}
+                      >
+                        {resource.status}
+                      </button>
+                    </td>
+                    <td>
+                      <button className="relative px-2 py-1 mr-8 dropdown">
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+
+                        <div className="absolute right-0 rounded-md p-2 shadow bg-white text-xs w-[200px]  dropdown-menu">
+                          <div className="flex flex-col text-left">
+                            <Link
+                              href={`?modal=edit-resource&resource_id=${resource.id}&contentType=${resource.resourceType}`}
+                              className="px-3 py-1"
+                            >
+                              {" "}
+                              <i className="fa fa-pencil mr-2"></i> Edit Content
+                            </Link>
+                            <Link
+                              href={`?modal=delete-resource&resource_id=${resource.id}`}
+                              className="text-red-500 px-3 py-1"
+                            >
+                              {" "}
+                              <i className="fa fa-trash mr-2"></i> Delete
+                            </Link>
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}

@@ -13,8 +13,10 @@ function AdminList() {
   const [filteredList, setFilteredlist] = useState([]);
   const [searchKey, setSearchKey] = useState("");
   const { showMessage } = useMessageContext();
+  const [fetchingUsers, setFetchingUsers] = useState(false);
 
   const fetchUsers = async () => {
+    setFetchingUsers(true);
     try {
       const response = await api.get("/usage-analytics/admin");
       console.log(response.data);
@@ -27,12 +29,30 @@ function AdminList() {
     } catch (err) {
       console.log(err);
       showMessage("Error fetching admin users", "error");
+    } finally {
+      setFetchingUsers(false);
     }
   };
 
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const resendInvite = async (email) => {
+    try {
+      const response = await api.post("/super-admin/resend-invitation", {
+        email,
+      });
+      console.log(response);
+      showMessage("Invite resent to user", "success");
+    } catch (error) {
+      showMessage(
+        error.response.data.message || "Error resending invite",
+        "error"
+      );
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     if (searchKey === "") return;
@@ -74,7 +94,16 @@ function AdminList() {
       </div>
 
       {/* users list table */}
-      {users ? (
+      {fetchingUsers ? (
+        <>
+          {/* Table Rows Placeholder */}
+          <div className="space-y-2">
+            {[...Array(5)].map((_, index) => (
+              <div key={index} className="h-6 bg-gray-200 rounded w-full"></div>
+            ))}
+          </div>
+        </>
+      ) : users ? (
         <div className="bg-base-white my-4 shadow">
           <table className="my-4 w-full">
             <tbody>
@@ -89,11 +118,46 @@ function AdminList() {
               {filteredList.map((user) => {
                 const date = new Date(user.created_at);
                 return (
-                  <UserRender info={user} date={date} key={Math.random()} />
+                  <UserRender
+                    info={user}
+                    date={date}
+                    key={Math.random()}
+                    resendInvite={resendInvite}
+                  />
                 );
               })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <EmptyList />
+      )}
 
-              {/* <tr>
+      {/* {users ? (
+        <div className="bg-base-white my-4 shadow">
+          <table className="my-4 w-full">
+            <tbody>
+              <tr className="bg-[#f5f6fa] ">
+                <th className="text-left px-16">Username</th>
+                <th className="text-left">Date</th>
+                <th className="text-left">Status</th>
+                <th className="text-left">Role</th>
+                <th className="text-left"></th>
+              </tr>
+
+              {filteredList.map((user) => {
+                const date = new Date(user.created_at);
+                return (
+                  <UserRender
+                    info={user}
+                    date={date}
+                    key={Math.random()}
+                    resendInvite={resendInvite}
+                  />
+                );
+              })} */}
+
+      {/* <tr>
               <td>WV1234</td>
               <td className="text-left px-6">
                 <h6 className="font-rubikMedium text-black">Mary Gideon</h6>
@@ -356,12 +420,12 @@ function AdminList() {
                 </button>
               </td>
             </tr> */}
-            </tbody>
+      {/* </tbody>
           </table>
         </div>
       ) : (
         <EmptyList />
-      )}
+      )} */}
     </>
   );
 }

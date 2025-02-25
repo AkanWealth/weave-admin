@@ -6,7 +6,7 @@ import Button from "@/components/elements/Button";
 import Link from "next/link";
 import api from "@/lib/api";
 import { ToastContext, useMessageContext } from "@/contexts/toast";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 
 export default function Page() {
@@ -49,11 +49,15 @@ function Login() {
           expires: 1 / 24,
         });
 
+        console.log("ph 1");
         if (
-          resp.data.user.firstName === null &&
-          resp.data.user.lastName === null
+          resp.data.user.firstName == null ||
+          resp.data.user.lastName == null
         ) {
+          console.log("going to setup");
+
           router.push("/setup/profile");
+
           return;
         }
 

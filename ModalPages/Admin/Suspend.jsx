@@ -13,7 +13,7 @@ function SuspendAdmin() {
   const invokeSuspension = async () => {
     setIsLoading(true);
     try {
-      const response = await api.patch("/usage-analytics/deactivate/{userId}");
+      const response = await api.patch(`/usage-analytics/deactivate/${userId}`);
       if (response.status === 200) {
         showMessage("User suspended successfully", "success");
         router.back();

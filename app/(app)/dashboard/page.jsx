@@ -1,9 +1,8 @@
 import React from "react";
-import Image from "next/image";
-import growthFrame from "@/assets/images/Frame.png";
 import Link from "next/link";
 import AppSummary from "./AppSummary";
 import NewSignups from "./NewSignups";
+import GrowthChart from "./GrowthChart";
 
 export default function Dashboard() {
   return (
@@ -20,19 +19,7 @@ export default function Dashboard() {
       <div className="rounded-2xl bg-white p-4 my-4">
         <h3 className="text-xl font-rubikMedium">User Growth</h3>
 
-        <div className="flex flex-col text-center justify-center py-12">
-          <Image
-            src={growthFrame}
-            className="w-[80px] h-[120px] mx-auto"
-            alt="Frame"
-          />
-          <h4 className="text-xl font-rubikMedium my-2">
-            Track your Growth Journey
-          </h4>
-          <h4 className="text-gray-400 text-sm">
-            No user growth data to display just yet.
-          </h4>
-        </div>
+        <GrowthChart />
       </div>
 
       {/* sign up activity tab */}

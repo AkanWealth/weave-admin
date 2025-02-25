@@ -104,6 +104,11 @@ function ContentInfo() {
     const category = form["category"].value;
     const thumbnailUrl = form["thumbnail"].value;
 
+    let btn = document.getElementById(`${status.toLowerCase()}-btn`);
+    let btnTitle = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Please wait...";
+
     try {
       if (contentType === "article") {
         const resp = await api.post("/resource-library/article", {
@@ -153,6 +158,9 @@ function ContentInfo() {
       showMessage("Error uploading content", "error");
     } finally {
       setIsSubmitting(false);
+
+      btn.disabled = false;
+      btn.textContent = btnTitle;
     }
   };
 
@@ -309,18 +317,18 @@ function ContentInfo() {
               </div>
             ) : thumbnails.length !== 0 ? (
               thumbnails.map((item) => (
-                <div className=" w-1/4 p-1" key={item.id}>
+                <div className=" w-1/4 p-1 relative" key={item.id}>
+                  <button
+                    className="absolute right-0 top-0 p-2 text-red-500 rounded-md"
+                    onClick={() => setThumbnailToDelete(item.id)}
+                  >
+                    <span className="fa fa-trash"></span>
+                  </button>
                   <label
                     className={`border border-${
                       thumbnail === item.fileUrl ? "weave-primary" : "gray-500"
-                    } rounded-md p-6  flex flex-col h-full relative`}
+                    } rounded-md p-6  flex flex-col h-full`}
                   >
-                    <button
-                      className="absolute right-0 top-0 p-2 text-red-500 rounded-md"
-                      onClick={() => setThumbnailToDelete(item.id)}
-                    >
-                      <span className="fa fa-trash"></span>
-                    </button>
                     <img
                       src={`${item.fileUrl}`}
                       className="w-full my-auto h-3/4"
@@ -510,6 +518,7 @@ function ContentInfo() {
               onClick={() => {
                 submitForm("Draft");
               }}
+              id="draft"
             >
               {isSubmitting ? "Please wait..." : "Save as Draft"}
             </button>
@@ -523,6 +532,7 @@ function ContentInfo() {
                 submitForm("Published");
               }}
               disabled={isSubmitting}
+              id="published"
             >
               {isSubmitting ? "Please wait..." : "Publish"}
             </button>

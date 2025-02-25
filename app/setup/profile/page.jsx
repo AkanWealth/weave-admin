@@ -8,7 +8,7 @@ import avatar from "@/assets/images/3d_avatar_1.png";
 import TextField from "@/components/elements/TextField";
 import Button from "@/components/elements/Button";
 import api from "@/lib/api";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 function ProfileSetup() {
   return (
@@ -23,6 +23,8 @@ function ProfileForm() {
   const [fileSelected, setFileSelected] = useState(null);
   const [image, setImage] = useState(null);
   const router = useRouter();
+  const params = useSearchParams();
+  const token = params.get("token");
 
   useEffect(() => {
     setImageView();
@@ -47,7 +49,7 @@ function ProfileForm() {
 
   const saveInfo = async () => {
     try {
-      const resp = await api.post("/super-admin/profile-setup", {
+      const resp = await api.post(`/super-admin/profile-setup?token=${token}`, {
         firstName,
         lastName,
       });

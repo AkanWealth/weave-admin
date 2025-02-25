@@ -25,7 +25,7 @@ function Layout({ children }) {
       <div>
         <nav className="w-[280px] fixed left-0 top-0 bottom-0 font-rubikRegular">
           <div className="p-4 py-6 border border-bottom-1">
-            <Image src={logo} className="w-2/3" alt="Weave Logo" />
+            <Image src={logo} className="w-full" alt="Weave Logo" />
           </div>
           <div className="h-3/5 p-2 flex flex-col py-6 space-y-3">
             <Link
@@ -125,7 +125,9 @@ function Layout({ children }) {
                   <h1 className="font-rubikMedium italic">
                     {userInfo && userInfo.username}
                   </h1>
-                  <h1>{userInfo && userInfo.role.name}</h1>
+                  <h1 className="capitalize">
+                    {userInfo && userInfo.role.name.replace(/_/, " ")}
+                  </h1>
                 </div>
               </div>
             </div>

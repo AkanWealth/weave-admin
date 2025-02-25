@@ -11,8 +11,9 @@ function Page() {
   const [selectedRolePermission, setSelectedRolePermission] = useState([]);
 
   useEffect(() => {
-    let matchRole = availableRoles.find((role) => role.id === selectedRole);
-    if (matchRole) setSelectedRolePermission(matchRole.permissions);
+    matchRole = availableRoles.find((role) => role.id === selectedRole);
+    console.log(matchRole);
+    setSelectedRolePermission(matchRole.permissions);
   }, [selectedRole]);
 
   const fetchRoles = async () => {
@@ -28,27 +29,6 @@ function Page() {
   useEffect(() => {
     fetchRoles();
   }, []);
-
-  const [deleting, setDeleting] = useState(false);
-  const deleteSelectedRole = async () => {
-    setDeleting(true);
-    try {
-      const response = await api.delete(`/role/${selectedRole}`);
-      console.log(response);
-      showMessage(
-        "Role deleted successfully, refresh to see changes",
-        "success"
-      );
-    } catch (error) {
-      showMessage(
-        error.response.data.message || "Error deleting role",
-        "error"
-      );
-      console.log(error);
-    } finally {
-      setDeleting(false);
-    }
-  };
 
   return (
     <div>
@@ -105,16 +85,6 @@ function Page() {
                 <button className="bg-weave-primary text-base-white px-4 py-2 mx-4 rounded-md">
                   Save
                 </button>
-                {selectedRole !== "" ? (
-                  <button
-                    className="bg-red-500 text-base-white px-4 py-2 mx-4 rounded-md"
-                    onClick={() => deleteSelectedRole()}
-                  >
-                    {deleting ? "Deleting" : "Delete"}
-                  </button>
-                ) : (
-                  <></>
-                )}
               </div>
             </div>
           </div>
@@ -124,30 +94,59 @@ function Page() {
         <table className="w-full">
           <tbody>
             <tr className="border">
-              <th className="p-4 border">Permission</th>
               <th className="p-4 border">Action</th>
+              <th className="p-4 border">View</th>
+              <th className="p-4 border">Manage</th>
+              <th className="p-4 border">Export</th>
             </tr>
-            {selectedRolePermission.length > 0 ? (
-              selectedRolePermission.map((permission) => (
-                <tr className="border" key={permission.id}>
-                  <td className="p-4 border capitalize">
-                    {permission.name.replace(/_/, " ")}
-                  </td>
-                  <td className="p-4 border">
-                    <input
-                      type="checkbox"
-                      name="permission"
-                      id={permission.id}
-                      value={permission.id}
-                      // onChange={(e) => addToPerm(e)}
-                      // checked={checkInPerm(permission.id)}
-                    />
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <></>
-            )}
+            <tr className="border">
+              <td className="p-4 border">Dashboard</td>
+              <td className="p-4 border">
+                <input type="checkbox" name="" id="" />
+              </td>
+              <td className="p-4 border">
+                <input type="checkbox" name="" id="" />
+              </td>
+              <td className="p-4 border">
+                <input type="checkbox" name="" id="" />
+              </td>
+            </tr>
+            <tr className="border">
+              <td className="p-4 border">User Management</td>
+              <td className="p-4 border">
+                <input type="checkbox" name="" id="" />
+              </td>
+              <td className="p-4 border">
+                <input type="checkbox" name="" id="" />
+              </td>
+              <td className="p-4 border">
+                <input type="checkbox" name="" id="" />
+              </td>
+            </tr>
+            <tr className="border">
+              <td className="p-4 border">Content Management</td>
+              <td className="p-4 border">
+                <input type="checkbox" name="" id="" />
+              </td>
+              <td className="p-4 border">
+                <input type="checkbox" name="" id="" />
+              </td>
+              <td className="p-4 border">
+                <input type="checkbox" name="" id="" />
+              </td>
+            </tr>
+            <tr className="border">
+              <td className="p-4 border">Audit Logs</td>
+              <td className="p-4 border">
+                <input type="checkbox" name="" id="" />
+              </td>
+              <td className="p-4 border">
+                <input type="checkbox" name="" id="" />
+              </td>
+              <td className="p-4 border">
+                <input type="checkbox" name="" id="" />
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>

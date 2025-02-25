@@ -1,9 +1,10 @@
+import { useModalContext } from "@/components/elements/Modal";
 import ResourceLibraryProvider, {
   useResourceLibrary,
 } from "@/contexts/ResourceLibraryContext";
 import { ToastContext, useMessageContext } from "@/contexts/toast";
 import api from "@/lib/api";
-import { useSearchParams } from "next/navigation";
+import { redirect, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 function DeleteResource() {
@@ -12,7 +13,8 @@ function DeleteResource() {
   const [deleting, setDeleting] = useState(false);
   const { resources } = useResourceLibrary();
   const [resourceInfo, setResourceInfo] = useState(null);
-  const { showMessage } = useMessageContext();
+  // const { showMessage } = useMessageContext();
+  const { closeModal, showMessage } = useModalContext();
 
   useEffect(() => {
     const resource = resources.find((resource) => resource.id === itemId);
@@ -24,6 +26,7 @@ function DeleteResource() {
     try {
       const response = await api.delete(`/resource-library/${itemId}`);
       showMessage(response.data.message, "success");
+      closeModal();
     } catch (error) {
       console.log(error);
       showMessage("Error deleting resource", "error");
@@ -96,7 +99,10 @@ function DeleteResource() {
           </button>
         </div>
         <div className="flex-1">
-          <button className="border border-black py-2 w-full font-rubikMedium rounded-md">
+          <button
+            className="border border-black py-2 w-full font-rubikMedium rounded-md"
+            onClick={closeModal}
+          >
             Cancel
           </button>
         </div>

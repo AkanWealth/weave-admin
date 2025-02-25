@@ -61,7 +61,8 @@ function AddAdmin() {
 
   const submitUser = async () => {
     setIsSubmitting(true);
-    if (firstname == "" || lastname == "" || email == "") {
+    if (email == "") {
+      // if (firstname == "" || lastname == "" || email == "") {
       setError("User name cannot be left empty");
       return;
     }
@@ -192,7 +193,7 @@ function AddAdmin() {
                       key={role.id}
                       className="capitalize"
                     >
-                      {role.name}
+                      {role.name.replace(/_/, " ")}
                     </option>
                   ))}
                 </select>

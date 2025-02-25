@@ -1,7 +1,8 @@
 import Link from "next/link";
 import React from "react";
 
-function UserRender({ info, date }) {
+function UserRender({ info, date, resendInvite }) {
+  const role = info.role.name.replace(/_/, " ");
   return (
     <tr>
       <td className="text-left px-6">
@@ -27,7 +28,7 @@ function UserRender({ info, date }) {
         </span>
       </td>
       <td className="text-left">
-        <h6>{info.role.name}</h6>
+        <h6 className="capitalize">{role}</h6>
       </td>
       <td>
         <button className="relative px-2 py-1 mr-8 dropdown">
@@ -51,16 +52,36 @@ function UserRender({ info, date }) {
                 {" "}
                 <i className="fa fa-trash mr-2"></i> Delete User{" "}
               </Link>
+
+              {info.isActive ? (
+                <Link
+                  href={`/users?modal=suspend-admin&id=${info.id}`}
+                  className="px-3 py-1"
+                >
+                  {" "}
+                  <i className="fa fa-user-times mr-2"></i> Suspend User
+                </Link>
+              ) : (
+                <Link
+                  href={`/users?modal=activate-app-user&id=${info.id}`}
+                  className="px-3 py-1"
+                >
+                  {" "}
+                  <i className="fa fa-user-check mr-2"></i> Reactivate User
+                </Link>
+              )}
+
               <Link
-                href={`/users?modal=suspend-admin&id=${info.id}`}
+                href={`/users?resend-invite`}
                 className="px-3 py-1"
+                onClick={() => resendInvite(info.email)}
               >
                 {" "}
-                <i className="fa fa-user-times mr-2"></i> Suspend User{" "}
-              </Link>
-              <Link href={`/users?resend-invite`} className="px-3 py-1">
-                {" "}
                 <i className="fa fa-share mr-2"></i> Resend Invite
+              </Link>
+              <Link href={`/auditLog?admin=${info.id}`} className="px-3 py-1">
+                {" "}
+                <i className="fa fa-share mr-2"></i> View Logs
               </Link>
             </div>
           </div>

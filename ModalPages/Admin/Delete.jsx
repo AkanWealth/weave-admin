@@ -1,12 +1,14 @@
 import { useModalContext } from "@/components/elements/Modal";
 import api from "@/lib/api";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 
 function DeleteAdmin() {
   const [loading, setLoading] = useState(false);
   const [confirmText, setConfirmText] = useState("");
   const btndisabled = loading || confirmText !== "DELETE";
+  const params = useSearchParams();
+  const userId = params.get("id");
 
   const router = useRouter();
   const { showMessage } = useModalContext();
@@ -14,11 +16,11 @@ function DeleteAdmin() {
   const invokeDelete = async () => {
     setLoading(true);
     try {
-      const response = await api.delete("/users/delete/{userId}");
-      // const response = await api.delete("/usage-analytics/delete/{userId}");
+      // const response = await api.delete(`/super-admin/${userId}`);
+      const response = await api.delete(`/usage-analytics/delete/${userId}`);
 
       if (response.status === 200) {
-        showMessage("User deleted safely", "success");
+        showMessage("User deleted", "success");
         return;
       }
 

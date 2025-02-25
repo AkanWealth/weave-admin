@@ -80,31 +80,44 @@ function NewSignups() {
                     <h6>{`${lastLogin.getHours()}:${lastLogin.getMinutes()}`}</h6>
                   </td>
                   <td>
-                    <div className="relative px-2 py-1 mr-8 dropdown">
+                    <button className="relative px-2 py-1 mr-8 dropdown">
                       <div className="dot"></div>
                       <div className="dot"></div>
                       <div className="dot"></div>
 
-                      <div className="absolute right-0 rounded-md p-2 shadow bg-white text-xs w-[200px]  dropdown-menu">
+                      <div className="absolute right-0 rounded-md p-2 shadow bg-white text-xs w-[200px] dropdown-menu">
                         <div className="flex flex-col text-left">
-                          <button
+                          <a
+                            onClick={() =>
+                              router.push(
+                                `?modal=${
+                                  user.isActive ? "suspend" : "activate"
+                                }-app-user&id=${user.id}`
+                              )
+                            }
                             className="px-3 py-1"
-                            onClick={() => router.push("?modal")}
                           >
-                            {" "}
-                            <i className="fa fa-user-times mr-2"></i> Deactivate
-                          </button>
-                          <button className="px-3 py-1">
+                            <i className="fa fa-user-times mr-2"></i>{" "}
+                            {user.isActive ? "Deactivate" : "Activate"}
+                          </a>
+                          <a className="px-3 py-1">
                             {" "}
                             <i className="fa fa-envelope mr-2"></i> Send Message
-                          </button>
-                          <button className="text-red-500 px-3 py-1">
+                          </a>
+                          <a
+                            onClick={() =>
+                              router.push(
+                                `?modal=delete-app-user&id=${user.id}`
+                              )
+                            }
+                            className="text-red-500 px-3 py-1"
+                          >
                             {" "}
                             <i className="fa fa-trash mr-3"></i> Delete User{" "}
-                          </button>
+                          </a>
                         </div>
                       </div>
-                    </div>
+                    </button>
                   </td>
                 </tr>
               );

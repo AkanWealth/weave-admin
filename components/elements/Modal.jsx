@@ -47,7 +47,7 @@ export default function Modal() {
   };
 
   return (
-    <ModalContext.Provider value={{ showMessage }}>
+    <ModalContext.Provider value={{ showMessage, closeModal: onClose }}>
       {usage && (
         <div
           style={{
