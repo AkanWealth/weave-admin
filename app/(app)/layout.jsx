@@ -27,7 +27,7 @@ function Layout({ children }) {
           <div className="p-4 py-6 border border-bottom-1">
             <Image src={logo} className="w-full" alt="Weave Logo" />
           </div>
-          <div className="h-3/5 p-2 flex flex-col py-6 space-y-3">
+          <div className="h-1/2 p-2 flex flex-col py-6 space-y-3">
             <Link
               href={"/dashboard"}
               className={
@@ -74,7 +74,7 @@ function Layout({ children }) {
             </Link>
           </div>
 
-          <div className="h-1/5 p-2 flex flex-col py-6">
+          <div className="h-2/5 p-2 flex flex-col py-6">
             <Link
               href={"/settings"}
               className={
