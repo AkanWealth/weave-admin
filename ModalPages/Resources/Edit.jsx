@@ -24,9 +24,9 @@ function EditResource() {
   const router = useRouter();
 
   const { showMessage } = useMessageContext();
-  useEffect(() => {
-    console.log(articleBody);
-  }, [articleBody]);
+  // useEffect(() => {
+  //   console.log(articleBody);
+  // }, [articleBody]);
 
   const [resourceInfo, setResourceInfo] = useState(null);
   const { resources, getSingleProduct } = useResourceLibrary();
@@ -94,11 +94,13 @@ function EditResource() {
     getThumbnails();
   }, []);
 
-  useEffect(() => {
-    setResourceInfo({ ...resourceInfo, content: articleBody });
-  }, [articleBody]);
+  // useEffect(() => {
+  //   setResourceInfo({ ...resourceInfo, content: articleBody });
+  // }, [articleBody]);
 
   const updateResource = async (status) => {
+    // console.log(resourceInfo.content);
+    // return;
     setIsSubmitting(true);
     let btn = document.getElementById(`${status.toLowerCase()}-btn`);
     let btnTitle = btn.textContent;
@@ -176,7 +178,8 @@ function EditResource() {
         <div className="w-2/3 my-6">
           <button
             className="text-gray-500 pr-6 "
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
               setActiveTab("info");
             }}
           >
@@ -185,7 +188,10 @@ function EditResource() {
 
           <button
             className="text-gray-500 px-4"
-            onClick={() => setActiveTab("file")}
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab("file");
+            }}
           >
             <i className="fa fa-copy mx-2"></i>
             Content Details
@@ -407,7 +413,10 @@ function EditResource() {
                 <div className="flex-1">
                   <button
                     className="border border-black py-2 w-full font-rubikMedium rounded-md"
-                    onClick={() => router.back()}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      router.back();
+                    }}
                   >
                     Back
                   </button>
@@ -416,7 +425,10 @@ function EditResource() {
                 <div className="flex-1">
                   <button
                     className="bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md"
-                    onClick={() => setActiveTab("file")}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setActiveTab("file");
+                    }}
                   >
                     Continue
                   </button>
@@ -432,8 +444,10 @@ function EditResource() {
 
                   <div className="mb-4">
                     <RichTextEditor
-                      value={articleBody}
-                      setValue={setArticleBody}
+                      value={resourceInfo.content}
+                      setValue={(content) =>
+                        setResourceInfo({ ...resourceInfo, content })
+                      }
                     />
                   </div>
 

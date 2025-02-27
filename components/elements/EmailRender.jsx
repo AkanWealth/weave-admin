@@ -19,7 +19,11 @@ function EmailRender({ email }) {
     <>
       <span className="text-gray-500 text-sm">{email}</span>
       <button className="mx-2 p-1" onClick={copyEmail}>
-        {isCopied ? "Copied" : <i className="fa fa-copy"></i>}
+        {isCopied ? (
+          <span className="text-xs">Copied!</span>
+        ) : (
+          <i className="fa fa-copy"></i>
+        )}
       </button>
     </>
   );

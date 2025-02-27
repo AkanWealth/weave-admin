@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import EmptyList from "../elements/EmptyList";
 import UserRender from "./userRender";
 import PaginatedItems from "../elements/Pagination";
+import exportData from "@/lib/export";
 // import { useRouter } from "next/router";
 
 // import users from "@/dummyData/adminUser";
@@ -15,6 +16,29 @@ function AdminList() {
   const [searchKey, setSearchKey] = useState("");
   const { showMessage } = useMessageContext();
   const [fetchingUsers, setFetchingUsers] = useState(false);
+  const [roles, setRoles] = useState([]);
+  const [selectedRole, setSelectedRole] = useState("");
+
+  const fetchRoles = async () => {
+    try {
+      const response = await api.get("/role");
+      if (response.status === 200) {
+        console.log(response);
+        setRoles(response.data);
+        return;
+      }
+      showMessage("Unable to fetch roles", "error");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedRole === "") return setFilteredlist(users);
+    setSearchKey("");
+    const filtered = users.filter((user) => user.role.name === selectedRole);
+    setFilteredlist(filtered);
+  }, [selectedRole]);
 
   const fetchUsers = async () => {
     setFetchingUsers(true);
@@ -37,6 +61,7 @@ function AdminList() {
 
   useEffect(() => {
     fetchUsers();
+    fetchRoles();
   }, []);
 
   const resendInvite = async (email) => {
@@ -81,16 +106,55 @@ function AdminList() {
             />
           </div>
         </div>
-        <div className="w-1/5"></div>
-        <div className="w-1/5">
-          <button className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium">
+        <div className="w-2/5 text-right">
+          <button
+            className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium"
+            onClick={() =>
+              exportData(
+                filteredList.map((user) => ({
+                  ...user,
+                  status: user.isActive ? "Active" : "Inactive",
+                  role: user.role.name,
+                })),
+                ["username", "email", "created_at", "status", "role"],
+                "usersList"
+              )
+            }
+          >
             Export
             <i className="fa fa-window-maximize ml-2"></i>
           </button>
-          <button className="border p-2 px-4 rounded-md font-rubikMedium">
+          <button className="relative dropdown border p-2 rounded-md font-rubikMedium">
+            <span className="px-2">
+              Filter
+              <i className="fa fa-list ml-2"></i>
+            </span>
+            <div className="absolute right-0 rounded-md p-1 shadow bg-white text-xs w-[200px]  dropdown-menu">
+              <div className="flex flex-col text-left">
+                <a
+                  className={`p-2 capitalize rounded-md mb-1`}
+                  onClick={() => setSelectedRole("")}
+                >
+                  Reset Filter
+                </a>
+                {roles.map((role) => (
+                  <a
+                    className={`p-2 capitalize rounded-md mb-1 ${
+                      selectedRole === role.name ? "bg-gray-200" : ""
+                    }`}
+                    onClick={() => setSelectedRole(role.name)}
+                    key={role.id}
+                  >
+                    {role.name.replace(/_/, " ")}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </button>
+          {/* <button className="border p-2 px-4 rounded-md font-rubikMedium">
             Filter
             <i className="fa fa-list ml-2"></i>
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -119,8 +183,8 @@ function AdminList() {
             )}
             renderTitle={() => (
               <tr className="bg-[#f5f6fa] ">
-                <th className="text-left px-16">Username</th>
-                <th className="text-left px-16">Email</th>
+                <th className="text-left px-4">Username</th>
+                <th className="text-left px-4">Email</th>
                 <th className="text-left">Date</th>
                 <th className="text-left">Status</th>
                 <th className="text-left">Role</th>

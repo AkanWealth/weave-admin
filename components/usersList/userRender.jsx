@@ -4,14 +4,13 @@ import DateRender from "../elements/DateRender";
 import EmailRender from "../elements/EmailRender";
 
 function UserRender({ info, date, resendInvite }) {
-  console.log(info);
   const role = info.role.name.replace(/_/, " ");
   return (
     <tr>
       <td>
         <h6 className="font-rubikMedium text-black px-6">{info.username}</h6>
       </td>
-      <td className="text-left px-6">
+      <td className="text-left px-4">
         <EmailRender email={info.email} />
       </td>
       <td className="text-left">

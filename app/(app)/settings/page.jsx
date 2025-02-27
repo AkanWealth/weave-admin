@@ -5,8 +5,10 @@ import avatar from "@/assets/images/3d_avatar_1.png";
 import TextField from "@/components/elements/TextField";
 import Button from "@/components/elements/Button";
 import PasswordField from "@/components/elements/PasswordField";
+import Cookies from "js-cookie";
 import api from "@/lib/api";
 import { ToastContext, useMessageContext } from "@/contexts/toast";
+import { baseUrl } from "@/lib/envfile";
 
 function SettingPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,6 +17,9 @@ function SettingPage() {
   const [userProfile, setUserProfile] = useState(null);
   const [isFetching, setIsFetching] = useState(true);
   const { showMessage } = useMessageContext();
+  const [profileImg, setProfileImg] = useState(null);
+  const [attachedimg, setAttachedImg] = useState(null);
+  const accessToken = Cookies.get("session");
 
   // inputs
   const [initialPassword, setInitialPassword] = useState("");
@@ -47,10 +52,6 @@ function SettingPage() {
     getUserProfile();
   }, []);
 
-  useEffect(() => {
-    console.log(userProfile);
-  }, [userProfile]);
-
   const updateUserPassword = async () => {
     setIsupdatingpassword(true);
     try {
@@ -75,11 +76,40 @@ function SettingPage() {
     setIsupdatinginfo(true);
 
     try {
+      const formData = new FormData();
+      formData.append("headshot", profileImg);
+      formData.append("firstName", userProfile.firstName);
+      formData.append("lastName", userProfile.lastName);
+      formData.append("username", userProfile.username);
+      formData.append("email", userProfile.email);
+
+      const response = await fetch(`${baseUrl}/super-admin/profile`, {
+        method: "PUT",
+        body: formData,
+        headers: {
+          contentType: "multipart/formdata",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (response.status === 200) {
+        showMessage("Profile updated successfully", "success");
+      }
     } catch (error) {
+      showMessage("Error updating user profile", "error");
     } finally {
       setIsupdatinginfo(false);
     }
   };
+
+  useEffect(() => {
+    if (profileImg) {
+      const reader = new FileReader();
+      reader.readAsDataURL(profileImg);
+      reader.onload = (e) => {
+        setAttachedImg(e.target.result);
+      };
+    }
+  }, [profileImg]);
 
   return (
     <div>
@@ -107,20 +137,43 @@ function SettingPage() {
                 </p>
 
                 <div className="flex mt-4 mb-8">
-                  <input type="file" className="hidden" id="profile_img" />
-                  <div className="w-[160px] h-[160px]">
-                    <Image src={avatar} alt="User Avatar" className="w-full" />
+                  <input
+                    type="file"
+                    className="hidden"
+                    id="profile_img"
+                    onChange={(e) => setProfileImg(e.target.files[0])}
+                  />
+                  <div
+                    className="w-[160px] h-[160px] rounded-full"
+                    style={{ overflow: "hidden" }}
+                  >
+                    <img
+                      src={
+                        attachedimg !== null
+                          ? attachedimg
+                          : userProfile.headshot
+                          ? userProfile.headshot
+                          : avatar
+                      }
+                      width={160}
+                      height={160}
+                      alt="User Avatar"
+                      className="w-full"
+                    />
                   </div>
                   <div className="flex px-6">
                     {/* <button className="bg-weave-primary text-base-white rounded-xl p-2 px-5 my-auto">
               Upload
             </button> */}
-                    <label
-                      htmlFor="profile_img"
+                    <button
                       className="border border-black rounded-xl p-2 px-5 my-auto mr-3"
+                      onClick={() => {
+                        setAttachedImg(null);
+                        setProfileImg(null);
+                      }}
                     >
                       Remove
-                    </label>
+                    </button>
                     <label
                       htmlFor="profile_img"
                       className="bg-weave-primary text-base-white rounded-xl p-2 px-5 my-auto"
@@ -159,7 +212,20 @@ function SettingPage() {
                 </div>
               </div>
               <div className="md:flex md:space-x-4 w-full">
-                <div className="flex-1">
+                <div className="w-1/3">
+                  <TextField
+                    label={"Username"}
+                    placeholder={"Enter your new username"}
+                    value={userProfile.username}
+                    setValue={(e) =>
+                      setUserProfile({
+                        ...userProfile,
+                        username: e,
+                      })
+                    }
+                  />
+                </div>
+                <div className="w-2/3">
                   <TextField
                     label={"Email Address"}
                     placeholder={"Enter your first name"}

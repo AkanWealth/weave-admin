@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import DateRender from "@/components/elements/DateRender";
 import PaginatedItems from "@/components/elements/Pagination";
 import Loader from "@/components/elements/Loader";
+import exportData from "@/lib/export";
 
 function AuditLogs() {
   const [auditLogs, setAuditLogs] = useState([]);
@@ -29,29 +30,29 @@ function AuditLogs() {
     setIsLoading(true);
     console.log("fetching");
     try {
-      if (adminId) {
+      if (adminId || (startDate && endDate)) {
         const query = {
           startDate,
           endDate,
-          adminId,
           limit: 10,
           page,
         };
+        if (adminId) {
+          query[adminId] = adminId;
+        }
+
         const queryString = new URLSearchParams(query).toString();
         console.log(queryString);
         // return;
         const response = await api.get(`/system-logs?${queryString}`);
-        console.log(response);
         if (response.status === 200) {
           setAuditLogs(response.data.logs);
-          console.log(response.data.logs);
         }
       } else {
         const response = await api.get(`/system-logs/all-admins-logs`);
         // console.log(response);
         if (response.status === 200) {
           setAuditLogs(response.data.logs);
-          console.log(response.data.logs);
         }
       }
     } catch (error) {
@@ -65,45 +66,71 @@ function AuditLogs() {
     fetchAudits();
   }, []);
 
+  const exportAudit = async () => {
+    exportData(
+      auditLogs.map((audit) => ({
+        admin: audit.admin.username,
+        details: audit.details.message,
+        date: new Date(audit.created_at).toLocaleString().replace(/,/, " "),
+        action: audit.action.replace(/_/g, " "),
+        affectedResourceType: audit.affectedResourceType,
+      })),
+      ["date", "admin", "details", "action", "affectedResourceType"],
+      "audit_logs"
+    );
+  };
+
   return (
     <>
       <div className="flex my-4">
         <div className="w-3/5">
-          <form action="" className="bg-white border px-8 py-2 rounded-md">
+          <form action="" className="bg-white border py-2 rounded-md">
             {/* <input
               type="text"
               className="bg-[#f5f6fa] rounded-md w-full px-4 py-2"
               placeholder="Search here"
             /> */}
-            <div className="w-full flex flex-row space-x-4">
-              <input
-                type="date"
-                onChange={(e) => setStartDate(e.target.value)}
-                className="border p-2 px-4 rounded-md font-rubikMedium"
-              />
+            <div className="flex flex-row">
+              <div className="flex-2 px-2">
+                <label className="pr-3">From</label>
+                <input
+                  type="date"
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="border p-2 px-4 rounded-md font-rubikMedium"
+                />
+              </div>
+              <div className="flex-2 px-2">
+                <label className="pr-3">To</label>
+                <input
+                  type="date"
+                  className="border p-2 px-4 rounded-md font-rubikMedium"
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+
+              <div className="flex-1">
+                <button
+                  className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    fetchAudits();
+                  }}
+                >
+                  Search
+                </button>
+              </div>
               {/* From */}
               {/* <i className="fa fa-list ml-2"></i> */}
               {/* </input> */}
-              <input
-                type="date"
-                className="border p-2 px-4 rounded-md font-rubikMedium"
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-              <button
-                className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium"
-                onClick={(e) => {
-                  e.preventDefault();
-                  fetchAudits();
-                }}
-              >
-                Search
-              </button>
             </div>
           </form>
         </div>
         <div className="w-1/5"></div>
         <div className="w-1/5 text-right">
-          <button className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium">
+          <button
+            className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium"
+            onClick={() => exportAudit()}
+          >
             Export
             <i className="fa fa-window-maximize ml-2"></i>
           </button>
@@ -174,11 +201,16 @@ function AuditLogs() {
                       audit.admin.role.name.replace(/_/, " ")}
                   </h6>
                 </td>
-                <td className="text-xs pl-6 text-left">
-                  {audit.details.message}
+                <td className="pl-6 text-left">{audit.details.message}</td>
+                <td>
+                  <span className="capitalize">
+                    {audit.action.replace(/_/, " ").toLowerCase()}
+                  </span>
                 </td>
-                <td className="capitalize">{audit.action.replace(/_/, " ")}</td>
-                <td className="capitalize">{audit.affectedResourceType}</td>
+                <td className="capitalize">
+                  {audit.affectedResourceType &&
+                    audit.affectedResourceType.toLowerCase()}
+                </td>
               </tr>
             )}
           />

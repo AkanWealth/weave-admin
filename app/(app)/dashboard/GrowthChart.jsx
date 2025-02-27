@@ -35,7 +35,7 @@ function GrowthChart() {
         <div className="flex flex-col text-center justify-center py-12">
           <Image
             src={growthFrame}
-            className="w-[80px] h-[120px] mx-auto"
+            className="w-[80px] h-[100px] mx-auto"
             alt="Frame"
           />
           <h4 className="text-xl font-rubikMedium my-2">
@@ -106,7 +106,7 @@ const ChartComponent = ({ growthRate }) => {
         options={chartOptions}
         series={chartSeries}
         type="area"
-        height={350}
+        height={300}
       />
     </div>
   );

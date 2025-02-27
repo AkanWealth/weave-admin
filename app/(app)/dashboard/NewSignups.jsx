@@ -32,8 +32,8 @@ function NewSignups() {
         <table className="my-4 w-full">
           <tbody>
             <tr className="bg-[#f5f6fa] ">
-              <th>User Id</th>
-              <th className="text-left px-16">Username</th>
+              <th className="text-left px-4">Username</th>
+              <th className="text-left px-8">Email</th>
               <th>Date Created </th>
               <th>Status</th>
               {/* <th>Device</th> */}
@@ -46,11 +46,12 @@ function NewSignups() {
               const lastLogin = new Date(user.lastLogin);
               return (
                 <tr key={Math.random()}>
-                  <td>{user.id}</td>
-                  <td className="text-left px-6">
-                    <h6 className="font-rubikMedium text-black">
+                  <td>
+                    <h6 className="font-rubikMedium text-black px-2">
                       {user.username}
                     </h6>
+                  </td>
+                  <td className="text-left px-6">
                     <EmailRender email={user.email} />
                   </td>
                   <td>
@@ -61,11 +62,11 @@ function NewSignups() {
                   </td>
                   <td>
                     {user.isActive ? (
-                      <button className="bg-[#28A745] px-4 rounded-full py-1 text-sm text-base-white">
+                      <button className="bg-[#28A745] px-3 rounded-full py-1 text-sm text-base-white">
                         Active
                       </button>
                     ) : (
-                      <button className="bg-red-500 px-4 rounded-full py-1 text-sm text-base-white">
+                      <button className="bg-red-500 px-3 rounded-full py-1 text-sm text-base-white">
                         Inactive
                       </button>
                     )}

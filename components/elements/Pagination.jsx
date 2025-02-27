@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import ReactPaginate from "react-paginate";
+import EmptyList from "./EmptyList";
 
 // Example items, to simulate fetching from another resources.
 const items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
@@ -34,6 +35,7 @@ export default function PaginatedItems({
     // console.log(
     //   `User requested page number ${event.selected}, which is offset ${newOffset}`
     // );
+    console.log(newOffset);
     setItemOffset(newOffset);
   };
 
@@ -52,8 +54,12 @@ export default function PaginatedItems({
             )}
           </tbody>
         </table>
+      ) : currentItems.length > 0 ? (
+        <div className="flex flex-row flex-wrap">
+          <Items currentItems={currentItems} renderItems={renderItems} />
+        </div>
       ) : (
-        <></>
+        <EmptyList />
       )}
 
       <div className="rounded-md bg-white p-4 my-4 md:flex md:justify-end">
