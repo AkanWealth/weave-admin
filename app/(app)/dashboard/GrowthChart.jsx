@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import growthFrame from "@/assets/images/Frame.png";
 import dynamic from "next/dynamic";
+import Loader from "@/components/elements/Loader";
 
 const ApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -29,9 +30,7 @@ function GrowthChart() {
   return (
     <>
       {isFetching ? (
-        <div className="min-h-[300px] bg-white flex flex-column justify-center">
-          <div className="loader my-auto"></div>
-        </div>
+        <Loader />
       ) : growthRate === null ? (
         <div className="flex flex-col text-center justify-center py-12">
           <Image

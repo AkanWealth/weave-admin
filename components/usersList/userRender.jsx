@@ -1,22 +1,21 @@
 import Link from "next/link";
 import React from "react";
+import DateRender from "../elements/DateRender";
+import EmailRender from "../elements/EmailRender";
 
 function UserRender({ info, date, resendInvite }) {
+  console.log(info);
   const role = info.role.name.replace(/_/, " ");
   return (
     <tr>
-      <td className="text-left px-6">
+      <td>
         <h6 className="font-rubikMedium text-black px-6">{info.username}</h6>
-        <span className="text-gray-500 text-sm">{info.email}</span>
-        <button className="mx-2 p-1">
-          <i className="fa fa-copy"></i>
-        </button>
+      </td>
+      <td className="text-left px-6">
+        <EmailRender email={info.email} />
       </td>
       <td className="text-left">
-        <h6>{`${date.getFullYear()}-${
-          date.getMonth() + 1
-        }-${date.getDate()}`}</h6>
-        <h6>{`${date.getHours()}:${date.getMinutes()}`}</h6>
+        <DateRender date={info.created_at} />
       </td>
       <td className="text-left">
         <span

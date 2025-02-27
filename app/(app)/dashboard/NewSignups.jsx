@@ -4,6 +4,7 @@ import Image from "next/image";
 import api from "@/lib/api";
 import EmptyList from "@/components/elements/EmptyList";
 import { useRouter } from "next/navigation";
+import EmailRender from "@/components/elements/EmailRender";
 
 function NewSignups() {
   const [newSignups, setNewSignups] = useState([]);
@@ -50,10 +51,7 @@ function NewSignups() {
                     <h6 className="font-rubikMedium text-black">
                       {user.username}
                     </h6>
-                    <span className="text-gray-500 text-sm">{user.email}</span>
-                    <button className="mx-2 p-1">
-                      <i className="fa fa-copy"></i>
-                    </button>
+                    <EmailRender email={user.email} />
                   </td>
                   <td>
                     <h6>{`${date.getFullYear()}-${

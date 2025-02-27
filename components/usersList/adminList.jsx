@@ -4,6 +4,7 @@ import api from "@/lib/api";
 import React, { useEffect, useState } from "react";
 import EmptyList from "../elements/EmptyList";
 import UserRender from "./userRender";
+import PaginatedItems from "../elements/Pagination";
 // import { useRouter } from "next/router";
 
 // import users from "@/dummyData/adminUser";
@@ -105,29 +106,28 @@ function AdminList() {
         </>
       ) : users ? (
         <div className="bg-base-white my-4 shadow">
-          <table className="my-4 w-full">
-            <tbody>
+          <PaginatedItems
+            items={filteredList}
+            itemsPerPage={10}
+            displayType={"table"}
+            renderItems={(user) => (
+              <UserRender
+                info={user}
+                key={Math.random()}
+                resendInvite={resendInvite}
+              />
+            )}
+            renderTitle={() => (
               <tr className="bg-[#f5f6fa] ">
                 <th className="text-left px-16">Username</th>
+                <th className="text-left px-16">Email</th>
                 <th className="text-left">Date</th>
                 <th className="text-left">Status</th>
                 <th className="text-left">Role</th>
                 <th className="text-left"></th>
               </tr>
-
-              {filteredList.map((user) => {
-                const date = new Date(user.created_at);
-                return (
-                  <UserRender
-                    info={user}
-                    date={date}
-                    key={Math.random()}
-                    resendInvite={resendInvite}
-                  />
-                );
-              })}
-            </tbody>
-          </table>
+            )}
+          />
         </div>
       ) : (
         <EmptyList />

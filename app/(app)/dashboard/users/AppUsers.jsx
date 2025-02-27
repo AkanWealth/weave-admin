@@ -5,6 +5,8 @@ import Image from "next/image";
 import signupFrame from "@/assets/images/signupFrame.png";
 import { useRouter } from "next/navigation";
 import PaginatedItems from "@/components/elements/Pagination";
+import EmailRender from "@/components/elements/EmailRender";
+import DateRender from "@/components/elements/DateRender";
 
 function AppUsers() {
   const [appUsers, setAppUsers] = useState([]);
@@ -106,9 +108,6 @@ function AppUsers() {
             </tr>
           )}
           renderItems={(user) => {
-            const date = new Date(user.created_at);
-            const lastLogin = new Date(user.lastLogin);
-
             return (
               <tr key={Math.random()}>
                 <td>
@@ -117,16 +116,10 @@ function AppUsers() {
                   </h6>
                 </td>
                 <td className="text-left px-6">
-                  <span className="text-gray-500 text-sm">{user.email}</span>
-                  <button className="mx-2 p-1">
-                    <i className="fa fa-copy"></i>
-                  </button>
+                  <EmailRender email={user.email} />
                 </td>
                 <td>
-                  <h6>{`${date.getFullYear()}-${
-                    date.getMonth() + 1
-                  }-${date.getDate()}`}</h6>
-                  <h6>{`${date.getHours()}:${date.getMinutes()}`}</h6>
+                  <DateRender date={user.created_at} />
                 </td>
                 <td>
                   {user.isActive ? (
@@ -141,10 +134,7 @@ function AppUsers() {
                 </td>
                 {/* <td>Android</td> */}
                 <td>
-                  <h6>{`${lastLogin.getFullYear()}-${
-                    lastLogin.getMonth() + 1
-                  }-${lastLogin.getDate()}`}</h6>
-                  <h6>{`${lastLogin.getHours()}:${lastLogin.getMinutes()}`}</h6>
+                  <DateRender date={user.lastLogin} />
                 </td>
                 <td>
                   <button className="relative px-2 py-1 mr-8 dropdown">
