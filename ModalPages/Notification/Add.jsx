@@ -67,9 +67,10 @@ function AddNotification() {
       title: notificationTitle,
       content: notificationContent,
       type: notificationType,
-      recipients: recipientGroup.map((recipient) => recipient.id),
+      recipient: recipientGroup[0].id,
       // recipients: recipientGroup.map((recipient) => recipient.id),
     };
+
     try {
       const response = await api.post("/notification", data);
       if (response.status === 201) {
