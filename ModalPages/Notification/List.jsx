@@ -109,7 +109,7 @@ function Notifications() {
                 >
                   {notification.title}
 
-                  <button
+                  {/* <button
                     className="text-red-500 p-2"
                     style={{
                       position: "absolute",
@@ -118,7 +118,7 @@ function Notifications() {
                     }}
                   >
                     <i className="fa fa-trash"></i>
-                  </button>
+                  </button> */}
                 </h6>
 
                 <p className="text-gray-500 text-sm">{notification.content}</p>
