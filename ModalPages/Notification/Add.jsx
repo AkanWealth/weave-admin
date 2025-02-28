@@ -11,35 +11,37 @@ function AddNotification() {
   const [notificationTitle, setNotificationTitle] = useState("");
   const [notificationContent, setNotificationContent] = useState("");
   const [notificationType, setNotificationType] = useState("");
-  const [recipientGroup, setRecipientGroup] = useState([]);
-  const [searchName, setSearchName] = useState("");
+  // const [searchName, setSearchName] = useState("");
+  // const [recipientGroup, setRecipientGroup] = useState([]);
+  const [recipientGroup, setRecipientGroup] = useState("");
   const { closeModal, showMessage } = useModalContext();
 
-  const addToRecipient = (recipient) => {
-    const recipientExist = recipientGroup.find(
-      (item) => item.id === recipient.id
-    );
-    if (!recipientExist)
-      setRecipientGroup([
-        ...recipientGroup,
-        {
-          email: recipient.email,
-          id: recipient.id,
-          username: recipient.username,
-        },
-      ]);
-    document.getElementById("recipient").focus();
-    setSearchName("");
-  };
+  // const addToRecipient = (recipient) => {
+  //   const recipientExist = recipientGroup.find(
+  //     (item) => item.id === recipient.id
+  //   );
+  //   if (!recipientExist)
+  //     setRecipientGroup([
+  //       ...recipientGroup,
+  //       {
+  //         email: recipient.email,
+  //         id: recipient.id,
+  //         username: recipient.username,
+  //       },
+  //     ]);
+  //   document.getElementById("recipient").focus();
+  //   setSearchName("");
+  // };
 
-  const removeFromRecipients = (receipient) => {
-    const otherRecipients = recipientGroup.filter(
-      (item) => item.id !== receipient
-    );
-    setRecipientGroup(otherRecipients);
-  };
+  // const removeFromRecipients = (receipient) => {
+  //   const otherRecipients = recipientGroup.filter(
+  //     (item) => item.id !== receipient
+  //   );
+  //   setRecipientGroup(otherRecipients);
+  // };
 
   // fetch all users
+
   const getUsers = async () => {
     setIsFetching(true);
     try {
@@ -67,10 +69,11 @@ function AddNotification() {
       title: notificationTitle,
       content: notificationContent,
       type: notificationType,
-      recipient: recipientGroup[0].id,
+      recipient: recipientGroup,
       // recipients: recipientGroup.map((recipient) => recipient.id),
     };
 
+    console.log(data);
     try {
       const response = await api.post("/notification", data);
       if (response.status === 201) {
@@ -120,14 +123,24 @@ function AddNotification() {
           {/* <span className="text-gray-500">Select Notification Type</span> */}
           <option value="">Select Notification Type</option>
           <option value="email">Email</option>
-          <option value="push-notification">Push Notification</option>
+          <option value="push">Push Notification</option>
         </select>
 
         <h6 className="font-rubikMedium my-2">Select Recipient</h6>
+        <select
+          className="border border-black p-2 py-3 rounded-md w-full"
+          value={recipientGroup}
+          onChange={(e) => setRecipientGroup(e.target.value)}
+        >
+          {/* <span className="text-gray-500">Select Notification Type</span> */}
+          <option value="">Select Recipient Group </option>
+          <option value="users">App Users</option>
+          <option value="admins">Admin Users</option>
+        </select>
         {/* <div className="border border-black p-2 rounded-md">
           <span className="text-gray-500">Select recipient group</span>
         </div> */}
-        <div className="border border-weave-primary rounded-md p-2 flex flex-row flex-wrap my-2">
+        {/* <div className="border border-weave-primary rounded-md p-2 flex flex-row flex-wrap my-2">
           {recipientGroup.length > 0 ? (
             recipientGroup.map((recipient) => (
               <div
@@ -179,7 +192,7 @@ function AddNotification() {
                 </a>
               ))}
           </div>
-        </div>
+        </div> */}
       </div>
       <div className="flex  my-8" style={{ gap: 10 }}>
         <div className="flex-1">

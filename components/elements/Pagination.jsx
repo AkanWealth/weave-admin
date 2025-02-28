@@ -62,19 +62,23 @@ export default function PaginatedItems({
         <EmptyList />
       )}
 
-      <div className="rounded-md bg-white p-4 my-4 md:flex md:justify-end">
-        <div className="pagination">
-          <ReactPaginate
-            breakLabel={"..."}
-            nextLabel={"Next"}
-            onPageChange={handlePageClick}
-            pageRangeDisplayed={5}
-            pageCount={pageCount}
-            previousLabel={"Previous"}
-            renderOnZeroPageCount={null}
-          />
+      {currentItems.length > 0 ? (
+        <div className="rounded-md bg-white p-4 my-4 md:flex md:justify-end">
+          <div className="pagination">
+            <ReactPaginate
+              breakLabel={"..."}
+              nextLabel={"Next"}
+              onPageChange={handlePageClick}
+              pageRangeDisplayed={5}
+              pageCount={pageCount}
+              previousLabel={"Previous"}
+              renderOnZeroPageCount={null}
+            />
+          </div>
         </div>
-      </div>
+      ) : (
+        <> </>
+      )}
     </>
   );
 }
