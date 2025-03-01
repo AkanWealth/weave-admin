@@ -53,6 +53,11 @@ function EditResource() {
     setArticleBody(resource.content);
   }, [resource_id, resources]);
 
+  useEffect(() => {
+    if (!resourceInfo) return;
+    document.getElementById("resource-file").src = resourceInfo.resourceUrl;
+  }, [resourceInfo]);
+
   const [loadingThumbnail, setLoadingThumbnail] = useState(false);
   const [thumbnails, setThumbnails] = useState([]);
 
@@ -471,6 +476,10 @@ function EditResource() {
                   <h6 className="text-xl font-rubikBold my-2 capitalize">
                     {contentType} File Upload
                   </h6>
+                  <label htmlFor="" className="capitalize font-rubikMedium">
+                    Current {resourceInfo.resourceType} file
+                  </label>
+                  <audio id="resource-file" controls className="w-full"></audio>
 
                   <form action="" encType="multipart/formdata">
                     <input
@@ -490,13 +499,17 @@ function EditResource() {
                         margin: "15px auto",
                       }}
                     >
-                      <span>Drag or and drop your audio file here</span>
-                      <span className="text-gray-500">MP3, WAV</span>
-                      <span>
-                        <span className="inline-block px-4 py-2 text-md text-base-white bg-weave-primary rounded-xl">
-                          Select File
-                        </span>
-                      </span>
+                      {resourceFile?.name || (
+                        <>
+                          <span>Drag or and drop your audio file here</span>
+                          <span className="text-gray-500">MP3, WAV</span>
+                          <span>
+                            <span className="inline-block px-4 py-2 text-md text-base-white bg-weave-primary rounded-xl">
+                              Select File
+                            </span>
+                          </span>
+                        </>
+                      )}
                     </label>
                   </form>
                 </>

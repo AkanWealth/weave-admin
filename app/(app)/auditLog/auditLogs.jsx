@@ -91,26 +91,26 @@ function AuditLogs() {
               placeholder="Search here"
             /> */}
             <div className="flex flex-row">
-              <div className="flex-2 px-2">
+              <div className="w-2/5 px-2">
                 <label className="pr-3">From</label>
                 <input
                   type="date"
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="border p-2 px-4 rounded-md font-rubikMedium"
+                  className="border w-2/3 p-2 px-4 rounded-md font-rubikMedium"
                 />
               </div>
-              <div className="flex-2 px-2">
+              <div className="w-2/5 px-2">
                 <label className="pr-3">To</label>
                 <input
                   type="date"
-                  className="border p-2 px-4 rounded-md font-rubikMedium"
+                  className="border w-3/4 p-2 px-4 rounded-md font-rubikMedium"
                   onChange={(e) => setEndDate(e.target.value)}
                 />
               </div>
 
-              <div className="flex-1">
+              <div className="w-1/5 text-right">
                 <button
-                  className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium"
+                  className="bg-weave-primary text-base-white p-2 px-4 mr-2 rounded-md font-rubikMedium"
                   onClick={(e) => {
                     e.preventDefault();
                     fetchAudits();
