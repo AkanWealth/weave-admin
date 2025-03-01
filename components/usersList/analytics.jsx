@@ -1,11 +1,11 @@
 "use client";
-import { useMessageContext } from "@/contexts/toast";
+import { useToastContext } from "@/contexts/toast";
 import api from "@/lib/api";
 import React, { useState, useEffect } from "react";
 
 function Analytics() {
   const [analytics, setAnalytics] = useState(null);
-  const { showMessage } = useMessageContext();
+  const { showMessage } = useToastContext();
 
   const getAnalytics = async () => {
     try {

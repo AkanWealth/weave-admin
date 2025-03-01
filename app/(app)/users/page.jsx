@@ -4,14 +4,16 @@ import users from "@/dummyData/adminUser";
 import Analytics from "@/components/usersList/analytics";
 import AdminList from "@/components/usersList/adminList";
 import { ToastContext } from "@/contexts/toast";
-
+import { User } from "lucide-react";
 function Page() {
   return (
     <div>
-      <h3 className="text-2xl">
-        <i className="fa fa-users mr-4 text-xl bg-[#e8e8e8] rounded-full p-3"></i>
+      <h3 className="text-2xl flex items-center">
+        <span className="mr-4 bg-[#e8e8e8] rounded-full p-3 flex items-center justify-center">
+          <User className="w-7 h-7 text-weave-primary" />
+        </span>
         User Management
-        <div className="float-right">
+        <div className="ml-auto">
           <Link
             href={"/users/manage-roles"}
             className="px-4 p-2 border border-black text-sm rounded-md mr-4"

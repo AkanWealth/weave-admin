@@ -1,9 +1,10 @@
 "use client";
-import { useMessageContext } from "@/contexts/toast";
+import { useToastContext } from "@/contexts/toast";
 import api from "@/lib/api";
 import React, { useEffect, useState } from "react";
 import EmptyList from "../elements/EmptyList";
 import UserRender from "./userRender";
+import { Search,SquareArrowOutUpRight,ChevronUp } from "lucide-react";
 // import { useRouter } from "next/router";
 
 // import users from "@/dummyData/adminUser";
@@ -12,7 +13,7 @@ function AdminList() {
   const [users, setUsers] = useState(null);
   const [filteredList, setFilteredlist] = useState([]);
   const [searchKey, setSearchKey] = useState("");
-  const { showMessage } = useMessageContext();
+  const { showMessage } = useToastContext();
   const [fetchingUsers, setFetchingUsers] = useState(false);
 
   const fetchUsers = async () => {
@@ -68,7 +69,7 @@ function AdminList() {
 
   return (
     <>
-      <div className="flex my-4">
+      {/* <div className="flex my-4">
         <div className="w-3/5">
           <div className="bg-white border px-8 py-2 rounded-md">
             <input
@@ -91,6 +92,32 @@ function AdminList() {
             <i className="fa fa-list ml-2"></i>
           </button>
         </div>
+      </div> */}
+      <div className="flex flex-col lg:flex-row mb-4 items-start gap-4">
+        <div className="w-full lg:w-3/4 h-1/2">
+          <div className="relative border rounded-md px-8 py-2 bg-white">
+            <div className="absolute inset-y-0 left-3 flex items-center pl-6">
+              <Search className="h-5 w-5 text-gray-500" />
+            </div>
+            <input
+              type="text"
+              className="bg-gray-200 rounded-md w-full pl-10 pr-4 py-2 placeholder:text-gray-500 "
+              placeholder="Search here..."
+              value={searchKey}
+              onChange={(e) => setSearchKey(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="w-full lg:w-2/5 flex justify-end gap-3">
+          <button className="bg-weave-primary text-white py-2 px-4 rounded-xl font-medium flex items-center">
+            Export
+            <SquareArrowOutUpRight className="w-4 h-4 ml-2" />
+          </button>
+          <button className="border py-2 px-4 rounded-md font-medium flex items-center">
+            Filter
+            <ChevronUp className="w-4 h-4 ml-2 rotate-180" />
+          </button>
+        </div>
       </div>
 
       {/* users list table */}
@@ -109,9 +136,10 @@ function AdminList() {
             <tbody>
               <tr className="bg-[#f5f6fa] ">
                 <th className="text-left px-16">Username</th>
+                <th className="text-left">Role</th>
                 <th className="text-left">Date</th>
                 <th className="text-left">Status</th>
-                <th className="text-left">Role</th>
+                
                 <th className="text-left"></th>
               </tr>
 

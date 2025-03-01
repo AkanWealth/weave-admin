@@ -1,6 +1,7 @@
 .banner {
-  background: url("../assets/images/banner.png") no-repeat center;
+  background: linear-gradient( rgba(97, 237, 255, 0.7), rgba(115, 234, 255, 0.8)), url("../assets/images/loginbackgroung.jpeg") no-repeat center;
   background-size: cover;
+  background-position: center;
 }
 
 tr {

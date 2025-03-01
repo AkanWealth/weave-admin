@@ -3,12 +3,16 @@ import Link from "next/link";
 import AppSummary from "./AppSummary";
 import NewSignups from "./NewSignups";
 import GrowthChart from "./GrowthChart";
+import PentagonWithCircleIcon from "@/components/elements/PentagonWithCircleIcon";
+
 
 export default function Dashboard() {
   return (
     <div>
-      <h1 className="text-2xl">
-        <i className="fa fa-home mr-4 text-xl bg-[#e8e8e8] rounded-full p-3"></i>
+<h1 className="text-2xl flex items-center">
+        <span className="inline-flex items-center justify-center mr-4">
+          <PentagonWithCircleIcon className="bg-[#e8e8e8] text-weave-primary rounded-full p-3"/>
+        </span>
         Dashboard
       </h1>
 

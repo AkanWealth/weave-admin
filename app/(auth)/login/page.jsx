@@ -5,7 +5,7 @@ import PasswordField from "@/components/elements/PasswordField";
 import Button from "@/components/elements/Button";
 import Link from "next/link";
 import api from "@/lib/api";
-import { ToastContext, useMessageContext } from "@/contexts/toast";
+import { ToastContext, useToastContext } from "@/contexts/toast";
 import { redirect, useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 
@@ -20,7 +20,7 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { showMessage } = useMessageContext();
+  const { showMessage } = useToastContext();
   const router = useRouter();
 
   const btnDisabled = email === "" || password === "" || isLoading;
@@ -61,14 +61,14 @@ function Login() {
           return;
         }
 
-        router.push("/dashboard");
+        router.push("/welcome");
 
         return;
       }
 
-      showMessage("Error Logging in, check credentials and retry", "error");
+      showMessage("Login Failed", "Incorrect email or password. Please try again.", "error");
     } catch (err) {
-      showMessage("Error loggin in, check credentials and retry", "error");
+      showMessage("Login Failed", "Incorrect email or password. Please try again.", "error");
     } finally {
       setIsLoading(false);
     }
@@ -81,7 +81,7 @@ function Login() {
         login();
       }}
     >
-      <h1 className="text-4xl font-rubikBold"> Login as the Weave Admin </h1>
+      <h1 className="text-5xl font-rubikBold text-gray-900"> Login as the Weave Admin </h1>
       <p className="text-md my-4 mb-8">
         Enter your account correct login below
       </p>

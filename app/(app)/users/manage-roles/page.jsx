@@ -1,11 +1,11 @@
 "use client";
-import { ToastContext, useMessageContext } from "@/contexts/toast";
+import { ToastContext, useToastContext } from "@/contexts/toast";
 import api from "@/lib/api";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 function Page() {
-  const { showMessage } = useMessageContext();
+  const { showMessage } = useToastContext();
   const [availableRoles, setAvailableRoles] = useState([]);
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedRolePermission, setSelectedRolePermission] = useState([]);
@@ -21,7 +21,7 @@ function Page() {
       setAvailableRoles(response.data);
     } catch (error) {
       console.log(error);
-      showMessage("Unable to fetch available roles", "error");
+      showMessage("Error","Unable to fetch available roles", "error");
     }
   };
 
@@ -35,13 +35,13 @@ function Page() {
     try {
       const response = await api.delete(`/role/${selectedRole}`);
       console.log(response);
-      showMessage(
+      showMessage("Role deleted successfully",
         "Role deleted successfully, refresh to see changes",
         "success"
       );
     } catch (error) {
-      showMessage(
-        error.response.data.message || "Error deleting role",
+      showMessage("Error",
+     "Error deleting role",
         "error"
       );
       console.log(error);

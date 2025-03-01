@@ -1,12 +1,13 @@
-import { useModalContext } from "@/components/elements/Modal";
+import { useToastContext } from "@/contexts/toast";
 import api from "@/lib/api";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
+import { UserRoundX } from "lucide-react";
 
 function SuspendAppUser() {
   const params = useSearchParams();
   const userId = params.get("id");
-  const { showMessage } = useModalContext();
+  const { showMessage } = useToastContext();
   const router = useRouter();
   const [loading, setIsLoading] = useState(false);
 
@@ -17,17 +18,17 @@ function SuspendAppUser() {
       console.log(response);
       if (response.status === 200) {
         showMessage(
-          "User suspended successfully, refresh to see changes",
+          "User suspended successfully", "refresh to see changes",
           "success"
         );
         router.back();
         return;
       }
 
-      showMessage("Error executing action", "error");
+      showMessage("Error executing action","Try Again", "error");
     } catch (err) {
       console.log(err);
-      showMessage("Error executing action", "error");
+      showMessage("Error executing action", "Try Again","error");
     } finally {
       setIsLoading(false);
     }
@@ -43,10 +44,11 @@ function SuspendAppUser() {
             height: 50,
             background: "#FFDEDE",
             borderRadius: "50%",
+            color: 'red',
             display: "flex",
           }}
         >
-          <i className="fa fa-user-plus m-auto"></i>
+          <UserRoundX className="fa fa-user-plus m-auto"/>
         </div>
         <div className="">
           <h4 className="font-rubikMedium text-xl">Deactivate User</h4>

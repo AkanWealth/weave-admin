@@ -1,7 +1,7 @@
-import { useModalContext } from "@/components/elements/Modal";
 import api from "@/lib/api";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
+import { useToastContext } from "@/contexts/toast";
 
 function DeleteAdmin() {
   const [loading, setLoading] = useState(false);
@@ -11,7 +11,7 @@ function DeleteAdmin() {
   const userId = params.get("id");
 
   const router = useRouter();
-  const { showMessage } = useModalContext();
+  const { showMessage } = useToastContext();
 
   const invokeDelete = async () => {
     setLoading(true);
@@ -20,15 +20,15 @@ function DeleteAdmin() {
       const response = await api.delete(`/usage-analytics/delete/${userId}`);
 
       if (response.status === 200) {
-        showMessage("User deleted", "success");
+        showMessage("User deleted","The user account has been deleted successfully.", "success");
         return;
       }
 
       console.log(response);
-      showMessage("Error deleting user", "error");
+      showMessage("Error deleting user", "Please try again later","error");
     } catch (error) {
       console.log(error);
-      showMessage("Error deleting the user", "error");
+      showMessage("Error deleting the user", "Please try again later","error");
     } finally {
       setLoading(false);
     }

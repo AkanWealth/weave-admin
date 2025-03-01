@@ -2,9 +2,10 @@
 import api from "@/lib/api";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import signupFrame from "@/assets/images/signupFrame.png";
 import { useRouter } from "next/navigation";
 import PaginatedItems from "@/components/elements/Pagination";
+import { Search, AlignLeft, SquareArrowOutUpRight } from "lucide-react";
+
 
 function AppUsers() {
   const [appUsers, setAppUsers] = useState([]);
@@ -47,26 +48,29 @@ function AppUsers() {
 
   return (
     <>
-      <div className="flex">
-        <div className="w-3/5">
-          <form action="" className="border px-8 py-2 rounded-md">
+      <div className="flex flex-col lg:flex-row mb-4 items-start gap-4">
+        <div className="w-full lg:w-3/4 h-1/2">
+          <div className="relative border rounded-md px-8 py-2">
+            <div className="absolute inset-y-0 left-3 flex items-center pl-6">
+              <Search className="h-5 w-5 text-gray-500" />
+            </div>
             <input
               type="text"
-              className="bg-[#f5f6fa] rounded-md w-2/3 px-4 py-2"
-              placeholder="Search here"
+              className="bg-gray-200 rounded-md w-full pl-10 pr-4 py-2 placeholder:text-gray-500 "
+              placeholder="Search here..."
+              value={searchKey}
               onChange={(e) => setSearchKey(e.target.value)}
             />
-          </form>
+          </div>
         </div>
-        <div className="w-1/5"></div>
-        <div className="w-1/5">
-          <button className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium">
+        <div className="w-full lg:w-2/5 flex justify-end gap-3">
+          <button className="bg-weave-primary text-white py-2 px-4 rounded-xl font-medium flex items-center">
             Export
-            <i className="fa fa-window-maximize ml-2"></i>
+            <SquareArrowOutUpRight className="w-4 h-4 ml-2" />
           </button>
-          <button className="border p-2 px-4 rounded-md font-rubikMedium">
+          <button className="border py-2 px-4 rounded-md font-medium flex items-center">
             Filter
-            <i className="fa fa-list ml-2"></i>
+            <AlignLeft className="w-4 h-4 ml-2 rotate-180" />
           </button>
         </div>
       </div>
@@ -96,37 +100,47 @@ function AppUsers() {
           displayType={"table"}
           renderTitle={() => (
             <tr className="bg-[#f5f6fa]">
-              <th>Username</th>
-              <th className="text-left px-16">Username</th>
-              <th>Date Created </th>
-              <th>Status</th>
-              {/* <th>Device</th> */}
-              <th>Last Login</th>
-              <th></th>
+              <th className="py-3 px-4 text-left font-medium">User ID</th>
+              <th className="py-3 px-4 text-left font-medium">Username</th>
+              <th className="py-3 px-4 text-left font-medium">Date</th>
+              <th className="py-3 px-4 text-left font-medium">Status</th>
+              <th className="py-3 px-4 text-left font-medium">Device</th>
+              <th className="py-3 px-4 text-left font-medium">Last Login</th>
+              <th className="py-3 px-4 text-left font-medium"></th>
             </tr>
           )}
           renderItems={(user) => {
-            const date = new Date(user.created_at);
-            const lastLogin = new Date(user.lastLogin);
-
+            const date = new Date(user.created_at || "2024-12-08T08:30:00");
+            const lastLogin = new Date(user.lastLogin || "2024-12-08T08:30:00");
+            const formatDate = (d) => {
+              return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            };
+            const formatTime = (d) => {
+              return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${d.getHours() >= 12 ? 'AM' : 'PM'}`;
+            };
             return (
               <tr key={Math.random()}>
                 <td>
-                  <h6 className="font-rubikMedium text-black px-5">
-                    {user.username}
+                  <h6 className="text-gray-600">
+                    {user.id.split('-')[0]}
                   </h6>
                 </td>
                 <td className="text-left px-6">
-                  <span className="text-gray-500 text-sm">{user.email}</span>
-                  <button className="mx-2 p-1">
-                    <i className="fa fa-copy"></i>
-                  </button>
+                  <div>
+                    <h6 className="font-medium text-black">{user.username}</h6>
+                    <div className="flex items-center">
+                      <span className="text-gray-500 text-sm">{user.email}</span>
+                      <button className="ml-2 p-1 text-gray-400">
+                        <i className="fa fa-copy"></i>
+                      </button>
+                    </div>
+                  </div>
                 </td>
-                <td>
-                  <h6>{`${date.getFullYear()}-${
-                    date.getMonth() + 1
-                  }-${date.getDate()}`}</h6>
-                  <h6>{`${date.getHours()}:${date.getMinutes()}`}</h6>
+                <td className="whitespace-nowrap">
+                  <div className="inline-block text-sm text-gray-600">
+                    <span className="block">{formatDate(date)}</span>
+                    <span className="block">{formatTime(date)}</span>
+                  </div>
                 </td>
                 <td>
                   {user.isActive ? (
@@ -139,12 +153,14 @@ function AppUsers() {
                     </button>
                   )}
                 </td>
-                {/* <td>Android</td> */}
-                <td>
-                  <h6>{`${lastLogin.getFullYear()}-${
-                    lastLogin.getMonth() + 1
-                  }-${lastLogin.getDate()}`}</h6>
-                  <h6>{`${lastLogin.getHours()}:${lastLogin.getMinutes()}`}</h6>
+                <td className="py-4 px-4">
+                  {user.device || (user.id % 2 === 0 ? "iOS" : "Android")}
+                </td>
+                <td className="whitespace-nowrap">
+                  <div className="inline-block text-sm text-gray-600">
+                    <span className="block">{formatDate(lastLogin)}</span>
+                    <span className="block">{formatTime(lastLogin)}</span>
+                  </div>
                 </td>
                 <td>
                   <button className="relative px-2 py-1 mr-8 dropdown">
@@ -157,8 +173,7 @@ function AppUsers() {
                         <a
                           onClick={() =>
                             router.push(
-                              `?modal=${
-                                user.isActive ? "suspend" : "activate"
+                              `?modal=${user.isActive ? "suspend" : "activate"
                               }-app-user&id=${user.id}`
                             )
                           }

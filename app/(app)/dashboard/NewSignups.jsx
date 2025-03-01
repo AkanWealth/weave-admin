@@ -30,36 +30,48 @@ function NewSignups() {
       ) : (
         <table className="my-4 w-full">
           <tbody>
-            <tr className="bg-[#f5f6fa] ">
-              <th>User Id</th>
-              <th className="text-left px-16">Username</th>
-              <th>Date Created </th>
-              <th>Status</th>
-              {/* <th>Device</th> */}
-              <th>Last Login</th>
-              <th></th>
+          <tr className="bg-[#f5f6fa]">
+              <th className="py-3 px-4 text-left font-medium">User ID</th>
+              <th className="py-3 px-4 text-left font-medium">Username</th>
+              <th className="py-3 px-4 text-left font-medium">Date</th>
+              <th className="py-3 px-4 text-left font-medium">Status</th>
+              <th className="py-3 px-4 text-left font-medium">Device</th>
+              <th className="py-3 px-4 text-left font-medium">Last Login</th>
+              <th className="py-3 px-4 text-left font-medium"></th>
             </tr>
 
             {newSignups.map((user) => {
-              const date = new Date(user.created_at);
-              const lastLogin = new Date(user.lastLogin);
+             const date = new Date(user.created_at || "2024-12-08T08:30:00");
+             const lastLogin = new Date(user.lastLogin || "2024-12-08T08:30:00");
+             const formatDate = (d) => {
+               return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+             };
+             const formatTime = (d) => {
+               return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${d.getHours() >= 12 ? 'AM' : 'PM'}`;
+             };
               return (
                 <tr key={Math.random()}>
-                  <td>{user.id}</td>
-                  <td className="text-left px-6">
-                    <h6 className="font-rubikMedium text-black">
-                      {user.username}
-                    </h6>
-                    <span className="text-gray-500 text-sm">{user.email}</span>
-                    <button className="mx-2 p-1">
-                      <i className="fa fa-copy"></i>
-                    </button>
-                  </td>
                   <td>
-                    <h6>{`${date.getFullYear()}-${
-                      date.getMonth() + 1
-                    }-${date.getDate()}`}</h6>
-                    <h6>{`${date.getHours()}:${date.getMinutes()}`}</h6>
+                    <h6 className="text-gray-600">
+                      {user.id.split('-')[0]}
+                    </h6>
+                  </td>
+                  <td className="text-left px-6">
+                    <div>
+                      <h6 className="font-medium text-black">{user.username}</h6>
+                      <div className="flex items-center">
+                        <span className="text-gray-500 text-sm">{user.email}</span>
+                        <button className="ml-2 p-1 text-gray-400">
+                          <i className="fa fa-copy"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap">
+                    <div className="inline-block text-sm text-gray-600">
+                      <span className="block">{formatDate(date)}</span>
+                      <span className="block">{formatTime(date)}</span>
+                    </div>
                   </td>
                   <td>
                     {user.isActive ? (
@@ -72,26 +84,27 @@ function NewSignups() {
                       </button>
                     )}
                   </td>
-                  {/* <td>Android</td> */}
-                  <td>
-                    <h6>{`${lastLogin.getFullYear()}-${
-                      lastLogin.getMonth() + 1
-                    }-${lastLogin.getDate()}`}</h6>
-                    <h6>{`${lastLogin.getHours()}:${lastLogin.getMinutes()}`}</h6>
+                  <td className="py-4 px-4">
+                    {user.device || (user.id % 2 === 0 ? "iOS" : "Android")}
+                  </td>
+                  <td className="whitespace-nowrap">
+                    <div className="inline-block text-sm text-gray-600">
+                      <span className="block">{formatDate(lastLogin)}</span>
+                      <span className="block">{formatTime(lastLogin)}</span>
+                    </div>
                   </td>
                   <td>
                     <button className="relative px-2 py-1 mr-8 dropdown">
                       <div className="dot"></div>
                       <div className="dot"></div>
                       <div className="dot"></div>
-
+  
                       <div className="absolute right-0 rounded-md p-2 shadow bg-white text-xs w-[200px] dropdown-menu">
                         <div className="flex flex-col text-left">
                           <a
                             onClick={() =>
                               router.push(
-                                `?modal=${
-                                  user.isActive ? "suspend" : "activate"
+                                `?modal=${user.isActive ? "suspend" : "activate"
                                 }-app-user&id=${user.id}`
                               )
                             }
@@ -113,9 +126,7 @@ function NewSignups() {
                           </a>
                           <a
                             onClick={() =>
-                              router.push(
-                                `?modal=delete-app-user&id=${user.id}`
-                              )
+                              router.push(`?modal=delete-app-user&id=${user.id}`)
                             }
                             className="text-red-500 px-3 py-1"
                           >
