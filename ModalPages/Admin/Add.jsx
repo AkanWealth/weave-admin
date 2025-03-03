@@ -181,18 +181,14 @@ function AddAdmin() {
 
                 <select
                   name=""
-                  className="text-sm p-2 rounded-md font-rubikRegular"
+                  className="text-sm p-2 rounded-md font-rubikRegular capitalize"
                   onChange={(e) => {
                     setSelectedRole(e.target.value);
                   }}
                 >
                   <option value=""> Select Role </option>
                   {availableRoles.map((role) => (
-                    <option
-                      value={role.id}
-                      key={role.id}
-                      className="capitalize"
-                    >
+                    <option value={role.id} key={role.id}>
                       {role.name.replace(/_/, " ")}
                     </option>
                   ))}
@@ -233,7 +229,9 @@ function AddAdmin() {
             {permissions.length > 0 ? (
               permissions.map((permission) => (
                 <tr key={permission.id}>
-                  <td>{permission.name}</td>
+                  <td className="capitalize">
+                    {permission.name.replace(/_/, " ")}
+                  </td>
                   <td>
                     <input
                       type="checkbox"

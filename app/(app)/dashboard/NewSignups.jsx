@@ -4,10 +4,14 @@ import Image from "next/image";
 import api from "@/lib/api";
 import EmptyList from "@/components/elements/EmptyList";
 import { useRouter } from "next/navigation";
+import { Copy, CheckCircle } from "lucide-react";
+
 
 function NewSignups() {
   const [newSignups, setNewSignups] = useState([]);
   const router = useRouter();
+  const [copiedEmail, setCopiedEmail] = useState(null);
+
   const getNewSignups = async () => {
     try {
       const newsignups = await api.get("/usage-analytics/new-signups");
@@ -20,6 +24,20 @@ function NewSignups() {
     }
   };
 
+  const copyToClipboard = (email) => {
+    navigator.clipboard.writeText(email)
+      .then(() => {
+        setCopiedEmail(email);
+        // Reset the copied state after 2 seconds
+        setTimeout(() => {
+          setCopiedEmail(null);
+        }, 2000);
+      })
+      .catch((err) => {
+        console.error('Failed to copy: ', err);
+      });
+  };
+
   useEffect(() => {
     getNewSignups();
   }, []);
@@ -30,25 +48,25 @@ function NewSignups() {
       ) : (
         <table className="my-4 w-full">
           <tbody>
-          <tr className="bg-[#f5f6fa]">
+            <tr className="bg-[#f5f6fa]">
               <th className="py-3 px-4 text-left font-medium">User ID</th>
               <th className="py-3 px-4 text-left font-medium">Username</th>
               <th className="py-3 px-4 text-left font-medium">Date</th>
               <th className="py-3 px-4 text-left font-medium">Status</th>
-              <th className="py-3 px-4 text-left font-medium">Device</th>
+              {/* <th className="py-3 px-4 text-left font-medium">Device</th> */}
               <th className="py-3 px-4 text-left font-medium">Last Login</th>
               <th className="py-3 px-4 text-left font-medium"></th>
             </tr>
 
             {newSignups.map((user) => {
-             const date = new Date(user.created_at || "2024-12-08T08:30:00");
-             const lastLogin = new Date(user.lastLogin || "2024-12-08T08:30:00");
-             const formatDate = (d) => {
-               return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-             };
-             const formatTime = (d) => {
-               return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${d.getHours() >= 12 ? 'AM' : 'PM'}`;
-             };
+              const date = new Date(user.created_at || "2024-12-08T08:30:00");
+              const lastLogin = new Date(user.lastLogin || "2024-12-08T08:30:00");
+              const formatDate = (d) => {
+                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+              };
+              const formatTime = (d) => {
+                return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${d.getHours() >= 12 ? 'AM' : 'PM'}`;
+              };
               return (
                 <tr key={Math.random()}>
                   <td>
@@ -61,8 +79,16 @@ function NewSignups() {
                       <h6 className="font-medium text-black">{user.username}</h6>
                       <div className="flex items-center">
                         <span className="text-gray-500 text-sm">{user.email}</span>
-                        <button className="ml-2 p-1 text-gray-400">
-                          <i className="fa fa-copy"></i>
+                        <button
+                          className="ml-2 p-1 text-gray-400 hover:text-gray-600 focus:outline-none"
+                          onClick={() => copyToClipboard(user.email)}
+                          title="Copy email to clipboard"
+                        >
+                          {copiedEmail === user.email ? (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -75,18 +101,18 @@ function NewSignups() {
                   </td>
                   <td>
                     {user.isActive ? (
-                      <button className="bg-[#28A745] px-4 rounded-full py-1 text-sm text-base-white">
+                      <button className="bg-[#28A745] px-3 rounded-full py-1 text-sm text-base-white">
                         Active
                       </button>
                     ) : (
-                      <button className="bg-red-500 px-4 rounded-full py-1 text-sm text-base-white">
+                      <button className="bg-red-500 px-3 rounded-full py-1 text-sm text-base-white">
                         Inactive
                       </button>
                     )}
                   </td>
-                  <td className="py-4 px-4">
+                  {/* <td className="py-4 px-4">
                     {user.device || (user.id % 2 === 0 ? "iOS" : "Android")}
-                  </td>
+                  </td> */}
                   <td className="whitespace-nowrap">
                     <div className="inline-block text-sm text-gray-600">
                       <span className="block">{formatDate(lastLogin)}</span>
@@ -98,7 +124,7 @@ function NewSignups() {
                       <div className="dot"></div>
                       <div className="dot"></div>
                       <div className="dot"></div>
-  
+
                       <div className="absolute right-0 rounded-md p-2 shadow bg-white text-xs w-[200px] dropdown-menu">
                         <div className="flex flex-col text-left">
                           <a

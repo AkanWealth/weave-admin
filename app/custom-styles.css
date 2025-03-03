@@ -9,7 +9,7 @@ tr {
 }
 td,
 th {
-  padding: 0.75rem;
+  padding: 0.5rem;
   text-align: left;
 }
 
@@ -25,6 +25,11 @@ th {
 .dropdown-menu {
   display: none;
   z-index: 10;
+}
+
+.dropdown-menu a:hover {
+  background: rgb(226, 226, 226);
+  border-radius: 5px;
 }
 
 .dropdown:hover .dropdown-menu,

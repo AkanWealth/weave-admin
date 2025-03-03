@@ -23,10 +23,10 @@ function EditResource() {
   const [resourceFile, setResourceFile] = useState(null);
   const router = useRouter();
 
-  const { showMessage } = useToastContext();
-  useEffect(() => {
-    console.log(articleBody);
-  }, [articleBody]);
+  const { showMessage } = useMessageContext();
+  // useEffect(() => {
+  //   console.log(articleBody);
+  // }, [articleBody]);
 
   const [resourceInfo, setResourceInfo] = useState(null);
   const { resources, getSingleProduct } = useResourceLibrary();
@@ -52,6 +52,11 @@ function EditResource() {
     setResourceInfo(resource);
     setArticleBody(resource.content);
   }, [resource_id, resources]);
+
+  useEffect(() => {
+    if (!resourceInfo) return;
+    document.getElementById("resource-file").src = resourceInfo.resourceUrl;
+  }, [resourceInfo]);
 
   const [loadingThumbnail, setLoadingThumbnail] = useState(false);
   const [thumbnails, setThumbnails] = useState([]);
@@ -94,11 +99,13 @@ function EditResource() {
     getThumbnails();
   }, []);
 
-  useEffect(() => {
-    setResourceInfo({ ...resourceInfo, content: articleBody });
-  }, [articleBody]);
+  // useEffect(() => {
+  //   setResourceInfo({ ...resourceInfo, content: articleBody });
+  // }, [articleBody]);
 
   const updateResource = async (status) => {
+    // console.log(resourceInfo.content);
+    // return;
     setIsSubmitting(true);
     let btn = document.getElementById(`${status.toLowerCase()}-btn`);
     let btnTitle = btn.textContent;
@@ -176,7 +183,8 @@ function EditResource() {
         <div className="w-2/3 my-6">
           <button
             className="text-gray-500 pr-6 "
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
               setActiveTab("info");
             }}
           >
@@ -185,7 +193,10 @@ function EditResource() {
 
           <button
             className="text-gray-500 px-4"
-            onClick={() => setActiveTab("file")}
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab("file");
+            }}
           >
             <i className="fa fa-copy mx-2"></i>
             Content Details
@@ -407,7 +418,10 @@ function EditResource() {
                 <div className="flex-1">
                   <button
                     className="border border-black py-2 w-full font-rubikMedium rounded-md"
-                    onClick={() => router.back()}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      router.back();
+                    }}
                   >
                     Back
                   </button>
@@ -416,7 +430,10 @@ function EditResource() {
                 <div className="flex-1">
                   <button
                     className="bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md"
-                    onClick={() => setActiveTab("file")}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setActiveTab("file");
+                    }}
                   >
                     Continue
                   </button>
@@ -432,8 +449,10 @@ function EditResource() {
 
                   <div className="mb-4">
                     <RichTextEditor
-                      value={articleBody}
-                      setValue={setArticleBody}
+                      value={resourceInfo.content}
+                      setValue={(content) =>
+                        setResourceInfo({ ...resourceInfo, content })
+                      }
                     />
                   </div>
 
@@ -457,6 +476,10 @@ function EditResource() {
                   <h6 className="text-xl font-rubikBold my-2 capitalize">
                     {contentType} File Upload
                   </h6>
+                  <label htmlFor="" className="capitalize font-rubikMedium">
+                    Current {resourceInfo.resourceType} file
+                  </label>
+                  <audio id="resource-file" controls className="w-full"></audio>
 
                   <form action="" encType="multipart/formdata">
                     <input
@@ -476,13 +499,17 @@ function EditResource() {
                         margin: "15px auto",
                       }}
                     >
-                      <span>Drag or and drop your audio file here</span>
-                      <span className="text-gray-500">MP3, WAV</span>
-                      <span>
-                        <span className="inline-block px-4 py-2 text-md text-base-white bg-weave-primary rounded-xl">
-                          Select File
-                        </span>
-                      </span>
+                      {resourceFile?.name || (
+                        <>
+                          <span>Drag or and drop your audio file here</span>
+                          <span className="text-gray-500">MP3, WAV</span>
+                          <span>
+                            <span className="inline-block px-4 py-2 text-md text-base-white bg-weave-primary rounded-xl">
+                              Select File
+                            </span>
+                          </span>
+                        </>
+                      )}
                     </label>
                   </form>
                 </>

@@ -6,6 +6,8 @@ import axios from "axios";
 import feedbacks from "@/dummyData/feedbacks";
 import { useMessageContext } from "@/contexts/toast";
 import api from "@/lib/api";
+import PaginatedItems from "@/components/elements/Pagination";
+import Loader from "@/components/elements/Loader";
 
 export default function FeedbackRender() {
   // const getFeedBack= async()=>{
@@ -15,7 +17,24 @@ export default function FeedbackRender() {
   // }
   const [isLoading, setIsLoading] = useState(true);
   const [feedbacks, setFeedBacks] = useState([]);
+  const [filteredFeedbacks, setFilteredFeedbacks] = useState([]);
+  const [dateFilter, setDateFilter] = useState("");
   const { showMessage } = useMessageContext();
+
+  useEffect(() => {
+    setFilteredFeedbacks(feedbacks);
+  }, [feedbacks]);
+
+  useEffect(() => {
+    console.log(dateFilter);
+    if (!dateFilter || dateFilter === "")
+      return setFilteredFeedbacks(feedbacks);
+
+    const filtered = feedbacks.filter((feedback) => {
+      return feedback.created_at.includes(dateFilter);
+    });
+    setFilteredFeedbacks(filtered);
+  }, [dateFilter]);
 
   const fetchFeedback = async () => {
     try {
@@ -45,24 +64,29 @@ export default function FeedbackRender() {
           <h4 className="text-2xl px-4 font-rubikMedium">App Feedback</h4>
         </div>
         <div className="w-1/4">
-          <button className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium">
+          {/* <button className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium">
             Export
             <i className="fa fa-window-maximize ml-2"></i>
-          </button>
+          </button> */}
           <span className="text-gray-500">Date: </span>
           <label
             htmlFor="datepicker"
             className="rounded-md bg-white border inline-block text-sm px-2 py-1"
           >
-            Last 7 days <i className="fa fa-calendar"></i>
-            <input type="date" name="" id="datepicker" className="hidden" />
+            {/* Last 7 days <i className="fa fa-calendar"></i> */}
+            <input
+              type="date"
+              name=""
+              id="datepicker"
+              onChange={(e) => setDateFilter(e.target.value)}
+            />
           </label>
         </div>
       </div>
 
       {/* resources section */}
       {isLoading ? (
-        "fetching"
+        <Loader />
       ) : feedbacks && feedbacks.length === 0 ? (
         <div className="flex flex-col text-center justify-center py-12 max-w-[350px] mx-auto">
           <Image
@@ -78,15 +102,18 @@ export default function FeedbackRender() {
           </p>
         </div>
       ) : (
-        <div className="flex flex-row flex-wrap">
-          {feedbacks.map((feedback) => (
+        <PaginatedItems
+          items={filteredFeedbacks}
+          itemsPerPage={15}
+          displayType={"grid"}
+          renderItems={(feedback) => (
             <div key={Math.random()} className="w-1/3 p-2">
               <div
                 className="bg-base-white border p-3 rounded-md 
               text-sm"
               >
                 <p className="text-xs text-gray-500 mb-3">
-                  {feedback.created_at}
+                  {new Date(feedback.created_at).toLocaleString()}
                 </p>
                 {feedback.feedback !== ""
                   ? feedback.feedback
@@ -106,12 +133,12 @@ export default function FeedbackRender() {
                 </div>
               </div>
             </div>
-          ))}
-        </div>
+          )}
+        />
       )}
 
       {/* pagination activity tab */}
-      <div className="rounded-md bg-white p-4 my-4 md:flex md:justify-end">
+      {/* <div className="rounded-md bg-white p-4 my-4 md:flex md:justify-end">
         <div className="md:min-w-1/2 flex space-x-2">
           <p className="my-auto">Page 1 of 20</p>
           <button className="rounded-full w-[30px] h-[30px] bg-weave-primary text-base-white flex justify-center">
@@ -149,7 +176,7 @@ export default function FeedbackRender() {
             </span>
           </button>
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

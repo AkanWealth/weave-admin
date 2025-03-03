@@ -7,10 +7,27 @@ import { useMessageContext } from "@/contexts/toast";
 import ResourceLibraryProvider, {
   useResourceLibrary,
 } from "@/contexts/ResourceLibraryContext";
+import exportData from "@/lib/export";
+import PaginatedItems from "@/components/elements/Pagination";
+import DateRender from "@/components/elements/DateRender";
 function ResourcesRender() {
   const [filteredResources, setFilteredResources] = useState([]);
   const [searchKey, setSearchKey] = useState("");
   const { resources, isLoading } = useResourceLibrary();
+  const resourceTypes = ["Article", "Video", "Audio"];
+  const [resourceFilter, setResourceFilter] = useState("");
+
+  useEffect(() => {
+    if (resourceFilter === "") return setFilteredResources(resources);
+
+    setSearchKey("");
+    const matchResources = resources.filter(
+      (resource) =>
+        resource.resourceType.toLowerCase() === resourceFilter.toLowerCase()
+    );
+
+    setFilteredResources(matchResources);
+  }, [resourceFilter]);
 
   useEffect(() => {
     setFilteredResources(resources);
@@ -29,6 +46,20 @@ function ResourcesRender() {
     setFilteredResources(matchResources);
   }, [searchKey]);
 
+  const exportContents = () => {
+    exportData(
+      filteredResources.map((resource) => ({
+        title: resource.title,
+        tags: resource.tags.join(", ").replace(/,/g, " & "),
+        resourceType: resource.resourceType,
+        date_created: resource.created_at,
+        status: resource.status,
+      })),
+      ["title", "tags", "resourceType", "date_created", "status"],
+      "resources"
+    );
+  };
+
   return (
     <>
       {/* search pane */}
@@ -44,15 +75,46 @@ function ResourcesRender() {
             />
           </div>
         </div>
-        <div className="w-1/5"></div>
-        <div className="w-1/5">
-          <button className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium">
+        <div className="w-2/5 text-right">
+          <button
+            className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium"
+            onClick={exportContents}
+          >
             Export
             <i className="fa fa-window-maximize ml-2"></i>
           </button>
-          <button className="border p-2 px-4 rounded-md font-rubikMedium">
-            Filter
-            <i className="fa fa-list ml-2"></i>
+          <button className="relative dropdown border p-2 rounded-md font-rubikMedium">
+            <span className="px-2">
+              {resourceFilter !== "" ? (
+                resourceFilter
+              ) : (
+                <>
+                  Filter
+                  <i className="fa fa-list ml-2"></i>
+                </>
+              )}
+            </span>
+            <div className="absolute right-0 rounded-md p-1 shadow bg-white text-xs w-[200px]  dropdown-menu">
+              <div className="flex flex-col text-left">
+                <a
+                  className={`p-2 capitalize rounded-md mb-1`}
+                  onClick={() => setResourceFilter("")}
+                >
+                  Reset Filter
+                </a>
+                {resourceTypes.map((typ) => (
+                  <a
+                    className={`p-2 capitalize rounded-md mb-1 ${
+                      resourceFilter === typ ? "bg-gray-200" : ""
+                    }`}
+                    onClick={() => setResourceFilter(typ)}
+                    key={typ}
+                  >
+                    {typ}
+                  </a>
+                ))}
+              </div>
+            </div>
           </button>
         </div>
       </div>
@@ -95,85 +157,78 @@ function ResourcesRender() {
             </div>
           </div>
         ) : (
-          <table className="my-4 w-full text-sm">
-            <tbody>
+          <PaginatedItems
+            items={filteredResources}
+            itemsPerPage={10}
+            displayType={"table"}
+            renderTitle={() => (
               <tr className="bg-[#f5f6fa] ">
-                <th className="text-left px-16">Title</th>
+                <th className="text-left px-4">Title</th>
                 <th className="text-left pl-12">Tags</th>
                 <th>Type</th>
                 <th>Date Created </th>
                 <th>Status</th>
-                <th></th>
+                <th> </th>
               </tr>
-              {filteredResources.map((resource) => {
-                const date = new Date(resource.created_at);
-                const day = `${date.getFullYear()} ${
-                  date.getMonth() + 1
-                } ${date.getDate()}`;
+            )}
+            renderItems={(resource) => (
+              <tr key={resource.id}>
+                <td className="text-left px-2">
+                  <h6 className="font-rubikMedium text-black">
+                    {resource.title}
+                  </h6>
+                </td>
+                <td className="text-xs pl-6 text-left">
+                  {resource.tags.map((tag) => (
+                    <span key={tag} className="tag m-1">
+                      {tag}
+                    </span>
+                  ))}
+                </td>
+                <td>{resource.resourceType}</td>
+                <td>
+                  <DateRender date={resource.created_at} />
+                </td>
+                <td>
+                  <button
+                    className={`${
+                      resource.status.toLowerCase() === "published"
+                        ? "bg-[#28A745] text-base-white"
+                        : "bg-[#B5B5B5]"
+                    } px-4 rounded-full py-1 text-sm`}
+                  >
+                    {resource.status}
+                  </button>
+                </td>
+                <td>
+                  <button className="relative px-2 py-1 mr-8 dropdown">
+                    <div className="dot"></div>
+                    <div className="dot"></div>
+                    <div className="dot"></div>
 
-                const time = `${date.getHours()}:${date.getMinutes()}`;
-
-                return (
-                  <tr key={resource.id}>
-                    <td className="text-left px-6">
-                      <h6 className="font-rubikMedium text-black">
-                        {resource.title}
-                      </h6>
-                    </td>
-                    <td className="text-xs pl-6 text-left">
-                      {resource.tags.map((tag) => (
-                        <span key={tag} className="tag m-1">
-                          {tag}
-                        </span>
-                      ))}
-                    </td>
-                    <td>{resource.resourceType}</td>
-                    <td>
-                      <h6>{day}</h6>
-                      <h6>{time}</h6>
-                    </td>
-                    <td>
-                      <button
-                        className={`${
-                          resource.status.toLowerCase() === "published"
-                            ? "bg-[#28A745] text-base-white"
-                            : "bg-[#B5B5B5]"
-                        } px-4 rounded-full py-1 text-sm`}
-                      >
-                        {resource.status}
-                      </button>
-                    </td>
-                    <td>
-                      <button className="relative px-2 py-1 mr-8 dropdown">
-                        <div className="dot"></div>
-                        <div className="dot"></div>
-                        <div className="dot"></div>
-
-                        <div className="absolute right-0 rounded-md p-2 shadow bg-white text-xs w-[200px]  dropdown-menu">
-                          <div className="flex flex-col text-left">
-                            <Link
-                              href={`?modal=edit-resource&resource_id=${resource.id}&contentType=${resource.resourceType}`}
-                              className="px-3 py-1"
-                            >
-                              {" "}
-                              <i className="fa fa-pencil mr-2"></i> Edit Content
-                            </Link>
-                            <Link
-                              href={`?modal=delete-resource&resource_id=${resource.id}`}
-                              className="text-red-500 px-3 py-1"
-                            >
-                              {" "}
-                              <i className="fa fa-trash mr-2"></i> Delete
-                            </Link>
-                          </div>
-                        </div>
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    <div className="absolute right-0 rounded-md p-2 shadow bg-white text-xs w-[200px]  dropdown-menu">
+                      <div className="flex flex-col text-left">
+                        <Link
+                          href={`?modal=edit-resource&resource_id=${resource.id}&contentType=${resource.resourceType}`}
+                          className="px-3 py-1"
+                        >
+                          {" "}
+                          <i className="fa fa-pencil mr-2"></i> Edit Content
+                        </Link>
+                        <Link
+                          href={`?modal=delete-resource&resource_id=${resource.id}`}
+                          className="text-red-500 px-3 py-1"
+                        >
+                          {" "}
+                          <i className="fa fa-trash mr-2"></i> Delete
+                        </Link>
+                      </div>
+                    </div>
+                  </button>
+                </td>
+              </tr>
+            )}
+          />
         )}
 
         {}

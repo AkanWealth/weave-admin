@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import ReactPaginate from "react-paginate";
+import EmptyList from "./EmptyList";
+
+// Example items, to simulate fetching from another resources.
+const items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 import { Plus } from "lucide-react";
 
 function Items({ currentItems, renderItems }) {
@@ -20,6 +24,10 @@ export default function PaginatedItems({
 
   const handlePageClick = (event) => {
     const newOffset = (event.selected * itemsPerPage) % items.length;
+    // console.log(
+    //   `User requested page number ${event.selected}, which is offset ${newOffset}`
+    // );
+    console.log(newOffset);
     setItemOffset(newOffset);
   };
 
@@ -43,6 +51,10 @@ export default function PaginatedItems({
             )}
           </tbody>
         </table>
+      ) : currentItems.length > 0 ? (
+        <div className="flex flex-row flex-wrap">
+          <Items currentItems={currentItems} renderItems={renderItems} />
+        </div>
       ) : (
         <Items currentItems={currentItems} renderItems={renderItems} />
       )}

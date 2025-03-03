@@ -4,14 +4,19 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import growthFrame from "@/assets/images/Frame-3.png";
 import { useSearchParams } from "next/navigation";
+import DateRender from "@/components/elements/DateRender";
+import PaginatedItems from "@/components/elements/Pagination";
+import Loader from "@/components/elements/Loader";
+import exportData from "@/lib/export";
 
 function AuditLogs() {
   const [auditLogs, setAuditLogs] = useState([]);
   const params = useSearchParams();
   const adminId = params.get("admin");
   const [page, setPage] = useState(1);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const next = () => {
     setPage(page++);
@@ -22,66 +27,110 @@ function AuditLogs() {
   };
 
   const fetchAudits = async () => {
+    setIsLoading(true);
     console.log("fetching");
     try {
-      const query = {
-        startDate,
-        endDate,
-        adminId,
-        limit: 10,
-        page,
-        isSecurityEvent: true,
-      };
-      const queryString = new URLSearchParams(query).toString();
-      console.log(queryString);
-      // return;
-      const response = await api.get(`/system-logs/`);
-      console.log(response);
+      if (adminId || (startDate && endDate)) {
+        const query = {
+          startDate,
+          endDate,
+          limit: 10,
+          page,
+        };
+        if (adminId) {
+          query[adminId] = adminId;
+        }
+
+        const queryString = new URLSearchParams(query).toString();
+        console.log(queryString);
+        // return;
+        const response = await api.get(`/system-logs?${queryString}`);
+        if (response.status === 200) {
+          setAuditLogs(response.data.logs);
+        }
+      } else {
+        const response = await api.get(`/system-logs/all-admins-logs`);
+        // console.log(response);
+        if (response.status === 200) {
+          setAuditLogs(response.data.logs);
+        }
+      }
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // useEffect(() => {
-  //   fetchAudits();
-  // }, []);
+  useEffect(() => {
+    fetchAudits();
+  }, []);
+
+  const exportAudit = async () => {
+    exportData(
+      auditLogs.map((audit) => ({
+        admin: audit.admin.username,
+        details: audit.details.message,
+        date: new Date(audit.created_at).toLocaleString().replace(/,/, " "),
+        action: audit.action.replace(/_/g, " "),
+        affectedResourceType: audit.affectedResourceType,
+      })),
+      ["date", "admin", "details", "action", "affectedResourceType"],
+      "audit_logs"
+    );
+  };
 
   return (
     <>
       <div className="flex my-4">
         <div className="w-3/5">
-          <form action="" className="bg-white border px-8 py-2 rounded-md">
-            <input
+          <form action="" className="bg-white border py-2 rounded-md">
+            {/* <input
               type="text"
               className="bg-[#f5f6fa] rounded-md w-full px-4 py-2"
               placeholder="Search here"
-            />
-            <input
-              type="date"
-              onChange={(e) => setStartDate(e.target.value)}
-              className="border p-2 px-4 rounded-md font-rubikMedium"
-            />
-            {/* From */}
-            {/* <i className="fa fa-list ml-2"></i> */}
-            {/* </input> */}
-            <input
-              type="date"
-              className="border p-2 px-4 rounded-md font-rubikMedium"
-              onChange={(e) => setEndDate(e.target.value)}
-            />
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                fetchAudits();
-              }}
-            >
-              Search
-            </button>
+            /> */}
+            <div className="flex flex-row">
+              <div className="w-2/5 px-2">
+                <label className="pr-3">From</label>
+                <input
+                  type="date"
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="border w-2/3 p-2 px-4 rounded-md font-rubikMedium"
+                />
+              </div>
+              <div className="w-2/5 px-2">
+                <label className="pr-3">To</label>
+                <input
+                  type="date"
+                  className="border w-3/4 p-2 px-4 rounded-md font-rubikMedium"
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+
+              <div className="w-1/5 text-right">
+                <button
+                  className="bg-weave-primary text-base-white p-2 px-4 mr-2 rounded-md font-rubikMedium"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    fetchAudits();
+                  }}
+                >
+                  Search
+                </button>
+              </div>
+              {/* From */}
+              {/* <i className="fa fa-list ml-2"></i> */}
+              {/* </input> */}
+            </div>
           </form>
         </div>
         <div className="w-1/5"></div>
-        <div className="w-1/5">
-          <button className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium">
+        <div className="w-1/5 text-right">
+          <button
+            className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium"
+            onClick={() => exportAudit()}
+          >
             Export
             <i className="fa fa-window-maximize ml-2"></i>
           </button>
@@ -107,7 +156,9 @@ function AuditLogs() {
       <div className="rounded-2xl bg-white p-4 my-4">
         <h3 className="text-xl font-rubikMedium">Audit Logs </h3>
 
-        {auditLogs && auditLogs.length === 0 ? (
+        {isLoading ? (
+          <Loader />
+        ) : auditLogs && auditLogs.length === 0 ? (
           <div className="flex flex-col text-center justify-center py-12 max-w-[350px] mx-auto my-16">
             <Image
               src={growthFrame}
@@ -123,8 +174,11 @@ function AuditLogs() {
             </p>
           </div>
         ) : (
-          <table className="my-4 w-full text-sm">
-            <tbody>
+          <PaginatedItems
+            items={auditLogs}
+            itemsPerPage={10}
+            displayType={"table"}
+            renderTitle={() => (
               <tr className="bg-[#f5f6fa] ">
                 <th className="text-left">Date/Time</th>
                 <th className="text-left">Admin Username </th>
@@ -132,26 +186,34 @@ function AuditLogs() {
                 <th>Action Type</th>
                 <th> Affected Data </th>
               </tr>
-              {auditLogs.map((audit) => (
-                <tr key={Math.random()}>
-                  <td className="text-left px-6 py-4">{audit.date}</td>
-                  <td className="text-left px-6">
-                    <h6 className="font-rubikMedium text-black">
-                      {audit.admin_user}
-                    </h6>
-                    <h6 className="text-sm text-gray-500">
-                      {audit.admin_role}
-                    </h6>
-                  </td>
-                  <td className="text-xs pl-6 text-left">
-                    {audit.description}
-                  </td>
-                  <td>{audit.actionType}</td>
-                  <td>{audit.affectedData}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            )}
+            renderItems={(audit) => (
+              <tr key={Math.random()}>
+                <td className="text-left px-6 py-4">
+                  <DateRender date={audit.created_at} />
+                </td>
+                <td className="text-left px-6 capitalize">
+                  <h6 className="font-rubikMedium text-black">
+                    {audit.admin.username}
+                  </h6>
+                  <h6 className="text-sm text-gray-500">
+                    {audit.admin.role &&
+                      audit.admin.role.name.replace(/_/, " ")}
+                  </h6>
+                </td>
+                <td className="pl-6 text-left">{audit.details.message}</td>
+                <td>
+                  <span className="capitalize">
+                    {audit.action.replace(/_/, " ").toLowerCase()}
+                  </span>
+                </td>
+                <td className="capitalize">
+                  {audit.affectedResourceType &&
+                    audit.affectedResourceType.toLowerCase()}
+                </td>
+              </tr>
+            )}
+          />
         )}
       </div>
     </>

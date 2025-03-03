@@ -4,7 +4,8 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import PaginatedItems from "@/components/elements/Pagination";
-import { Search, AlignLeft, SquareArrowOutUpRight } from "lucide-react";
+import { Search, AlignLeft, Copy, CheckCircle  } from "lucide-react";
+import TableExportPDF from "@/components/elements/ExportasPDF";
 
 
 function AppUsers() {
@@ -13,6 +14,31 @@ function AppUsers() {
   const [searchKey, setSearchKey] = useState("");
   const router = useRouter();
   const [fetching, setIsFetching] = useState(true);
+  const [copiedEmail, setCopiedEmail] = useState(null);
+
+  const columns = [
+    { header: "User ID", accessor: (user) => user.id.split('-')[0] },
+    { header: "Username", accessor: "username" },
+    { header: "Email", accessor: "email" },
+    { 
+      header: "Date Created", 
+      accessor: (user) => {
+        const date = new Date(user.created_at || "2024-12-08T08:30:00");
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      }
+    },
+    { 
+      header: "Status", 
+      accessor: (user) => user.isActive ? "Active" : "Inactive" 
+    },
+    { 
+      header: "Last Login", 
+      accessor: (user) => {
+        const date = new Date(user.lastLogin || "2024-12-08T08:30:00");
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      }
+    }
+  ];
 
   const getUsers = async () => {
     try {
@@ -46,6 +72,21 @@ function AppUsers() {
     setFilteredList(matchresult);
   }, [searchKey]);
 
+// Function to copy email to clipboard
+const copyToClipboard = (email) => {
+  navigator.clipboard.writeText(email)
+    .then(() => {
+      setCopiedEmail(email);
+      // Reset the copied state after 2 seconds
+      setTimeout(() => {
+        setCopiedEmail(null);
+      }, 2000);
+    })
+    .catch((err) => {
+      console.error('Failed to copy: ', err);
+    });
+};
+
   return (
     <>
       <div className="flex flex-col lg:flex-row mb-4 items-start gap-4">
@@ -64,10 +105,13 @@ function AppUsers() {
           </div>
         </div>
         <div className="w-full lg:w-2/5 flex justify-end gap-3">
-          <button className="bg-weave-primary text-white py-2 px-4 rounded-xl font-medium flex items-center">
-            Export
-            <SquareArrowOutUpRight className="w-4 h-4 ml-2" />
-          </button>
+        <TableExportPDF 
+            data={filteredList} 
+            columns={columns}
+            fileName={`AppUsers_${new Date().toISOString().split('T')[0]}.pdf`}
+            title="Application Users"
+            buttonText="Export"
+          />
           <button className="border py-2 px-4 rounded-md font-medium flex items-center">
             Filter
             <AlignLeft className="w-4 h-4 ml-2 rotate-180" />
@@ -104,7 +148,7 @@ function AppUsers() {
               <th className="py-3 px-4 text-left font-medium">Username</th>
               <th className="py-3 px-4 text-left font-medium">Date</th>
               <th className="py-3 px-4 text-left font-medium">Status</th>
-              <th className="py-3 px-4 text-left font-medium">Device</th>
+              {/* <th className="py-3 px-4 text-left font-medium">Device</th> */}
               <th className="py-3 px-4 text-left font-medium">Last Login</th>
               <th className="py-3 px-4 text-left font-medium"></th>
             </tr>
@@ -130,8 +174,16 @@ function AppUsers() {
                     <h6 className="font-medium text-black">{user.username}</h6>
                     <div className="flex items-center">
                       <span className="text-gray-500 text-sm">{user.email}</span>
-                      <button className="ml-2 p-1 text-gray-400">
-                        <i className="fa fa-copy"></i>
+                      <button 
+                        className="ml-2 p-1 text-gray-400 hover:text-gray-600 focus:outline-none"
+                        onClick={() => copyToClipboard(user.email)}
+                        title="Copy email to clipboard"
+                      >
+                        {copiedEmail === user.email ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -153,9 +205,9 @@ function AppUsers() {
                     </button>
                   )}
                 </td>
-                <td className="py-4 px-4">
+                {/* <td className="py-4 px-4">
                   {user.device || (user.id % 2 === 0 ? "iOS" : "Android")}
-                </td>
+                </td> */}
                 <td className="whitespace-nowrap">
                   <div className="inline-block text-sm text-gray-600">
                     <span className="block">{formatDate(lastLogin)}</span>

@@ -447,13 +447,17 @@ function ContentInfo() {
                 margin: "15px auto",
               }}
             >
-              <span>Drag or and drop your audio file here</span>
-              <span className="text-gray-500">MP3, WAV</span>
-              <span>
-                <span className="inline-block px-4 py-2 text-md text-base-white bg-weave-primary rounded-xl">
-                  Select File
-                </span>
-              </span>
+              {resourceFile?.name || (
+                <>
+                  <span>Drag or and drop your audio file here</span>
+                  <span className="text-gray-500">MP3, WAV</span>
+                  <span>
+                    <span className="inline-block px-4 py-2 text-md text-base-white bg-weave-primary rounded-xl">
+                      Select File
+                    </span>
+                  </span>
+                </>
+              )}
             </label>
           </>
         )}
