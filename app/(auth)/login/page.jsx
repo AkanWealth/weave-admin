@@ -1,5 +1,5 @@
 "use client"; 
-import React, { useState } from "react"; 
+import React, { useState, useEffect } from "react"; 
 import TextField from "@/components/elements/TextField"; 
 import PasswordField from "@/components/elements/PasswordField"; 
 import Button from "@/components/elements/Button"; 
@@ -22,9 +22,15 @@ function Login() {
   const [password, setPassword] = useState("");   
   const [isLoading, setIsLoading] = useState(false);   
   const { showMessage } = useToastContext();   
+  const [isClient, setIsClient] = useState(false);
   const router = useRouter();    
 
-  const btnDisabled = email === "" || password === "" || isLoading;   
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const btnDisabled = !isClient || email === "" || password === "" || isLoading;   
 
   const login = async () => {     
     setIsLoading(true);     
@@ -45,10 +51,12 @@ function Login() {
           return;         
         }          
 
-        localStorage.setItem("userinfo", JSON.stringify(resp.data.user));         
-        Cookies.set("session", resp.data.accessToken, {           
-          expires: 1 / 24,         
-        });          
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("userinfo", JSON.stringify(resp.data.user));         
+          Cookies.set("session", resp.data.accessToken, {           
+            expires: 1 / 24,         
+          });
+        }       
 
         // Show success toast message
         showMessage("Login Successful", "Welcome back!", "success");

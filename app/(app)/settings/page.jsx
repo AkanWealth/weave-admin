@@ -7,7 +7,7 @@ import Button from "@/components/elements/Button";
 import PasswordField from "@/components/elements/PasswordField";
 import Cookies from "js-cookie";
 import api from "@/lib/api";
-import { ToastContext, useMessageContext } from "@/contexts/toast";
+import { ToastContext, useToastContext } from "@/contexts/toast";
 import { baseUrl } from "@/lib/envfile";
 
 function SettingPage() {
@@ -16,7 +16,7 @@ function SettingPage() {
   const [isupdatingpassword, setIsupdatingpassword] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [isFetching, setIsFetching] = useState(true);
-  const { showMessage } = useMessageContext();
+  const { showMessage } = useToastContext();
   const [profileImg, setProfileImg] = useState(null);
   const [attachedimg, setAttachedImg] = useState(null);
   const accessToken = Cookies.get("session");
@@ -60,11 +60,11 @@ function SettingPage() {
         newPassword,
       });
       console.log(response);
-      showMessage(response.data.message, "sucess");
+      showMessage(response.data.message,"", "sucess");
     } catch (error) {
       console.log(error);
       showMessage(
-        error.response.data.message || "Error updating password",
+        error.response.data.message || "Error updating password","",
         "error"
       );
     } finally {
