@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useMessageContext } from "./toast";
+import { useToastContext } from "./toast";
 import api from "@/lib/api";
 
 const ResourceLibraryContext = createContext();
 
 export default function ResourceLibraryProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
-  const { showMessage } = useMessageContext();
+  const { showMessage } = useToastContext();
 
   const [resources, setResources] = useState([]);
   const fetchResources = async () => {
@@ -18,7 +18,7 @@ export default function ResourceLibraryProvider({ children }) {
       }
     } catch (err) {
       console.log(err);
-      showMessage("Unable to fetch resources", "error");
+      showMessage("Unable to fetch resources", "", "error");
     } finally {
       setIsLoading(false);
     }

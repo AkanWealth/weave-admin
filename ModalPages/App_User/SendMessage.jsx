@@ -39,9 +39,12 @@ function SendMessage() {
         subject,
         content,
       });
-      console.log(response);
-      showMessage(response.data.message, "success");
-      if (response.status === 201) closeModal();
+      if (response.status === 201) {
+        showMessage(response.data.message, "success");
+        closeModal();
+        return;
+      }
+      showMessage(response.data.message, "error");
     } catch (error) {
       showMessage(error.response.data.message, "error");
     } finally {

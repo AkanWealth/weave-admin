@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import growthFrame from "@/assets/images/Frame.png";
 import Link from "next/link";
-import api from "@/lib/api";
-import { useMessageContext } from "@/contexts/toast";
 import ResourceLibraryProvider, {
   useResourceLibrary,
 } from "@/contexts/ResourceLibraryContext";

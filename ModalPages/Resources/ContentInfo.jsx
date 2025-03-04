@@ -522,9 +522,9 @@ function ContentInfo() {
               onClick={() => {
                 submitForm("Draft");
               }}
-              id="draft"
+              id="draft-btn"
             >
-              {isSubmitting ? "Please wait..." : "Save as Draft"}
+              Save as Draft
             </button>
           </div>
           <div className="flex-1">
@@ -536,9 +536,9 @@ function ContentInfo() {
                 submitForm("Published");
               }}
               disabled={isSubmitting}
-              id="published"
+              id="published-btn"
             >
-              {isSubmitting ? "Please wait..." : "Publish"}
+              Publish
             </button>
           </div>
         </div>

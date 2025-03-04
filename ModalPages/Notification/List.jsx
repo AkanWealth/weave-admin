@@ -3,58 +3,6 @@ import api from "@/lib/api";
 import React, { useEffect, useState } from "react";
 
 function Notifications() {
-  // const notifications = [
-  //   {
-  //     date: "12-12-2020",
-  //     content:
-  //       "CKEditor 5 boasts a modern and feature-rich design, complete with a clean and intuitive user interface. It stands out for its collaboration features, making it an excellent choice for projects requiring real-time editing. However, developers should consider the larger bundle size compared to some alternatives.",
-  //     title: "CKEditor",
-  //     recipients: "All Users",
-  //   },
-  //   {
-  //     date: "12-12-2020",
-  //     content:
-  //       "CKEditor 5 boasts a modern and feature-rich design, complete with a clean and intuitive user interface. It stands out for its collaboration features, making it an excellent choice for projects requiring real-time editing. However, developers should consider the larger bundle size compared to some alternatives.",
-  //     title: "CKEditor",
-  //     recipients: "All Users",
-  //   },
-  //   {
-  //     date: "12-12-2020",
-  //     content:
-  //       "CKEditor 5 boasts a modern and feature-rich design, complete with a clean and intuitive user interface. It stands out for its collaboration features, making it an excellent choice for projects requiring real-time editing. However, developers should consider the larger bundle size compared to some alternatives.",
-  //     title: "CKEditor",
-  //     recipients: "All Users",
-  //   },
-  //   {
-  //     date: "12-12-2020",
-  //     content:
-  //       "CKEditor 5 boasts a modern and feature-rich design, complete with a clean and intuitive user interface. It stands out for its collaboration features, making it an excellent choice for projects requiring real-time editing. However, developers should consider the larger bundle size compared to some alternatives.",
-  //     title: "CKEditor",
-  //     recipients: "All Users",
-  //   },
-  //   {
-  //     date: "12-12-2020",
-  //     content:
-  //       "CKEditor 5 boasts a modern and feature-rich design, complete with a clean and intuitive user interface. It stands out for its collaboration features, making it an excellent choice for projects requiring real-time editing. However, developers should consider the larger bundle size compared to some alternatives.",
-  //     title: "CKEditor",
-  //     recipients: "All Users",
-  //   },
-  //   {
-  //     date: "12-12-2020",
-  //     content:
-  //       "CKEditor 5 boasts a modern and feature-rich design, complete with a clean and intuitive user interface. It stands out for its collaboration features, making it an excellent choice for projects requiring real-time editing. However, developers should consider the larger bundle size compared to some alternatives.",
-  //     title: "CKEditor",
-  //     recipients: "All Users",
-  //   },
-  //   {
-  //     date: "12-12-2020",
-  //     content:
-  //       "CKEditor 5 boasts a modern and feature-rich design, complete with a clean and intuitive user interface. It stands out for its collaboration features, making it an excellent choice for projects requiring real-time editing. However, developers should consider the larger bundle size compared to some alternatives.",
-  //     title: "CKEditor",
-  //     recipients: "All Users",
-  //   },
-  // ];
-
   const [notifications, setNotifications] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
 
