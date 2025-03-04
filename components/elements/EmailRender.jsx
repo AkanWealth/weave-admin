@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import copy from "clipboard-copy";
+// import copy from "clipboard-copy";
 
 function EmailRender({ email }) {
   const [isCopied, setIsCopied] = useState(false);

@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import React, { useState } from "react";
 import ReactPaginate from "react-paginate";
 import EmptyList from "./EmptyList";
 
 // Example items, to simulate fetching from another resources.
 const items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+import { Plus } from "lucide-react";
 
 function Items({ currentItems, renderItems }) {
   return <>{currentItems && currentItems.map((item) => renderItems(item))}</>;
@@ -17,19 +17,11 @@ export default function PaginatedItems({
   renderTitle,
   displayType,
 }) {
-  // Here we use item offsets; we could also use page offsets
-  // following the API or data you're working with.
   const [itemOffset, setItemOffset] = useState(0);
-
-  // Simulate fetching items from another resources.
-  // (This could be items from props; or items loaded in a local state
-  // from an API endpoint with useEffect and useState)
   const endOffset = itemOffset + itemsPerPage;
-  //   console.log(`Loading items from ${itemOffset} to ${endOffset}`);
   const currentItems = items.slice(itemOffset, endOffset);
   const pageCount = Math.ceil(items.length / itemsPerPage);
 
-  // Invoke when user click to request another page.
   const handlePageClick = (event) => {
     const newOffset = (event.selected * itemsPerPage) % items.length;
     // console.log(
@@ -39,17 +31,22 @@ export default function PaginatedItems({
     setItemOffset(newOffset);
   };
 
+  // Calculate current page
+  const currentPage = Math.ceil(itemOffset / itemsPerPage) + 1;
+
   return (
     <>
       {displayType === "table" ? (
-        <table className="my-4 w-full">
+        <table className="w-full border-collapse">
+          <thead>{renderTitle()}</thead>
           <tbody>
-            {renderTitle()}
             {currentItems.length > 0 ? (
               <Items currentItems={currentItems} renderItems={renderItems} />
             ) : (
               <tr>
-                <td colSpan={6}>No user match search key</td>
+                <td colSpan={7} className="py-4 text-center text-gray-500">
+                  No user matches your search
+                </td>
               </tr>
             )}
           </tbody>
@@ -59,26 +56,42 @@ export default function PaginatedItems({
           <Items currentItems={currentItems} renderItems={renderItems} />
         </div>
       ) : (
-        <EmptyList />
+        <Items currentItems={currentItems} renderItems={renderItems} />
       )}
 
-      {currentItems.length > 0 ? (
-        <div className="rounded-md bg-white p-4 my-4 md:flex md:justify-end">
-          <div className="pagination">
-            <ReactPaginate
-              breakLabel={"..."}
-              nextLabel={"Next"}
-              onPageChange={handlePageClick}
-              pageRangeDisplayed={5}
-              pageCount={pageCount}
-              previousLabel={"Previous"}
-              renderOnZeroPageCount={null}
-            />
-          </div>
+      <div className="py-4 px-6 bg-white flex flex-col md:flex-row justify-between items-center mt-4 rounded-md">
+        <div className="text-sm text-black mb-3 md:mb-0">
+          Page {currentPage} of {pageCount > 0 ? pageCount : 1}
         </div>
-      ) : (
-        <> </>
-      )}
+        
+        <div className="flex items-center">
+          <ReactPaginate
+            breakLabel="..."
+            nextLabel={
+              <button className="flex items-center px-3 py-1 border rounded-md ml-2 bg-white text-black">
+                Next <span className="ml-1"><Plus className="w-4 h-4"/></span>
+              </button>
+            }
+            onPageChange={handlePageClick}
+            pageRangeDisplayed={3}
+            marginPagesDisplayed={1}
+            pageCount={pageCount}
+            previousLabel={
+              <button className="flex items-center px-3 py-1 border rounded-md mr-2 bg-weave-primary text-white">
+                <span className="mr-1"><Plus className="w-4 h-4"/></span> Previous
+              </button>
+            }
+            renderOnZeroPageCount={null}
+            containerClassName="flex items-center"
+            pageClassName="mx-1"
+            pageLinkClassName="px-3 py-1 hover:bg-gray-50"
+            activeClassName="active"
+            activeLinkClassName="bg-weave-primary rounded-2xl text-white hover:bg-blue-600"
+            disabledClassName="opacity-50 cursor-not-allowed"
+            disabledLinkClassName="text-gray-300"
+          />
+        </div>
+      </div>
     </>
   );
 }

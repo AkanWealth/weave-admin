@@ -4,12 +4,13 @@ import TextField from "@/components/elements/TextField";
 import Button from "@/components/elements/Button";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
-import { ToastContext, useMessageContext } from "@/contexts/toast";
+import { ToastContext} from "@/contexts/toast";
+import { useToastContext } from "@/contexts/toast";
 
 function PasswordReset() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { showMessage } = useMessageContext();
+  const { showMessage } = useToastContext();
   const router = useRouter();
 
   const btnDisabled = email === "" || isLoading;

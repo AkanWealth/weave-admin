@@ -1,20 +1,69 @@
 import Link from "next/link";
 import React from "react";
-import DateRender from "../elements/DateRender";
-import EmailRender from "../elements/EmailRender";
+import Avatar from "@/assets/images/Avatar.png";
+import Image from "next/image";
 
 function UserRender({ info, date, resendInvite }) {
   const role = info.role.name.replace(/_/, " ");
+  const formatDate = () => {
+    if (!date || !(date instanceof Date) || isNaN(date)) {
+      return { dateStr: "N/A", timeStr: "N/A" };
+    }
+    
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const hours = date.getHours();
+    const timeStr = `${String(hours % 12 || 12).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} ${hours >= 12 ? 'PM' : 'AM'}`;
+    
+    return { dateStr, timeStr };
+  };
+  
+  // Get formatted date strings
+  const { dateStr, timeStr } = formatDate();
+
   return (
     <tr>
-      <td>
-        <h6 className="font-rubikMedium text-black px-6">{info.username}</h6>
-      </td>
-      <td className="text-left px-4">
-        <EmailRender email={info.email} />
+       <td className="text-left px-6">
+        <div className="flex items-center">
+          {/* Profile image */}
+          <div className="w-8 h-8 rounded-full overflow-hidden mr-3 flex-shrink-0">
+            {info.profileImage ? (
+              <img 
+                src={info.profileImage} 
+                alt={`${info.username}'s profile`} 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              // Fallback for users without profile image
+              <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white font-medium">
+                <Image 
+                src={Avatar} 
+                alt={`${info.username}'s profile`} 
+                width={100}
+                height={100}
+                className="w-full h-full object-cover"
+              />
+              </div>
+            )}
+          </div>
+          
+          {/* Username and email */}
+          <div>
+            <h6 className="font-rubikMedium text-black">{info.username}</h6>
+            <div className="flex items-center">
+              <span className="text-gray-500 text-sm">{info.email}</span>
+              <button className="ml-2 p-1">
+                <i className="fa fa-copy"></i>
+              </button>
+            </div>
+          </div>
+        </div>
       </td>
       <td className="text-left">
-        <DateRender date={info.created_at} />
+        <h6 className="capitalize">{role}</h6>
+      </td>
+      <td className="text-left">
+        <h6>{dateStr}</h6>
+        <h6>{timeStr}</h6>
       </td>
       <td className="text-left">
         <span
@@ -25,9 +74,7 @@ function UserRender({ info, date, resendInvite }) {
           {info.isActive ? "Active" : "Inactive"}
         </span>
       </td>
-      <td className="text-left">
-        <h6 className="capitalize">{role}</h6>
-      </td>
+ 
       <td>
         <button className="relative px-2 py-1 mr-8 dropdown">
           <div className="dot"></div>

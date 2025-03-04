@@ -2,11 +2,11 @@
 import api from "@/lib/api";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import signupFrame from "@/assets/images/signupFrame.png";
 import { useRouter } from "next/navigation";
 import PaginatedItems from "@/components/elements/Pagination";
-import EmailRender from "@/components/elements/EmailRender";
-import DateRender from "@/components/elements/DateRender";
+import { Search, AlignLeft, Copy, CheckCircle  } from "lucide-react";
+import TableExportPDF from "@/components/elements/ExportasPDF";
+
 
 function AppUsers() {
   const [appUsers, setAppUsers] = useState([]);
@@ -14,6 +14,31 @@ function AppUsers() {
   const [searchKey, setSearchKey] = useState("");
   const router = useRouter();
   const [fetching, setIsFetching] = useState(true);
+  const [copiedEmail, setCopiedEmail] = useState(null);
+
+  const columns = [
+    { header: "User ID", accessor: (user) => user.id.split('-')[0] },
+    { header: "Username", accessor: "username" },
+    { header: "Email", accessor: "email" },
+    { 
+      header: "Date Created", 
+      accessor: (user) => {
+        const date = new Date(user.created_at || "2024-12-08T08:30:00");
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      }
+    },
+    { 
+      header: "Status", 
+      accessor: (user) => user.isActive ? "Active" : "Inactive" 
+    },
+    { 
+      header: "Last Login", 
+      accessor: (user) => {
+        const date = new Date(user.lastLogin || "2024-12-08T08:30:00");
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      }
+    }
+  ];
 
   const getUsers = async () => {
     try {
@@ -47,28 +72,49 @@ function AppUsers() {
     setFilteredList(matchresult);
   }, [searchKey]);
 
+// Function to copy email to clipboard
+const copyToClipboard = (email) => {
+  navigator.clipboard.writeText(email)
+    .then(() => {
+      setCopiedEmail(email);
+      // Reset the copied state after 2 seconds
+      setTimeout(() => {
+        setCopiedEmail(null);
+      }, 2000);
+    })
+    .catch((err) => {
+      console.error('Failed to copy: ', err);
+    });
+};
+
   return (
     <>
-      <div className="flex">
-        <div className="w-3/5">
-          <form action="" className="border px-8 py-2 rounded-md">
+      <div className="flex flex-col lg:flex-row mb-4 items-start gap-4">
+        <div className="w-full lg:w-3/4 h-1/2">
+          <div className="relative border rounded-md px-8 py-2">
+            <div className="absolute inset-y-0 left-3 flex items-center pl-6">
+              <Search className="h-5 w-5 text-gray-500" />
+            </div>
             <input
               type="text"
-              className="bg-[#f5f6fa] rounded-md w-2/3 px-4 py-2"
-              placeholder="Search here"
+              className="bg-gray-200 rounded-md w-full pl-10 pr-4 py-2 placeholder:text-gray-500 "
+              placeholder="Search here..."
+              value={searchKey}
               onChange={(e) => setSearchKey(e.target.value)}
             />
-          </form>
+          </div>
         </div>
-        <div className="w-1/5"></div>
-        <div className="w-1/5">
-          <button className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium">
-            Export
-            <i className="fa fa-window-maximize ml-2"></i>
-          </button>
-          <button className="border p-2 px-4 rounded-md font-rubikMedium">
+        <div className="w-full lg:w-2/5 flex justify-end gap-3">
+        <TableExportPDF 
+            data={filteredList} 
+            columns={columns}
+            fileName={`AppUsers_${new Date().toISOString().split('T')[0]}.pdf`}
+            title="Application Users"
+            buttonText="Export"
+          />
+          <button className="border py-2 px-4 rounded-md font-medium flex items-center">
             Filter
-            <i className="fa fa-list ml-2"></i>
+            <AlignLeft className="w-4 h-4 ml-2 rotate-180" />
           </button>
         </div>
       </div>
@@ -98,28 +144,55 @@ function AppUsers() {
           displayType={"table"}
           renderTitle={() => (
             <tr className="bg-[#f5f6fa]">
-              <th>Username</th>
-              <th className="text-left px-16">Username</th>
-              <th>Date Created </th>
-              <th>Status</th>
-              {/* <th>Device</th> */}
-              <th>Last Login</th>
-              <th></th>
+              <th className="py-3 px-4 text-left font-medium">User ID</th>
+              <th className="py-3 px-4 text-left font-medium">Username</th>
+              <th className="py-3 px-4 text-left font-medium">Date</th>
+              <th className="py-3 px-4 text-left font-medium">Status</th>
+              {/* <th className="py-3 px-4 text-left font-medium">Device</th> */}
+              <th className="py-3 px-4 text-left font-medium">Last Login</th>
+              <th className="py-3 px-4 text-left font-medium"></th>
             </tr>
           )}
           renderItems={(user) => {
+            const date = new Date(user.created_at || "2024-12-08T08:30:00");
+            const lastLogin = new Date(user.lastLogin || "2024-12-08T08:30:00");
+            const formatDate = (d) => {
+              return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            };
+            const formatTime = (d) => {
+              return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${d.getHours() >= 12 ? 'AM' : 'PM'}`;
+            };
             return (
               <tr key={Math.random()}>
                 <td>
-                  <h6 className="font-rubikMedium text-black px-5">
-                    {user.username}
+                  <h6 className="text-gray-600">
+                    {user.id.split('-')[0]}
                   </h6>
                 </td>
                 <td className="text-left px-6">
-                  <EmailRender email={user.email} />
+                  <div>
+                    <h6 className="font-medium text-black">{user.username}</h6>
+                    <div className="flex items-center">
+                      <span className="text-gray-500 text-sm">{user.email}</span>
+                      <button 
+                        className="ml-2 p-1 text-gray-400 hover:text-gray-600 focus:outline-none"
+                        onClick={() => copyToClipboard(user.email)}
+                        title="Copy email to clipboard"
+                      >
+                        {copiedEmail === user.email ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
                 </td>
-                <td>
-                  <DateRender date={user.created_at} />
+                <td className="whitespace-nowrap">
+                  <div className="inline-block text-sm text-gray-600">
+                    <span className="block">{formatDate(date)}</span>
+                    <span className="block">{formatTime(date)}</span>
+                  </div>
                 </td>
                 <td>
                   {user.isActive ? (
@@ -132,9 +205,14 @@ function AppUsers() {
                     </button>
                   )}
                 </td>
-                {/* <td>Android</td> */}
-                <td>
-                  <DateRender date={user.lastLogin} />
+                {/* <td className="py-4 px-4">
+                  {user.device || (user.id % 2 === 0 ? "iOS" : "Android")}
+                </td> */}
+                <td className="whitespace-nowrap">
+                  <div className="inline-block text-sm text-gray-600">
+                    <span className="block">{formatDate(lastLogin)}</span>
+                    <span className="block">{formatTime(lastLogin)}</span>
+                  </div>
                 </td>
                 <td>
                   <button className="relative px-2 py-1 mr-8 dropdown">
@@ -147,8 +225,7 @@ function AppUsers() {
                         <a
                           onClick={() =>
                             router.push(
-                              `?modal=${
-                                user.isActive ? "suspend" : "activate"
+                              `?modal=${user.isActive ? "suspend" : "activate"
                               }-app-user&id=${user.id}`
                             )
                           }
