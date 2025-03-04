@@ -23,7 +23,7 @@ function EditResource() {
   const [resourceFile, setResourceFile] = useState(null);
   const router = useRouter();
 
-  const { showMessage } = useMessageContext();
+  const { showMessage } = useToastContext();
   // useEffect(() => {
   //   console.log(articleBody);
   // }, [articleBody]);
@@ -74,9 +74,9 @@ function EditResource() {
       await readAndUploadThumbnail(thumbNailSelected);
 
     if (uploadThumbnail.status === "success") {
-      showMessage("Thumbnail uploaded","", "success");
+      showMessage("Thumbnail uploaded", "", "success");
     } else {
-      showMessage("Error uploading thumbail", "","error");
+      showMessage("Error uploading thumbail", "", "error");
     }
   }, [thumbNailSelected]);
 
@@ -89,7 +89,7 @@ function EditResource() {
         setThumbnails(response?.data.thumbnails);
       }
     } catch (error) {
-      showMessage("Unable to fetch thumbnails", "","error");
+      showMessage("Unable to fetch thumbnails", "", "error");
     } finally {
       setLoadingThumbnail(false);
     }
@@ -140,14 +140,14 @@ function EditResource() {
         }
       );
       const respbody = await response.json();
-      showMessage(respbody.message, "","success");
+      showMessage(respbody.message, "", "success");
 
       if (response.status) {
         router.push("/contentsManagement");
       }
     } catch (err) {
       console.log(err);
-      showMessage("Error","Error uploading content", "error");
+      showMessage("Error", "Error uploading content", "error");
     } finally {
       setIsSubmitting(false);
       btn.disabled = false;
@@ -162,9 +162,10 @@ function EditResource() {
     setIsdeletingThumbnail(true);
     try {
       const response = await api.delete(`/thumbnails/${thumbNailSelected}`);
-      showMessage(response.data.message,"", "success");
+      showMessage(response.data.message, "", "success");
     } catch (error) {
-      showMessage("Error",
+      showMessage(
+        "Error",
         error.response.data.message || "Error deleting thumbnail",
         "error"
       );
