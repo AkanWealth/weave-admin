@@ -86,3 +86,7 @@ export function ToastContext({ children }) {
 export function useToastContext() {
   return useContext(MessageContext);
 }
+
+export function useMessageContext() {
+  return useContext(MessageContext);
+}
