@@ -18,7 +18,7 @@ export default function ResourceLibraryProvider({ children }) {
       }
     } catch (err) {
       console.log(err);
-      showMessage("Unable to fetch resources","", "error");
+      showMessage("Unable to fetch resources", "", "error");
     } finally {
       setIsLoading(false);
     }

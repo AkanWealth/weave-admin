@@ -4,9 +4,8 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import PaginatedItems from "@/components/elements/Pagination";
-import { Search, AlignLeft, Copy, CheckCircle  } from "lucide-react";
+import { Search, AlignLeft, Copy, CheckCircle } from "lucide-react";
 import TableExportPDF from "@/components/elements/ExportasPDF";
-
 
 function AppUsers() {
   const [appUsers, setAppUsers] = useState([]);
@@ -17,27 +16,33 @@ function AppUsers() {
   const [copiedEmail, setCopiedEmail] = useState(null);
 
   const columns = [
-    { header: "User ID", accessor: (user) => user.id.split('-')[0] },
+    { header: "User ID", accessor: (user) => user.id.split("-")[0] },
     { header: "Username", accessor: "username" },
     { header: "Email", accessor: "email" },
-    { 
-      header: "Date Created", 
+    {
+      header: "Date Created",
       accessor: (user) => {
         const date = new Date(user.created_at || "2024-12-08T08:30:00");
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-      }
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+          2,
+          "0"
+        )}-${String(date.getDate()).padStart(2, "0")}`;
+      },
     },
-    { 
-      header: "Status", 
-      accessor: (user) => user.isActive ? "Active" : "Inactive" 
+    {
+      header: "Status",
+      accessor: (user) => (user.isActive ? "Active" : "Inactive"),
     },
-    { 
-      header: "Last Login", 
+    {
+      header: "Last Login",
       accessor: (user) => {
         const date = new Date(user.lastLogin || "2024-12-08T08:30:00");
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-      }
-    }
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+          2,
+          "0"
+        )}-${String(date.getDate()).padStart(2, "0")}`;
+      },
+    },
   ];
 
   const getUsers = async () => {
@@ -72,20 +77,21 @@ function AppUsers() {
     setFilteredList(matchresult);
   }, [searchKey]);
 
-// Function to copy email to clipboard
-const copyToClipboard = (email) => {
-  navigator.clipboard.writeText(email)
-    .then(() => {
-      setCopiedEmail(email);
-      // Reset the copied state after 2 seconds
-      setTimeout(() => {
-        setCopiedEmail(null);
-      }, 2000);
-    })
-    .catch((err) => {
-      console.error('Failed to copy: ', err);
-    });
-};
+  // Function to copy email to clipboard
+  const copyToClipboard = (email) => {
+    navigator.clipboard
+      .writeText(email)
+      .then(() => {
+        setCopiedEmail(email);
+        // Reset the copied state after 2 seconds
+        setTimeout(() => {
+          setCopiedEmail(null);
+        }, 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err);
+      });
+  };
 
   return (
     <>
@@ -105,10 +111,10 @@ const copyToClipboard = (email) => {
           </div>
         </div>
         <div className="w-full lg:w-2/5 flex justify-end gap-3">
-        <TableExportPDF 
-            data={filteredList} 
+          <TableExportPDF
+            data={filteredList}
             columns={columns}
-            fileName={`AppUsers_${new Date().toISOString().split('T')[0]}.pdf`}
+            fileName={`AppUsers_${new Date().toISOString().split("T")[0]}.pdf`}
             title="Application Users"
             buttonText="Export"
           />
@@ -144,8 +150,8 @@ const copyToClipboard = (email) => {
           displayType={"table"}
           renderTitle={() => (
             <tr className="bg-[#f5f6fa]">
-              <th className="py-3 px-4 text-left font-medium">User ID</th>
               <th className="py-3 px-4 text-left font-medium">Username</th>
+              <th className="py-3 px-8 text-left font-medium">Email</th>
               <th className="py-3 px-4 text-left font-medium">Date</th>
               <th className="py-3 px-4 text-left font-medium">Status</th>
               {/* <th className="py-3 px-4 text-left font-medium">Device</th> */}
@@ -157,24 +163,30 @@ const copyToClipboard = (email) => {
             const date = new Date(user.created_at || "2024-12-08T08:30:00");
             const lastLogin = new Date(user.lastLogin || "2024-12-08T08:30:00");
             const formatDate = (d) => {
-              return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+              return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+                2,
+                "0"
+              )}-${String(d.getDate()).padStart(2, "0")}`;
             };
             const formatTime = (d) => {
-              return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${d.getHours() >= 12 ? 'AM' : 'PM'}`;
+              return `${String(d.getHours()).padStart(2, "0")}:${String(
+                d.getMinutes()
+              ).padStart(2, "0")} ${d.getHours() >= 12 ? "AM" : "PM"}`;
             };
             return (
               <tr key={Math.random()}>
                 <td>
-                  <h6 className="text-gray-600">
-                    {user.id.split('-')[0]}
+                  <h6 className="font-medium text-black px-4">
+                    {user.username}
                   </h6>
                 </td>
                 <td className="text-left px-6">
                   <div>
-                    <h6 className="font-medium text-black">{user.username}</h6>
                     <div className="flex items-center">
-                      <span className="text-gray-500 text-sm">{user.email}</span>
-                      <button 
+                      <span className="text-gray-500 text-sm">
+                        {user.email}
+                      </span>
+                      <button
                         className="ml-2 p-1 text-gray-400 hover:text-gray-600 focus:outline-none"
                         onClick={() => copyToClipboard(user.email)}
                         title="Copy email to clipboard"
@@ -225,7 +237,8 @@ const copyToClipboard = (email) => {
                         <a
                           onClick={() =>
                             router.push(
-                              `?modal=${user.isActive ? "suspend" : "activate"
+                              `?modal=${
+                                user.isActive ? "suspend" : "activate"
                               }-app-user&id=${user.id}`
                             )
                           }

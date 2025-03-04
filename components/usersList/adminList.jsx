@@ -29,7 +29,7 @@ function AdminList() {
         setRoles(response.data);
         return;
       }
-      showMessage("Unable to fetch roles","", "error");
+      showMessage("Unable to fetch roles", "", "error");
     } catch (error) {
       console.log(error);
     }
@@ -52,10 +52,10 @@ function AdminList() {
         setFilteredlist(response.data);
         return;
       }
-      showMessage("Unable to fetch admin users", "","error");
+      showMessage("Unable to fetch admin users", "", "error");
     } catch (err) {
       console.log(err);
-      showMessage("Error fetching admin users", "","error");
+      showMessage("Error fetching admin users", "", "error");
     } finally {
       setFetchingUsers(false);
     }
@@ -72,10 +72,11 @@ function AdminList() {
         email,
       });
       console.log(response);
-      showMessage("Invite resent to user", "","success");
+      showMessage("Invite resent to user", "", "success");
     } catch (error) {
       showMessage(
-        error.response.data.message || "Error resending invite","",
+        error.response.data.message || "Error resending invite",
+        "",
         "error"
       );
       console.log(error);
@@ -176,27 +177,54 @@ function AdminList() {
         </div>
         <div className="w-full lg:w-2/5 flex justify-end gap-3">
           <TableExportPDF
-            data={filteredList ? filteredList.map((user) => ({
-              ...user,
-              status: user.isActive ? "Active" : "Inactive",
-              role: user.role?.name || "N/A",
-              created_date: new Date(user.created_at).toLocaleDateString(),
-              username: user.username || user.email
-            })) : []}
+            data={
+              filteredList
+                ? filteredList.map((user) => ({
+                    ...user,
+                    status: user.isActive ? "Active" : "Inactive",
+                    role: user.role?.name || "N/A",
+                    created_date: new Date(
+                      user.created_at
+                    ).toLocaleDateString(),
+                    username: user.username || user.email,
+                  }))
+                : []
+            }
             columns={[
               { header: "Username", accessor: "username" },
               { header: "Email", accessor: "email" },
               { header: "Role", accessor: "role" },
               { header: "Date Created", accessor: "created_date" },
-              { header: "Status", accessor: "status" }
+              { header: "Status", accessor: "status" },
             ]}
             fileName="Admin_Users_List.pdf"
             title="Admin Users List"
             buttonText="Export"
           />
-          <button className="border py-2 px-4 rounded-md font-medium flex items-center">
+          <button className="relative dropdown border py-2 px-4 rounded-md font-medium flex items-center">
             Filter
             <ChevronUp className="w-4 h-4 ml-2 rotate-180" />
+            <div className="absolute top-10 right-0 rounded-md p-1 shadow bg-white text-xs w-[200px]  dropdown-menu">
+              <div className="flex flex-col text-left">
+                <a
+                  className={`p-2 capitalize rounded-md mb-1`}
+                  onClick={() => setSelectedRole("")}
+                >
+                  Reset Filter
+                </a>
+                {roles.map((role) => (
+                  <a
+                    className={`p-2 capitalize rounded-md mb-1 ${
+                      selectedRole === role.name ? "bg-gray-200" : ""
+                    }`}
+                    onClick={() => setSelectedRole(role.name)}
+                    key={role.id}
+                  >
+                    {role.name.replace(/_/, " ")}
+                  </a>
+                ))}
+              </div>
+            </div>
           </button>
         </div>
       </div>

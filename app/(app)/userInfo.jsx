@@ -1,6 +1,9 @@
 "use client";
 import api from "@/lib/api";
 import React, { useEffect, useState } from "react";
+import placeholderAvatar from "@/assets/images/Avatar.png";
+import { ChevronDown } from "lucide-react";
+import Image from "next/image";
 
 function UserInfo() {
   const [userInfo, setUserInfo] = useState(null);
@@ -20,27 +23,36 @@ function UserInfo() {
   }, []);
 
   return (
-    <div className="w-1/2 flex space-x-4">
-      {userInfo && (
-        <>
-          <div
-            className="h-[45px] w-[45px] rounded-full"
-            style={{ overflow: "hidden" }}
-          >
-            <img
-              src={userInfo.headshot ? userInfo.headshot : placeholderAvatar}
-              className="w-full"
-              alt="User Image"
-            />
-          </div>
-          <div className="relative flex-1 text-gray-600">
-            <h1 className="font-rubikMedium italic">{userInfo.username}</h1>
-            <h1 className="capitalize">
-              {/* {userInfo.role.name.replace(/_/, " ")} */}
-            </h1>
-          </div>
-        </>
+    <div className="flex items-center pl-2 space-x-2">
+      {userInfo && userInfo.headshot ? (
+        <img
+          src={userInfo.headshot}
+          width={40}
+          height={40}
+          alt="User Image"
+          className="rounded-full"
+        />
+      ) : (
+        <Image
+          src={placeholderAvatar}
+          width={40}
+          height={40}
+          alt="User Image"
+          className="rounded-full"
+        />
       )}
+
+      <div className="ml-3 text-gray-600 ml-2">
+        <h1 className="font-rubikMedium text-sm">
+          {userInfo && userInfo.username}
+        </h1>
+        <h1 className="capitalize text-xs text-gray-500">
+          {userInfo && userInfo.role.name.replace(/_/, " ")}
+        </h1>
+      </div>
+      {/* <div className="text-gray-500 mr-2">
+        <ChevronDown className="h-5 w-5" />
+      </div> */}
     </div>
   );
 }

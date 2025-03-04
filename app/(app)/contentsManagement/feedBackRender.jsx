@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from "react";
+"use client";
+import React, { useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import growthFrame from "@/assets/images/Frame-2.png";
-import Link from "next/link";
-import axios from "axios";
-import feedbacks from "@/dummyData/feedbacks";
-import { useMessageContext } from "@/contexts/toast";
+
 import api from "@/lib/api";
 import PaginatedItems from "@/components/elements/Pagination";
 import Loader from "@/components/elements/Loader";
+import { useToastContext } from "@/contexts/toast";
 
 export default function FeedbackRender() {
   // const getFeedBack= async()=>{
@@ -19,7 +18,7 @@ export default function FeedbackRender() {
   const [feedbacks, setFeedBacks] = useState([]);
   const [filteredFeedbacks, setFilteredFeedbacks] = useState([]);
   const [dateFilter, setDateFilter] = useState("");
-  const { showMessage } = useMessageContext();
+  const { showMessage } = useToastContext();
 
   useEffect(() => {
     setFilteredFeedbacks(feedbacks);
@@ -108,12 +107,10 @@ export default function FeedbackRender() {
           displayType={"grid"}
           renderItems={(feedback) => (
             <div key={Math.random()} className="w-1/3 p-2">
-              <div
-                className="bg-base-white border p-3 rounded-md 
-              text-sm"
-              >
+              <div className="bg-base-white border p-3 rounded-md text-sm">
                 <p className="text-xs text-gray-500 mb-3">
-                  {new Date(feedback.created_at).toLocaleString()}
+                  {typeof window !== undefined &&
+                    new Date(feedback.created_at).toLocaleString()}
                 </p>
                 {feedback.feedback !== ""
                   ? feedback.feedback

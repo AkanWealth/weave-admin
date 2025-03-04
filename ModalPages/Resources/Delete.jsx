@@ -2,9 +2,9 @@ import { useModalContext } from "@/components/elements/Modal";
 import ResourceLibraryProvider, {
   useResourceLibrary,
 } from "@/contexts/ResourceLibraryContext";
-import { ToastContext, useMessageContext } from "@/contexts/toast";
+import { ToastContext } from "@/contexts/toast";
 import api from "@/lib/api";
-import { redirect, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 function DeleteResource() {
@@ -13,7 +13,7 @@ function DeleteResource() {
   const [deleting, setDeleting] = useState(false);
   const { resources } = useResourceLibrary();
   const [resourceInfo, setResourceInfo] = useState(null);
-  // const { showMessage } = useMessageContext();
+
   const { closeModal, showMessage } = useModalContext();
 
   useEffect(() => {

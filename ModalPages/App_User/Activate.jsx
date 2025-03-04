@@ -1,4 +1,4 @@
-import { useToastContext } from "@/contexts/toast";
+import { useModalContext } from "@/components/elements/Modal";
 import api from "@/lib/api";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
@@ -6,7 +6,7 @@ import React, { useState } from "react";
 function ActivateAppUser() {
   const params = useSearchParams();
   const userId = params.get("id");
-  const { showMessage } = useToastContext();
+  const { showMessage } = useModalContext();
   const router = useRouter();
   const [loading, setIsLoading] = useState(false);
 
@@ -17,17 +17,17 @@ function ActivateAppUser() {
       console.log(response);
       if (response.status === 200) {
         showMessage(
-          "User reactivated successfully", "refresh to see changes",
+          "User reactivated successfully, refresh to see changes",
           "success"
         );
         router.back();
         return;
       }
 
-      showMessage("Error executing action","Try again later", "error");
+      showMessage("Error executing action", "Try again later", "error");
     } catch (err) {
       console.log(err);
-      showMessage("Error executing action", "Try again later","error");
+      showMessage("Error executing action", "Try again later", "error");
     } finally {
       setIsLoading(false);
     }
