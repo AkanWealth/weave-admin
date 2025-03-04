@@ -14,7 +14,7 @@ function Analytics() {
       if (getAdminAnalytics.status === 200)
         setAnalytics(getAdminAnalytics.data);
     } catch (error) {
-      showMessage("Error fetching analytics", "error");
+      showMessage("Error fetching analytics","", "error");
     }
   };
 
