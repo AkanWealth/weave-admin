@@ -19,6 +19,7 @@ function AppSummary() {
       if (getAllUsers.status === 200) setAllUsers(getAllUsers.data);
       if (getAppUsers.status === 200) setAppUsers(getAppUsers.data);
       if (getAveragecheckin.status === 200) setaverageCheck(getAveragecheckin.data);
+  
 
     } catch (error) {
       console.log(error);
