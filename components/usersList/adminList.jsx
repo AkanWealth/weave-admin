@@ -7,6 +7,9 @@ import UserRender from "./userRender";
 import PaginatedItems from "../elements/Pagination";
 import { Search, ChevronUp } from "lucide-react";
 import TableExportPDF from "@/components/elements/ExportasPDF";
+import EditAdmin from "@/ModalPages/Admin/Edit";
+import { Copy, CheckCircle } from "lucide-react";
+
 
 // import { useRouter } from "next/router";
 
@@ -21,6 +24,10 @@ function AdminList() {
   const [roles, setRoles] = useState([]);
   const [selectedRole, setSelectedRole] = useState("");
 
+
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+
   const fetchRoles = async () => {
     try {
       const response = await api.get("/role");
@@ -34,6 +41,8 @@ function AdminList() {
       console.log(error);
     }
   };
+
+  
 
   useEffect(() => {
     if (selectedRole === "") return setFilteredlist(users);
@@ -73,6 +82,7 @@ function AdminList() {
       });
       console.log(response);
       showMessage("Invite resent to user", "", "success");
+      
     } catch (error) {
       showMessage(
         error.response.data.message || "Error resending invite",
@@ -94,6 +104,111 @@ function AdminList() {
 
     setFilteredlist(matchresult);
   }, [searchKey]);
+
+   // New function to handle editing a user
+  //  const handleEditUser = (user) => {
+  //   setSelectedUser(user);
+  //   setShowEditModal(true);
+  // };
+  const handleEditUser = (user) => {
+    // Make sure we have the complete role object with id and name
+    const userWithCompleteRole = {
+      ...user,
+      role: roles.find(r => r.id === user.role.id) || user.role
+    };
+    console.log("Initial role value:", user?.role?.id);
+    setSelectedUser(userWithCompleteRole);
+    setShowEditModal(true);
+  };
+
+  // Function to close the modal
+  const closeEditModal = () => {
+    setShowEditModal(false);
+    setSelectedUser(null);
+  };
+
+  // Function to handle user updates
+  // const handleUserUpdate = async (updatedUser) => {
+  //   try {
+  //     // Make API call to update user
+  //     const response = await api.put(`/super-admin/users/${updatedUser.id}`, {
+  //       firstName: updatedUser.firstName,
+  //       lastName: updatedUser.lastName,
+  //       email: updatedUser.email,
+  //       role: updatedUser.role
+  //     });
+      
+  //     if (response.status === 200) {
+  //       // Update local state if the API call was successful
+  //       if (users) {
+  //         const updatedUsers = users.map(user => 
+  //           user.id === updatedUser.id ? updatedUser : user
+  //         );
+  //         setUsers(updatedUsers);
+  //         setFilteredlist(updatedUsers);
+  //       }
+        
+  //       showMessage("User updated successfully", "", "success");
+  //     } else {
+  //       throw new Error("Failed to update user");
+  //     }
+      
+  //     closeEditModal();
+  //   } catch (error) {
+  //     console.error("Error updating user:", error);
+  //     showMessage(
+  //       error.response?.data?.message || "Error updating user",
+  //       "",
+  //       "error"
+  //     );
+  //   }
+  // };
+  
+  const handleUserUpdate = async (updatedUser) => {
+    try {
+      // Find the complete role object based on the ID
+      const selectedRole = roles.find(r => r.id === updatedUser.role) || 
+                          {id: updatedUser.role, name: "Unknown"};
+      
+      // Make API call to update user
+      const response = await api.put(`/super-admin/users/${updatedUser.id}`, {
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        email: updatedUser.email,
+        role: selectedRole.id // Send just the ID to the API
+      });
+      
+      if (response.status === 200) {
+        // For local state update, include the complete role object
+        const updatedUserWithRole = {
+          ...updatedUser,
+          role: selectedRole // Use complete role object for local state
+        };
+        
+        // Update local state
+        if (users) {
+          const updatedUsers = users.map(user => 
+            user.id === updatedUser.id ? updatedUserWithRole : user
+          );
+          setUsers(updatedUsers);
+          setFilteredlist(updatedUsers);
+        }
+        
+        showMessage("User updated successfully", "", "success");
+      } else {
+        throw new Error("Failed to update user");
+      }
+      
+      closeEditModal();
+    } catch (error) {
+      console.error("Error updating user:", error);
+      showMessage(
+        error.response?.data?.message || "Error updating user",
+        "",
+        "error"
+      );
+    }
+  };
 
   return (
     <>
@@ -251,6 +366,7 @@ function AdminList() {
                 date={new Date(user.created_at)}
                 key={Math.random()}
                 resendInvite={resendInvite}
+                onEditClick={handleEditUser}
               />
             )}
             renderTitle={() => (
@@ -268,6 +384,28 @@ function AdminList() {
       ) : (
         <EmptyList />
       )}
+{showEditModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-lg w-3/4 max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Edit User</h2>
+        <button 
+          onClick={closeEditModal}
+          className="text-gray-500 hover:text-gray-700"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <EditAdmin 
+        userData={selectedUser} 
+        onSave={handleUserUpdate}
+        onCancel={closeEditModal}
+      />
+    </div>
+  </div>
+)}
     </>
   );
 }

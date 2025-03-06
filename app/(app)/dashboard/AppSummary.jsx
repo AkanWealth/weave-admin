@@ -8,13 +8,18 @@ import { faUserGroup,faClockRotateLeft } from "@fortawesome/free-solid-svg-icons
 function AppSummary() {
   const [allUsers, setAllUsers] = useState(0);
   const [appUsers, setAppUsers] = useState(0);
-
+  const [averageCheck, setaverageCheck] = useState(0);
+  
   const getUsersSummary = async () => {
     try {
       const getAllUsers = await api.get("/usage-analytics/total-users");
       const getAppUsers = await api.get("/usage-analytics/app-users");
+      const getAveragecheckin = await api.get("/usage-analytics/average-checkin");
+      
       if (getAllUsers.status === 200) setAllUsers(getAllUsers.data);
       if (getAppUsers.status === 200) setAppUsers(getAppUsers.data);
+      if (getAveragecheckin.status === 200) setaverageCheck(getAveragecheckin.data);
+
     } catch (error) {
       console.log(error);
     }
@@ -87,7 +92,7 @@ function AppSummary() {
         <div className="flex justify-between items-start mb-4">
           <div className="whitespace-nowrap">
             <h5 className="text-gray-500 mb-2 text-sm">Average Check-In</h5>
-            <h6 className="font-rubikMedium text-2xl">0</h6>
+            <h6 className="font-rubikMedium text-2xl">{averageCheck}</h6>
           </div>
           <div className="flex justify-center items-center h-10 w-10 text-[#9747FF]">
             <FontAwesomeIcon icon={faClockRotateLeft} className="text-2xl"/>

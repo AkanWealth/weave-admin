@@ -3,7 +3,9 @@ import React, { useEffect, useState } from "react";
 import InputField from "@/components/elements/TextField";
 import Button from "@/components/elements/Button";
 import api from "@/lib/api";
-import { useModalContext } from "@/components/elements/Modal";
+// import { useModalContext } from "@/components/elements/Modal";
+import { useToastContext } from "@/contexts/toast";
+import { useRouter } from "next/navigation";
 
 function AddAdmin() {
   const [firstname, setFirstname] = useState("");
@@ -17,8 +19,10 @@ function AddAdmin() {
   const [selectedRole, setSelectedRole] = useState("");
   const [permissions, setPermissions] = useState([]);
   const [selectedPermissions, setSelectedPermissions] = useState([]);
-  const { showMessage } = useModalContext();
+  const { showMessage } = useToastContext();
   const [availableRoles, setAvailableRoles] = useState([]);
+  
+  const router = useRouter();
 
   useEffect(() => {
     const matchRole = availableRoles.find((role) => role.id === selectedRole);
@@ -76,13 +80,16 @@ function AddAdmin() {
       };
 
       const response = await api.post("/super-admin/invite", data);
-      if (response.status === 201)
-        return showMessage("User invite sent successfully", "success");
-
-      showMessage("Error sending invite", "error");
+      if (response.status === 201) {
+        showMessage("User invite sent successfully", "","success");
+        // Navigate back to users page on success
+        router.push('/users');
+      } else {
+        showMessage("Error sending invite", "","error");
+      }
     } catch (error) {
       showMessage(
-        error.response.data.message || "Error sending invite",
+        error.response?.data?.message || "Error sending invite","",
         "error"
       );
     } finally {

@@ -23,7 +23,7 @@ function DeleteAdmin() {
 
       if (response.status === 200) {
         showMessage("App User Deleted", "The user account has been deleted successfully.", "success");
-        router.push("/dashboard/users");
+        router.push("/users");
         return;
       }
       showMessage("Error deleting user", "Please try again later", "error");

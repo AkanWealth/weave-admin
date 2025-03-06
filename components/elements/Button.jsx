@@ -1,11 +1,15 @@
 import React from "react";
 
 function Button({ title, disabled, onClick, variant }) {
+  const handleClick = () => {
+    if (typeof onClick === 'function') {
+      onClick();
+    }
+  };
+
   return (
     <button
-      onClick={() => {
-        onClick();
-      }}
+      onClick={handleClick}
       className={
         variant === "inverse"
           ? (disabled ? "bg-weave-light" : "bg-base-white") +

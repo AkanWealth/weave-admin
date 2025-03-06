@@ -1,9 +1,12 @@
 import Link from "next/link";
-import React from "react";
+import React, {useState} from "react";
 import Avatar from "@/assets/images/Avatar.png";
 import Image from "next/image";
+import { Copy, CheckCircle } from "lucide-react";
 
-function UserRender({ info, date, resendInvite }) {
+
+function UserRender({ info, date, resendInvite,onEditClick  }) {
+    const [copiedEmail, setCopiedEmail] = useState(null);
   const role = info.role.name.replace(/_/, " ");
   const formatDate = () => {
     if (!date || !(date instanceof Date) || isNaN(date)) {
@@ -16,6 +19,21 @@ function UserRender({ info, date, resendInvite }) {
     
     return { dateStr, timeStr };
   };
+
+
+   const copyToClipboard = (email) => {
+      navigator.clipboard.writeText(email)
+        .then(() => {
+          setCopiedEmail(email);
+          // Reset the copied state after 2 seconds
+          setTimeout(() => {
+            setCopiedEmail(null);
+          }, 2000);
+        })
+        .catch((err) => {
+          console.error('Failed to copy: ', err);
+        });
+    };
   
   // Get formatted date strings
   const { dateStr, timeStr } = formatDate();
@@ -51,9 +69,17 @@ function UserRender({ info, date, resendInvite }) {
             <h6 className="font-rubikMedium text-black">{info.username}</h6>
             <div className="flex items-center">
               <span className="text-gray-500 text-sm">{info.email}</span>
-              <button className="ml-2 p-1">
-                <i className="fa fa-copy"></i>
-              </button>
+              <button
+                          className="ml-2 p-1 text-gray-700 hover:text-gray-600 focus:outline-none"
+                          onClick={() => copyToClipboard(info.email)}
+                          title="Copy email to clipboard"
+                        >
+                          {copiedEmail === info.email ? (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </button>
             </div>
           </div>
         </div>
@@ -83,13 +109,12 @@ function UserRender({ info, date, resendInvite }) {
 
           <div className="absolute right-0 rounded-md p-2 shadow bg-white text-xs w-[200px]  dropdown-menu">
             <div className="flex flex-col text-left">
-              <Link
-                href={`/users?modal=edit-admin&id=${info.id}`}
-                className="px-3 py-1"
+            <button
+                onClick={() => onEditClick(info)}
+                className="px-3 py-1 text-left hover:bg-gray-100"
               >
-                {" "}
                 <i className="fa fa-pencil mr-2"></i> Edit User
-              </Link>
+              </button>
               <Link
                 href={`/users?modal=delete-admin&id=${info.id}`}
                 className="text-red-500 px-3 py-1"

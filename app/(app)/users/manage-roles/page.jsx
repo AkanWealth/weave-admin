@@ -9,10 +9,17 @@ function Page() {
   const [availableRoles, setAvailableRoles] = useState([]);
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedRolePermission, setSelectedRolePermission] = useState([]);
+  const [enabledPermissions, setEnabledPermissions] = useState([]);
+  const [enableAll, setEnableAll] = useState(false);
 
   useEffect(() => {
     let matchRole = availableRoles.find((role) => role.id === selectedRole);
-    if (matchRole) setSelectedRolePermission(matchRole.permissions);
+    if (matchRole) {
+      setSelectedRolePermission(matchRole.permissions);
+      // Reset enabled permissions when changing roles
+      setEnabledPermissions([]);
+      setEnableAll(false);
+    }
   }, [selectedRole]);
 
   const fetchRoles = async () => {
@@ -21,7 +28,7 @@ function Page() {
       setAvailableRoles(response.data);
     } catch (error) {
       console.log(error);
-      showMessage("Error","Unable to fetch available roles", "error");
+      showMessage("Error", "Unable to fetch available roles", "error");
     }
   };
 
@@ -35,19 +42,69 @@ function Page() {
     try {
       const response = await api.delete(`/role/${selectedRole}`);
       console.log(response);
-      showMessage("Role deleted successfully",
+      showMessage(
+        "Role deleted successfully",
         "Role deleted successfully, refresh to see changes",
         "success"
       );
     } catch (error) {
-      showMessage("Error",
-     "Error deleting role",
-        "error"
-      );
+      showMessage("Error", "Error deleting role", "error");
       console.log(error);
     } finally {
       setDeleting(false);
     }
+  };
+
+  // Handle Enable All checkbox change
+  const handleEnableAllChange = (e) => {
+    const isChecked = e.target.checked;
+    setEnableAll(isChecked);
+    
+    if (isChecked) {
+      // If checked, enable all permissions
+      const allPermissionIds = selectedRolePermission.map(permission => permission.id);
+      setEnabledPermissions(allPermissionIds);
+    } else {
+      // If unchecked, disable all permissions
+      setEnabledPermissions([]);
+    }
+  };
+
+  // Handle individual permission checkbox change
+  const handlePermissionChange = (permissionId, isChecked) => {
+    if (isChecked) {
+      // Add to enabled permissions
+      setEnabledPermissions(prev => [...prev, permissionId]);
+    } else {
+      // Remove from enabled permissions
+      setEnabledPermissions(prev => prev.filter(id => id !== permissionId));
+    }
+  };
+
+  // Check if permission is in enabled permissions
+  const isPermissionEnabled = (permissionId) => {
+    return enabledPermissions.includes(permissionId);
+  };
+
+  // Update enableAll state when individual permissions change
+  useEffect(() => {
+    if (selectedRolePermission.length > 0 && enabledPermissions.length === selectedRolePermission.length) {
+      setEnableAll(true);
+    } else {
+      setEnableAll(false);
+    }
+  }, [enabledPermissions, selectedRolePermission]);
+
+  // Reset all permissions
+  const handleReset = () => {
+    setEnabledPermissions([]);
+    setEnableAll(false);
+  };
+
+  // Save permissions
+  const handleSave = async () => {
+    // Implement your save logic here
+    showMessage("Success", "Permissions saved successfully", "success");
   };
 
   return (
@@ -85,6 +142,7 @@ function Page() {
                   id=""
                   className="capitalize text-sm p-2 rounded-md font-rubikRegular"
                   onChange={(e) => setSelectedRole(e.target.value)}
+                  value={selectedRole}
                 >
                   <option value="">Select Role</option>
                   {availableRoles.map((role) => (
@@ -99,10 +157,26 @@ function Page() {
             <div className="flex-1 px-4">
               <div className="flex text-sm font-rubikMedium text-center">
                 <div className="m-auto flex-1">
-                  Enable All <input type="checkbox" name="" id="" />
+                  Enable All{" "}
+                  <input 
+                    type="checkbox" 
+                    checked={enableAll}
+                    onChange={handleEnableAllChange}
+                    disabled={selectedRolePermission.length === 0}
+                  />
                 </div>
-                <button className="px-4 py-2 mr-4 rounded-md">Reset</button>
-                <button className="bg-weave-primary text-base-white px-4 py-2 mx-4 rounded-md">
+                <button 
+                  className="px-4 py-2 mr-4 rounded-md"
+                  onClick={handleReset}
+                  disabled={selectedRolePermission.length === 0}
+                >
+                  Reset
+                </button>
+                <button 
+                  className="bg-weave-primary text-base-white px-4 py-2 mx-4 rounded-md"
+                  onClick={handleSave}
+                  disabled={selectedRolePermission.length === 0}
+                >
                   Save
                 </button>
                 {selectedRole !== "" ? (
@@ -139,14 +213,18 @@ function Page() {
                       name="permission"
                       id={permission.id}
                       value={permission.id}
-                      // onChange={(e) => addToPerm(e)}
-                      // checked={checkInPerm(permission.id)}
+                      checked={isPermissionEnabled(permission.id)}
+                      onChange={(e) => handlePermissionChange(permission.id, e.target.checked)}
                     />
                   </td>
                 </tr>
               ))
             ) : (
-              <></>
+              <tr>
+                <td colSpan={2} className="p-4 text-center">
+                  Select a role to view permissions
+                </td>
+              </tr>
             )}
           </tbody>
         </table>

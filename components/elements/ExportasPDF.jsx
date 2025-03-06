@@ -1,18 +1,21 @@
 "use client";
-import React from "react";
-import { SquareArrowOutUpRight } from "lucide-react";
+import React, { useState } from "react";
+import { SquareArrowOutUpRight, FileText, Download, ChevronDown } from "lucide-react";
 // Import jsPDF as a namespace import
 import { jsPDF } from "jspdf";
 // Import autotable - newer versions require a different approach
 import autoTable from 'jspdf-autotable';
 
-const TableExportPDF = ({ 
+const TableExport = ({ 
   data = [], 
   columns = [], 
-  fileName = `Export_${new Date().toISOString().split('T')[0]}.pdf`,
+  fileName = `Export_${new Date().toISOString().split('T')[0]}`,
   buttonText = "Export",
-  title = "Exported Data"
+  title = "Exported Data",
+  id = "export-button"
 }) => {
+  const [showDropdown, setShowDropdown] = useState(false);
+
   const exportToPDF = () => {
     // Create a new document with proper import
     const pdf = new jsPDF('landscape');
@@ -56,18 +59,93 @@ const TableExportPDF = ({
       pdf.text(`Page ${i} of ${pageCount}`, pdf.internal.pageSize.width - 40, pdf.internal.pageSize.height - 10);
     }
     
-    pdf.save(fileName);
+    pdf.save(`${fileName}.pdf`);
+    setShowDropdown(false);
+  };
+
+  const exportToExcel = () => {
+    // Get headers from columns
+    const tableHeaders = columns.map(column => column.header || column.Header || column.id || column.accessor);
+    
+    // Extract data for each row based on columns
+    const tableData = data.map(item => {
+      return columns.map(column => {
+        if (typeof column.accessor === 'function') {
+          return column.accessor(item);
+        }
+        
+        if (column.accessor && column.accessor.includes('.')) {
+          const accessorPath = column.accessor.split('.');
+          return accessorPath.reduce((obj, key) => obj?.[key], item);
+        }
+        
+        return item[column.accessor || column.id];
+      });
+    });
+    
+    // Create CSV content with headers and data
+    const csvContent = [
+      tableHeaders.join(','),
+      ...tableData.map(row => 
+        row.map(cell => 
+          // Handle commas and quotes in CSV format
+          typeof cell === 'string' && (cell.includes(',') || cell.includes('"')) 
+            ? `"${cell.replace(/"/g, '""')}"` 
+            : cell
+        ).join(',')
+      )
+    ].join('\n');
+    
+    // Create a Blob object and download link
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${fileName}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setShowDropdown(false);
+  };
+
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown);
   };
 
   return (
-    <button
-      className="bg-weave-primary text-white py-2 px-4 rounded-xl font-medium flex items-center"
-      onClick={exportToPDF}
-    >
-      {buttonText}
-      <SquareArrowOutUpRight className="w-4 h-4 ml-2" />
-    </button>
+    <div className="relative" id={id}>
+      <button
+        className="bg-weave-primary text-white py-2 px-4 rounded-xl font-medium flex items-center"
+        onClick={toggleDropdown}
+      >
+        {buttonText}
+        <ChevronDown className="w-4 h-4 ml-2" />
+      </button>
+      
+      {showDropdown && (
+        <div className="absolute top-10 right-0 rounded-md p-1 shadow bg-white text-sm w-[150px] z-10">
+          <div className="flex flex-col text-left">
+            <button
+              className="p-2 flex items-center hover:bg-gray-100 rounded-md text-gray-800"
+              onClick={exportToPDF}
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              PDF
+            </button>
+            
+            <button
+              className="p-2 flex items-center hover:bg-gray-100 rounded-md text-gray-800"
+              onClick={exportToExcel}
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Excel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
-export default TableExportPDF;
+export default TableExport;

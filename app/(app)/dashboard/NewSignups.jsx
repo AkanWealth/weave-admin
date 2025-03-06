@@ -71,7 +71,7 @@ function NewSignups() {
                 <tr key={Math.random()}>
                   <td>
                     <h6 className="text-gray-600">
-                      {user.id.split('-')[0]}
+                      {user.id.split('-')[0].toUpperCase()}
                     </h6>
                   </td>
                   <td className="text-left px-6">

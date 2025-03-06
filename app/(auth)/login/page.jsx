@@ -103,7 +103,7 @@ function Login() {
         Login as the Weave Admin
       </h1>
       <p className="text-md my-4 mb-8">
-        Enter your account correct login below
+        Enter your account correct login details below
       </p>
       <div className="my-6 flex-col space-y-4">
         <TextField

@@ -1,6 +1,7 @@
 import { useModalContext } from "@/components/elements/Modal";
 import api from "@/lib/api";
 import { useRouter, useSearchParams } from "next/navigation";
+import { UserPen } from "lucide-react";
 import React, { useState } from "react";
 
 function SuspendAdmin() {
