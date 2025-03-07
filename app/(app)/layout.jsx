@@ -196,7 +196,7 @@ function Layout({ children }) {
                 <NotificationIcon />
 
                 {/* Replaced the original language dropdown with the custom component */}
-                <LanguageDropdown />
+                {/* <LanguageDropdown /> */}
 
                 {/* User profile section */}
                 {/* <div className="flex items-center pl-2 space-x-2">
