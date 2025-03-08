@@ -8,7 +8,7 @@ import Modal from "@/components/elements/Modal";
 import LogoutBtn from "./LogoutBtn";
 import { FaSearch } from "react-icons/fa";
 import Usaflag from "@/assets/images/UsaFlag.png";
-import { ChevronDown, User, NotepadText } from "lucide-react";
+import { ChevronDown, User, NotepadText,OctagonAlert } from "lucide-react";
 import Pentagonwithclock from "@/components/elements/Pentagonwithclock";
 import { ToastContext } from "@/contexts/toast";
 import UserInfo from "./userInfo";
@@ -105,19 +105,19 @@ function Layout({ children }) {
       <ToastContext>
         <div className="bg-[#F5F6FA]">
           <nav className="w-[280px] fixed left-0 top-0 bottom-0 font-rubikRegular">
-            <div className="border-b-2 border-gray-100 flex p-4 py-6 justify-center item=center">
-              <Image src={logo} className="w-40" alt="Weave Logo" />
+            <div className="border-b-2 border-gray-100 flex p-4 py-4 justify-center item=center">
+              <Image src={logo} className="w-[150px]" alt="Weave Logo" />
             </div>
-            <div className="h-1/2 p-2 flex flex-col py-6 space-y-3">
+            <div className="h-1/2 p-2 flex flex-col py-2 space-y-2 text-base">
               <Link
                 href={"/dashboard"}
                 className={
                   (pathname.startsWith("/dashboard")
                     ? "bg-weave-primary text-base-white "
-                    : "text-gray-600 ") + "rounded-md p-3 px-5"
+                    : "text-gray-600") + "rounded-md p-3 px-5"
                 }
               >
-                <i className="fa fa-home mr-4 text-xl"></i>
+                <i className="fa fa-home mr-4 text-lg"></i>
                 Dashboard
               </Link>
               <Link
@@ -155,9 +155,21 @@ function Layout({ children }) {
                 <Pentagonwithclock className="mr-4 text-xl" />
                 Audit Logs
               </Link>
+
+              <Link
+                href={"/user-reported-Issue"}
+                className={
+                  (pathname.startsWith("/user-reported-Issue")
+                    ? "bg-weave-primary text-base-white "
+                    : "text-gray-600 ") + "rounded-md p-3 px-5  flex items-center"
+                }
+              >
+                <OctagonAlert className="w-5 h-5 mr-4 flex-shrink-0" />
+                User-Reported Issue
+              </Link>
             </div>
 
-            <div className="h-2/5 p-2 flex flex-col py-6">
+            <div className="h-2/5 p-2 flex flex-col py-6 text-base mt-4">
               <Link
                 href={"/settings"}
                 className={
