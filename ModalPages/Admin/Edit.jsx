@@ -7,6 +7,9 @@ import avatar from "@/assets/images/3d_avatar_1.png";
 import { UserPen, Settings2 } from "lucide-react";
 
 function EditAdmin({ userData, onSave, onCancel }) {
+
+
+  const [isUserDataLoading, setIsUserDataLoading] = useState(!userData);
   // Initialize state with the passed user data
   const [firstname, setFirstname] = useState(userData?.firstName || "");
   const [lastname, setLastname] = useState(userData?.lastName || "");
@@ -45,16 +48,26 @@ function EditAdmin({ userData, onSave, onCancel }) {
    
     fetchRoles();
     
-    // Initialize permissions if userData has them
-    if (userData?.permissions) {
-      setPermissions(userData.permissions);
+    if (userData) {
+      setFirstname(userData.firstName || "");
+      setLastname(userData.lastName || "");
+      setEmail(userData.email || "");
+      setUsername(userData.username || "");
+      setRole(userData.role?.id || "");
       
-      // Check if all permissions are enabled
-      const allChecked = Object.values(userData.permissions)
-        .flatMap(section => Object.values(section))
-        .every(value => value);
+      // Initialize permissions if userData has them
+      if (userData.permissions) {
+        setPermissions(userData.permissions);
         
-      setEnableAll(allChecked);
+        // Check if all permissions are enabled
+        const allChecked = Object.values(userData.permissions)
+          .flatMap(section => Object.values(section))
+          .every(value => value);
+          
+        setEnableAll(allChecked);
+      }
+      
+      setIsUserDataLoading(false);
     }
   }, [userData]);
 
@@ -177,6 +190,14 @@ function EditAdmin({ userData, onSave, onCancel }) {
       setIsSubmitting(false);
     }
   };
+
+  if (isUserDataLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-weave-primary"></div>
+      </div>
+    );
+  }
 
   const isDisabled = firstname === "" || lastname === "" || email === "" || role === "" || isSubmitting;
 

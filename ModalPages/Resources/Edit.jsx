@@ -53,9 +53,21 @@ function EditResource() {
     setArticleBody(resource.content);
   }, [resource_id, resources]);
 
+  // useEffect(() => {
+  //   if (!resourceInfo) return;
+  //   document.getElementById("resource-file").src = resourceInfo.resourceUrl;
+  // }, [resourceInfo]);
+
   useEffect(() => {
     if (!resourceInfo) return;
-    document.getElementById("resource-file").src = resourceInfo.resourceUrl;
+    
+    // Use setTimeout to ensure the DOM element has been rendered
+    setTimeout(() => {
+      const resourceFileElement = document.getElementById("resource-file");
+      if (resourceFileElement) {
+        resourceFileElement.src = resourceInfo.resourceUrl;
+      }
+    }, 0);
   }, [resourceInfo]);
 
   const [loadingThumbnail, setLoadingThumbnail] = useState(false);

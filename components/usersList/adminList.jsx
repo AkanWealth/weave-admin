@@ -110,16 +110,48 @@ function AdminList() {
   //   setSelectedUser(user);
   //   setShowEditModal(true);
   // };
-  const handleEditUser = (user) => {
-    // Make sure we have the complete role object with id and name
-    const userWithCompleteRole = {
-      ...user,
-      role: roles.find(r => r.id === user.role.id) || user.role
-    };
-    console.log("Initial role value:", user?.role?.id);
-    setSelectedUser(userWithCompleteRole);
-    setShowEditModal(true);
+  // const handleEditUser = (user) => {
+  //   // Make sure we have the complete role object with id and name
+  //   const userWithCompleteRole = {
+  //     ...user,
+  //     role: roles.find(r => r.id === user.role.id) || user.role
+  //   };
+  //   console.log("Initial role value:", user?.role?.id);
+  //   setSelectedUser(userWithCompleteRole);
+  //   setShowEditModal(true);
+  // };
+
+  const handleEditUser = async (user) => {
+    try {
+      setFetchingUsers(true);
+      // Fetch complete user details by ID
+      const response = await api.get(`/users/profile/${user.id}`);
+console.log(response);
+
+      if (response.status === 200) {
+        // Combine fetched data with complete role object
+        const userWithCompleteRole = {
+          ...response.data,
+          role: roles.find(r => r.id === response.data.role.id) || response.data.role
+        };
+        
+        setSelectedUser(userWithCompleteRole);
+        setShowEditModal(true);
+      } else {
+        showMessage("Failed to fetch user details", "", "error");
+      }
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      showMessage(
+        error.response?.data?.message || "Error fetching user details",
+        "",
+        "error"
+      );
+    } finally {
+      setFetchingUsers(false);
+    }
   };
+
 
   // Function to close the modal
   const closeEditModal = () => {
