@@ -112,12 +112,14 @@ function UserRender({ info, date, resendInvite, onEditClick }) {
 
           <div className="absolute right-0 rounded-md p-2 shadow bg-white text-xs w-[200px]  dropdown-menu">
             <div className="flex flex-col text-left">
-              <a
-                onClick={() => onEditClick(info)}
-                className="px-3 py-1 text-left hover:bg-gray-100"
+              <div
+                onClick={() => {
+                  onEditClick(info);
+                }}
+                className="px-3 py-1 text-left hover:bg-gray-100 cursor-pointer"
               >
                 <i className="fa fa-pencil mr-2"></i> Edit User
-              </a>
+              </div>
               <Link
                 href={`/users?modal=delete-admin&id=${info.id}`}
                 className="text-red-500 px-3 py-1"
