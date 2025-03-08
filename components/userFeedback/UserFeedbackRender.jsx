@@ -28,7 +28,7 @@ const UserFeedbackRender = ({ info }) => {
   };
 
   return (
-    <tr className="border-b hover:bg-gray-50 text-sm">
+    <tr className="border-b hover:bg-gray-50 text-sm text-gray-600">
       <td className="py-3 px-6 whitespace-nowrap">{info.userId}</td>
       <td className="py-3 whitespace-nowrap">{info.username}</td>
       <td className="py-3 whitespace-nowrap">{info.dateTime}</td>
