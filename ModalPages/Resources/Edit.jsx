@@ -24,9 +24,6 @@ function EditResource() {
   const router = useRouter();
 
   const { showMessage } = useToastContext();
-  // useEffect(() => {
-  //   console.log(articleBody);
-  // }, [articleBody]);
 
   const [resourceInfo, setResourceInfo] = useState(null);
   const { resources, getSingleProduct } = useResourceLibrary();
@@ -53,14 +50,9 @@ function EditResource() {
     setArticleBody(resource.content);
   }, [resource_id, resources]);
 
-  // useEffect(() => {
-  //   if (!resourceInfo) return;
-  //   document.getElementById("resource-file").src = resourceInfo.resourceUrl;
-  // }, [resourceInfo]);
-
   useEffect(() => {
     if (!resourceInfo) return;
-    
+
     // Use setTimeout to ensure the DOM element has been rendered
     setTimeout(() => {
       const resourceFileElement = document.getElementById("resource-file");
