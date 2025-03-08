@@ -78,10 +78,11 @@ function Login() {
 
       showMessage(
         "Login Failed",
-        "Incorrect email or password. Please try again.",
+        resp.data.message || "Incorrect email or password. Please try again.",
         "error"
       );
     } catch (err) {
+      console.log(err);
       showMessage(
         "Login Failed",
         "Incorrect email or password. Please try again.",
