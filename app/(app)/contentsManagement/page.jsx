@@ -4,6 +4,7 @@ import ResourcesRender from "./resoucesRender";
 import FeedbackRender from "./feedBackRender";
 import Link from "next/link";
 import { ToastContext } from "@/contexts/toast";
+import { NotepadText } from "lucide-react";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState("resources");
@@ -12,17 +13,22 @@ export default function Page() {
     <Suspense>
       <ToastContext>
         <div>
-          <h1 className="text-2xl">
-            <i className="fa fa-copy mr-4 text-xl bg-[#e8e8e8] rounded-full p-3"></i>
-            Content Management
-            <div className="float-right">
+          {/* Header Section */}
+          <div className="flex items-center justify-between">
+            {/* Title with Icon */}
+            <div className="flex items-center">
+              <NotepadText className="w-12 h-10 mr-4 bg-[#e8e8e8] text-weave-primary rounded-full p-3"/>
+              <h1 className="text-2xl font-bold">Content Management</h1>
+            </div>
+
+            {/* Buttons on the Right */}
+            <div>
               {activeTab === "resources" ? (
                 <Link
                   href={"?modal=add-content"}
                   className="px-4 py-2 text-sm text-base-white bg-weave-primary rounded-md font-rubikMedium"
                 >
-                  {" "}
-                  Add New Content{" "}
+                  Add New Content
                 </Link>
               ) : (
                 <>
@@ -41,34 +47,26 @@ export default function Page() {
                 </>
               )}
             </div>
-          </h1>
+          </div>
 
-          {/* search pane */}
+          {/* Search Pane */}
           <div className="my-4 flex">
-            <div className="bg-gray-300 p-0 rounded-md font-rubikMedium">
-              <button
-                className={`${
-                  activeTab === "resources"
-                    ? "bg-weave-primary text-base-white"
-                    : ""
-                } p-2 px-4 rounded-md`}
-                onClick={() => setActiveTab("resources")}
-              >
-                Library
-              </button>
-              <button
-                className={`${
-                  activeTab === "resources"
-                    ? ""
-                    : "bg-weave-primary text-base-white"
-                } p-2 px-4 rounded-md`}
-                onClick={() => setActiveTab("feedback")}
-              >
-                Feedback
-              </button>
+            <div className="bg-gray-300 p-0 rounded-md font-rubikMedium flex">
+              {["resources", "feedback"].map((tab) => (
+                <button
+                  key={tab}
+                  className={`p-2 px-4 rounded-md ${
+                    activeTab === tab ? "bg-weave-primary text-base-white" : ""
+                  }`}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tab === "resources" ? "Library" : "Feedback"}
+                </button>
+              ))}
             </div>
           </div>
 
+          {/* Tab Content */}
           {activeTab === "resources" ? <ResourcesRender /> : <FeedbackRender />}
         </div>
       </ToastContext>

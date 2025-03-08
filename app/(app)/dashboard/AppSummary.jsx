@@ -1,7 +1,7 @@
 "use client";
 import api from "@/lib/api";
 import React, { useEffect, useState } from "react";
-import { TrendingDown } from "lucide-react";
+import { TrendingDown, TrendingUp } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUserGroup,
@@ -12,6 +12,11 @@ function AppSummary() {
   const [allUsers, setAllUsers] = useState(0);
   const [appUsers, setAppUsers] = useState(0);
   const [averageCheck, setaverageCheck] = useState(0);
+  const [AllUserAveragemonthly, setAllUserAveragemonthly] = useState(0);
+  const [AllAppUserAveragemonthly, setAllAppUserAveragemonthly] = useState(0);
+  const [AllInternalUserAveragemonthly, setAllInternalUserAveragemonthly] =
+    useState(0);
+  const [averageCheckChange, setAverageCheckChange] = useState(-4.5); // Default value, replace with API call
 
   const getUsersSummary = async () => {
     try {
@@ -20,11 +25,83 @@ function AppSummary() {
       const getAveragecheckin = await api.get(
         "/usage-analytics/average-checkin"
       );
+      const getAllUserAveragemonthly = await api.get(
+        "/monitor-signups/all-users"
+      );
+      const getAllAppUserAveragemonthly = await api.get(
+        "/monitor-signups/app-users"
+      );
+      const getAllInternalUserAveragemonthly = await api.get(
+        "/monitor-signups/admins"
+      );
+
+      // You can add this when the API endpoint is available
+      // const getAverageCheckChange = await api.get("/usage-analytics/average-checkin-change");
 
       if (getAllUsers.status === 200) setAllUsers(getAllUsers.data);
       if (getAppUsers.status === 200) setAppUsers(getAppUsers.data);
-      if (getAveragecheckin.status === 200)
-        setaverageCheck(getAveragecheckin.data.averageCheckInFrequency);
+
+      // Average checkin
+      if (getAveragecheckin.status === 200) {
+        if (
+          typeof getAveragecheckin.data === "object" &&
+          getAveragecheckin.data !== null
+        ) {
+          setaverageCheck(getAveragecheckin.data.averageCheckInFrequency || 0);
+        } else {
+          setaverageCheck(getAveragecheckin.data);
+        }
+      }
+
+      // Average monthly user
+      if (getAllUserAveragemonthly.status === 200) {
+        if (
+          typeof getAllUserAveragemonthly.data === "object" &&
+          getAllUserAveragemonthly.data !== null
+        ) {
+          setAllUserAveragemonthly(
+            getAllUserAveragemonthly.data.growthRate || 0
+          );
+        } else {
+          setAllUserAveragemonthly(getAllUserAveragemonthly.data);
+        }
+      }
+
+      // Average app user
+      if (getAllAppUserAveragemonthly.status === 200) {
+        if (
+          typeof getAllAppUserAveragemonthly.data === "object" &&
+          getAllAppUserAveragemonthly.data !== null
+        ) {
+          setAllAppUserAveragemonthly(
+            getAllAppUserAveragemonthly.data.growthRate || 0
+          );
+        } else {
+          setAllAppUserAveragemonthly(getAllAppUserAveragemonthly.data);
+        }
+      }
+
+      // Average internal user
+      if (getAllInternalUserAveragemonthly.status === 200) {
+        if (
+          typeof getAllInternalUserAveragemonthly.data === "object" &&
+          getAllInternalUserAveragemonthly.data !== null
+        ) {
+          setAllInternalUserAveragemonthly(
+            getAllInternalUserAveragemonthly.data.growthRate || 0
+          );
+        } else {
+          setAllInternalUserAveragemonthly(
+            getAllInternalUserAveragemonthly.data
+          );
+        }
+        console.log(getAllInternalUserAveragemonthly.data.growthRate);
+      }
+
+      // When the API endpoint is available, uncomment this
+      // if (getAverageCheckChange.status === 200) {
+      //   setAverageCheckChange(getAverageCheckChange.data);
+      // }
     } catch (error) {
       console.log({ error });
     }
@@ -34,6 +111,28 @@ function AppSummary() {
     console.log("get user summary");
     getUsersSummary();
   }, []);
+
+  const renderPercentageChange = (value, timeframe) => {
+    // Determine if the value is positive or negative
+    const isPositive = value >= 0;
+    const absValue = Math.abs(value);
+
+    // Determine the color and icon based on the value
+    const textColorClass = isPositive ? "text-[#28A745]" : "text-red-500";
+    const bgColorClass = isPositive ? "bg-[#28A745]" : "bg-red-500";
+    const Icon = isPositive ? TrendingUp : TrendingDown;
+
+    return (
+      <div className={`flex items-center ${textColorClass} text-xs`}>
+        <div
+          className={`flex items-center justify-center ${bgColorClass} w-5 h-5 rounded-[5px] mr-2`}
+        >
+          <Icon className="text-white w-3 h-3" />
+        </div>
+        {value.toFixed(1)}% from {timeframe}
+      </div>
+    );
+  };
 
   return (
     <div className="grid grid-cols-4 gap-6 w-full my-4">
@@ -48,12 +147,7 @@ function AppSummary() {
           </div>
         </div>
 
-        <div className="flex items-center text-red-500 text-xs">
-          <div className="flex items-center justify-center bg-red-500 w-5 h-5 rounded-[5px] mr-2">
-            <TrendingDown className="text-white w-3 h-3" />
-          </div>
-          -4.5% from last month
-        </div>
+        {renderPercentageChange(AllUserAveragemonthly, "last month")}
       </div>
 
       <div className="bg-base-white p-6 rounded-2xl">
@@ -67,12 +161,7 @@ function AppSummary() {
           </div>
         </div>
 
-        <div className="flex items-center text-[#28A745] text-xs">
-          <div className="flex items-center justify-center bg-[#28A745] w-5 h-5 rounded-[5px] mr-2">
-            <TrendingDown className="text-white w-3 h-3" />
-          </div>
-          4.5% from last month
-        </div>
+        {renderPercentageChange(AllAppUserAveragemonthly, "last month")}
       </div>
 
       <div className="bg-base-white p-6 rounded-2xl">
@@ -86,12 +175,7 @@ function AppSummary() {
           </div>
         </div>
 
-        <div className="flex items-center text-[#28A745] text-xs">
-          <div className="flex items-center justify-center bg-[#28A745] w-5 h-5 rounded-[5px] mr-2">
-            <TrendingDown className="text-white w-3 h-3" />
-          </div>
-          4.5% from last month
-        </div>
+        {renderPercentageChange(AllInternalUserAveragemonthly, "last month")}
       </div>
 
       <div className="bg-base-white p-6 rounded-2xl">
@@ -105,12 +189,7 @@ function AppSummary() {
           </div>
         </div>
 
-        <div className="flex items-center text-red-500 text-xs">
-          <div className="flex items-center justify-center bg-red-500 w-5 h-5 rounded-[5px] mr-2">
-            <TrendingDown className="text-white w-3 h-3" />
-          </div>
-          -4.5% from yesterday
-        </div>
+        {renderPercentageChange(averageCheckChange, "yesterday")}
       </div>
     </div>
   );
