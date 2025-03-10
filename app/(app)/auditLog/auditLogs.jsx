@@ -31,18 +31,20 @@ function AuditLogs() {
     console.log("fetching");
     try {
       if (adminId || (startDate && endDate)) {
-        const query = {
-          startDate,
-          endDate,
+        let query = {
           limit: 10,
           page,
         };
         if (adminId) {
-          query[adminId] = adminId;
+          query["adminId"] = adminId;
+        }
+
+        if (startDate && endDate) {
+          query = { ...query, startDate, endDate };
         }
 
         const queryString = new URLSearchParams(query).toString();
-        console.log(queryString);
+
         // return;
         const response = await api.get(`/system-logs?${queryString}`);
         if (response.status === 200) {

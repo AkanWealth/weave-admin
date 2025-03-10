@@ -71,11 +71,12 @@ function AppSummary() {
       //   setAverageCheckChange(getAverageCheckChange.data);
       // }
     } catch (error) {
-      console.log(error);
+      console.log({ error });
     }
   };
 
   useEffect(() => {
+    console.log("get user summary");
     getUsersSummary();
   }, []);
 
@@ -108,13 +109,13 @@ function AppSummary() {
             <h6 className="font-rubikMedium text-2xl">{allUsers}</h6>
           </div>
           <div className="flex justify-center items-center h-10 w-10 text-[#8280FF]">
-            <FontAwesomeIcon icon={faUserGroup} className="text-2xl"/>
+            <FontAwesomeIcon icon={faUserGroup} className="text-2xl" />
           </div>
         </div>
         
         {renderPercentageChange(AllUserAveragemonthly, "last month")}
       </div>
-      
+
       <div className="bg-base-white p-6 rounded-2xl">
         <div className="flex justify-between items-start mb-4">
           <div className="whitespace-nowrap">
@@ -122,7 +123,7 @@ function AppSummary() {
             <h6 className="font-rubikMedium text-2xl">{appUsers}</h6>
           </div>
           <div className="flex justify-center items-center h-10 w-10 text-[#28A745]">
-            <FontAwesomeIcon icon={faUserGroup} className="text-2xl"/>
+            <FontAwesomeIcon icon={faUserGroup} className="text-2xl" />
           </div>
         </div>
         
@@ -136,7 +137,7 @@ function AppSummary() {
             <h6 className="font-rubikMedium text-2xl">{allUsers - appUsers}</h6>
           </div>
           <div className="flex justify-center items-center h-10 w-10 text-[#4AA0A4]">
-            <FontAwesomeIcon icon={faUserGroup} className="text-2xl"/>
+            <FontAwesomeIcon icon={faUserGroup} className="text-2xl" />
           </div>
         </div>
         
@@ -150,7 +151,7 @@ function AppSummary() {
             <h6 className="font-rubikMedium text-2xl">{averageCheck}</h6>
           </div>
           <div className="flex justify-center items-center h-10 w-10 text-[#9747FF]">
-            <FontAwesomeIcon icon={faClockRotateLeft} className="text-2xl"/>
+            <FontAwesomeIcon icon={faClockRotateLeft} className="text-2xl" />
           </div>
         </div>
         
