@@ -42,7 +42,7 @@ function UserReport() {
 
   const fetchStatuses = async () => {
     try {
-      // For testing, create dummy statuses instead of API call
+      // For testing,  dummy statuses instead of API call
       const dummyStatuses = [
         { id: 1, name: "New" },
         { id: 2, name: "In-progress" },
