@@ -159,26 +159,38 @@ console.log(response);
     setSelectedUser(null);
   };
 
-  // Function to handle user updates
+ 
   // const handleUserUpdate = async (updatedUser) => {
   //   try {
+  //     // Find the complete role object based on the ID
+  //     const selectedRole = roles.find(r => r.id === updatedUser.role) || 
+  //                         {id: updatedUser.role, name: "Unknown"};
+      
   //     // Make API call to update user
-  //     const response = await api.put(`/super-admin/users/${updatedUser.id}`, {
+  //     const response = await api.put(`/super-admin/profile/${updatedUser.id}`, {
   //       firstName: updatedUser.firstName,
   //       lastName: updatedUser.lastName,
   //       email: updatedUser.email,
-  //       role: updatedUser.role
+  //       username: updatedUser.username
+  //       // role: selectedRole.id 
   //     });
+  //     console.log("status : ", response.status)
       
   //     if (response.status === 200) {
-  //       // Update local state if the API call was successful
-  //       if (users) {
-  //         const updatedUsers = users.map(user => 
-  //           user.id === updatedUser.id ? updatedUser : user
-  //         );
-  //         setUsers(updatedUsers);
-  //         setFilteredlist(updatedUsers);
-  //       }
+  //       // For local state update, include the complete role object
+  //       // const updatedUserWithRole = {
+  //       //   ...updatedUser,
+  //       //   role: selectedRole // Use complete role object for local state
+  //       // };
+        
+  //       // // Update local state
+  //       // if (users) {
+  //       //   const updatedUsers = users.map(user => 
+  //       //     user.id === updatedUser.id ? updatedUserWithRole : user
+  //       //   );
+  //       //   setUsers(updatedUsers);
+  //       //   setFilteredlist(updatedUsers);
+  //       // }
         
   //       showMessage("User updated successfully", "", "success");
   //     } else {
@@ -195,52 +207,36 @@ console.log(response);
   //     );
   //   }
   // };
-  
+
+
+
   const handleUserUpdate = async (updatedUser) => {
     try {
-      // Find the complete role object based on the ID
-      const selectedRole = roles.find(r => r.id === updatedUser.role) || 
-                          {id: updatedUser.role, name: "Unknown"};
-      
-      // Make API call to update user
-      const response = await api.put(`/super-admin/users/${updatedUser.id}`, {
-        firstName: updatedUser.firstName,
-        lastName: updatedUser.lastName,
-        email: updatedUser.email,
-        role: selectedRole.id // Send just the ID to the API
-      });
-      
-      if (response.status === 200) {
-        // For local state update, include the complete role object
-        const updatedUserWithRole = {
-          ...updatedUser,
-          role: selectedRole // Use complete role object for local state
-        };
-        
-        // Update local state
-        if (users) {
-          const updatedUsers = users.map(user => 
-            user.id === updatedUser.id ? updatedUserWithRole : user
-          );
-          setUsers(updatedUsers);
-          setFilteredlist(updatedUsers);
-        }
-        
-        showMessage("User updated successfully", "", "success");
-      } else {
-        throw new Error("Failed to update user");
+      // Update local state
+      if (users) {
+        const updatedUsers = users.map(user => 
+          user.id === updatedUser.id ? updatedUser : user
+        );
+        setUsers(updatedUsers);
+        setFilteredlist(updatedUsers);
       }
       
+      showMessage("User updated successfully", "", "success");
       closeEditModal();
     } catch (error) {
       console.error("Error updating user:", error);
       showMessage(
-        error.response?.data?.message || "Error updating user",
+        "Error updating user",
         "",
         "error"
       );
     }
   };
+
+
+
+
+
 
   return (
     <>
