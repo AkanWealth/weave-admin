@@ -25,6 +25,27 @@ function AuditLogs() {
   const prev = () => {
     setPage(page--);
   };
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "";
+
+    const date = new Date(dateString);
+
+    // Format date as YYYY-MM-DD
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    // Format time as HH:MMAM/PM
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+
+    hours = hours % 12;
+    hours = hours ? hours : 12; // Convert 0 to 12
+    const formattedHours = String(hours).padStart(2, '0');
+
+    return `${year}-${month}-${day} - ${formattedHours}:${minutes}${ampm}`;
+  };
 
   const fetchAudits = async () => {
     setIsLoading(true);
@@ -73,7 +94,7 @@ function AuditLogs() {
       auditLogs.map((audit) => ({
         admin: audit.admin.username,
         details: audit.details.message,
-        date: new Date(audit.created_at).toLocaleString().replace(/,/, " "),
+        date: formatDateTime(audit.created_at),
         action: audit.action.replace(/_/g, " "),
         affectedResourceType: audit.affectedResourceType,
       })),
@@ -191,8 +212,9 @@ function AuditLogs() {
             )}
             renderItems={(audit) => (
               <tr key={Math.random()}>
+
                 <td className="text-left px-6 py-4">
-                  <DateRender date={audit.created_at} />
+                  {formatDateTime(audit.created_at)}
                 </td>
                 <td className="text-left px-6 capitalize">
                   <h6 className="font-rubikMedium text-black">

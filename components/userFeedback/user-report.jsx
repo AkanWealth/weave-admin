@@ -17,32 +17,40 @@ function UserReport() {
   const [selectedStatus, setSelectedStatus] = useState("");
 
   // Function to generate dummy data for testing
-  const generateDummyData = () => {
-    const statuses = ["New", "In-progress", "Resolved", "Closed"];
-    const dummyData = [];
+  // const generateDummyData = () => {
+  //   const statuses = ["New", "In-progress", "Resolved", "Closed"];
+  //   const dummyData = [];
     
-    for (let i = 1; i <= 30; i++) {
-      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+  //   for (let i = 1; i <= 30; i++) {
+  //     const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
       
-      dummyData.push({
-        id: `WV${1234 + i}`,
-        userId: `WV${1234 + i}`,
-        username: "Hassan Taiwo Adeola",
-        dateTime: "2024-12-08 - 08:30 AM",
-        created_at: "2024-12-08 - 08:30 AM",
-        issueSummary: "App crashes on load and can't register for an account",
-        summary: "App crashes on load and can't register for an account",
-        status: randomStatus,
-        role: { name: i % 3 === 0 ? "admin" : i % 2 === 0 ? "user" : "manager" }
-      });
-    }
+  //     dummyData.push({
+  //       id: `WV${1234 + i}`,
+  //       userId: `WV${1234 + i}`,
+  //       username: "Hassan Taiwo Adeola",
+  //       dateTime: "2024-12-08 - 08:30 AM",
+  //       created_at: "2024-12-08 - 08:30 AM",
+  //       issueSummary: "App crashes on load and can't register for an account",
+  //       summary: "App crashes on load and can't register for an account",
+  //       status: randomStatus,
+  //       role: { name: i % 3 === 0 ? "admin" : i % 2 === 0 ? "user" : "manager" }
+  //     });
+  //   }
     
-    return dummyData;
+  //   return dummyData;
+  // };
+
+  // Function to map backend status to frontend display status
+  const mapStatusForDisplay = (backendStatus) => {
+    if (backendStatus === "Pending") {
+      return "In-progress";
+    }
+    return backendStatus;
   };
 
   const fetchStatuses = async () => {
     try {
-      // For testing,  dummy statuses instead of API call
+      // For testing, dummy statuses instead of API call
       const dummyStatuses = [
         { id: 1, name: "New" },
         { id: 2, name: "In-progress" },
@@ -58,20 +66,35 @@ function UserReport() {
   useEffect(() => {
     if (!users || selectedStatus === "") return setFilteredlist(users);
     setSearchKey("");
-    const filtered = users.filter((user) => user.status === selectedStatus);
+    const filtered = users.filter((user) => mapStatusForDisplay(user.status) === selectedStatus);
     setFilteredlist(filtered);
   }, [selectedStatus, users]);
 
   const fetchUsers = async () => {
     setFetchingUsers(true);
     try {
-      // Simulate API call with dummy data
-      setTimeout(() => {
-        const dummyData = generateDummyData();
-        setUsers(dummyData);
-        setFilteredlist(dummyData);
-        setFetchingUsers(false);
-      }, 1000);
+      // Make API call to the correct endpoint
+      const response = await api.get('/help-support/issue-report');
+      console.log(response.status);
+      console.log(response.data.issueReports);
+      
+      
+      if (response.status === 200 && response.data.issueReports) {
+      
+        const mappedData = response.data.issueReports.map(issue => ({
+          id: issue.id,
+          userId: issue.id,
+          username: issue.email,
+          dateTime: new Date(issue.created_at).toLocaleString(),
+          issueSummary: `${issue.description}`,
+          status: issue.status 
+        }));
+        setUsers(mappedData);
+        setFilteredlist(mappedData);
+      } else {
+        // showMessage("Error fetching user reported issues", "", "error");
+      }
+      setFetchingUsers(false);
     } catch (err) {
       console.log(err);
       showMessage("Error fetching user reported issues", "", "error");
@@ -166,7 +189,7 @@ function UserReport() {
                   username: item.username || item.name,
                   dateTime: item.dateTime || item.created_at,
                   issueSummary: item.issueSummary || item.summary,
-                  status: item.status
+                  status: mapStatusForDisplay(item.status) 
                 }}
                 key={item.id || Math.random()}
               />

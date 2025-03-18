@@ -6,7 +6,6 @@ import Top from "@/assets/images/ScreenshotTop.png";
 import Bottom from "@/assets/images/SceenShotBottom.png";
 import Image from "next/image";
 
-
 import { useToastContext } from "@/contexts/toast";
 
 const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) => {
@@ -20,6 +19,8 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
   const [conversations, setConversations] = useState([]);
   const [expandedMessageId, setExpandedMessageId] = useState(null);
   const [newStatus, setNewStatus] = useState(status);
+  const [assignees, setAssignees] = useState([]);
+  const [loadingAssignees, setLoadingAssignees] = useState(false);
 
   // Function to toggle message expansion
   const toggleMessageExpansion = (id) => {
@@ -35,6 +36,41 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
     if (!text) return "";
     return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
   };
+
+  // Fetch assignees from API
+  const fetchAssignees = async () => {
+    setLoadingAssignees(true);
+    try {
+      const response = await api.get('/usage-analytics/admin');
+      console.log(response);
+      
+      if (response.status === 200 && response.data) {
+        // Add unassigned option at the beginning
+        const assigneesData = [
+          { id: 'unassigned', username: 'Unassigned' },
+          ...response.data
+        ];
+        setAssignees(assigneesData);
+      } else {
+  
+        setAssignees([{ id: 'unassigned', username: 'Unassigned' }]);
+        showMessage("Failed to load assignees", "", "error");
+      }
+    } catch (error) {
+      console.error("Error fetching assignees:", error);
+      // Fallback data in case of error
+      setAssignees([{ id: 'unassigned', username: 'Unassigned' }]);
+      showMessage("Failed to load assignees", "", "error");
+    } finally {
+      setLoadingAssignees(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchAssignees();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (issueData) {
@@ -57,14 +93,6 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
     { id: 2, name: "In-progress" },
     { id: 3, name: "Resolved" },
     { id: 4, name: "Closed" }
-  ];
-
-  // Sample assignees - can be fetched from API in real implementation
-  const assignees = [
-    { id: 1, name: "Unassigned" },
-    { id: 2, name: "John Doe" },
-    { id: 3, name: "Jane Smith" },
-    { id: 4, name: "Alex Johnson" }
   ];
 
   const handleSubmitResponse = async () => {
@@ -96,8 +124,8 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
 
   const handleSaveChanges = async () => {
     try {
-      // In a real app, this would be an API call
-      // const result = await api.put(`/issues/${issueData.userId}`, {
+      // In a real app, you would make an API call here
+      // const result = await api.put(`/help-support/issues/${issueData.userId}`, {
       //   status: status,
       //   assignee: assignee
       // });
@@ -133,7 +161,6 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
           <h2 className="text-xl font-medium">Issue Resolution</h2>
         </div>
 
-
         {/* Tab Navigation */}
         <div className="flex justify-center w-2/3 mx-auto">
           <button
@@ -168,8 +195,8 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
         {/* Modal Content */}
         <div className="px-6 py-5 overflow-y-auto flex-grow">
           {activeTab === 'details' ? (
-            <div className="space-y-6">
-              <div className="space-y-4">
+            <div className="space-y-12">
+              <div className="space-y-10">
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-500 mb-1">Issue ID:</label>
                   <p className="text-gray-900 font-medium">{issueData?.userId || "WV1234"}</p>
@@ -204,14 +231,13 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
                     <div className="text-center">
                       <Image src={Top} width={50} height={50} alt="Screenshot placeholder" className="mx-auto mb-2" />
                       <Image src={Bottom} width={50} height={50} alt="Screenshot placeholder" className="mx-auto" />
-
                     </div>
                   </div>
                 </div>
 
                 <div className="flex flex-row space-x-4 mt-8 mb-20">
                   <div className="w-1/2">
-                    <label className="block text-sm  text-gray-700 mb-2">Status:</label>
+                    <label className="block text-sm text-gray-700 mb-2">Status:</label>
                     <div className="relative">
                       <select
                         value={status}
@@ -230,17 +256,24 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
                   <div className="w-3/4">
                     <label className="block text-sm text-gray-700 mb-2">Assignee:</label>
                     <div className="relative">
-                      <select
-                        value={assignee}
-                        onChange={(e) => setAssignee(e.target.value)}
-                        className="block w-full pl-3 pr-10 py-2 text-sm border border-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                      >
-                        {assignees.map((option) => (
-                          <option key={option.id} value={option.name}>
-                            {option.name}
-                          </option>
-                        ))}
-                      </select>
+                      {loadingAssignees ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                          <span className="text-sm text-gray-500">Loading assignees...</span>
+                        </div>
+                      ) : (
+                        <select
+                          value={assignee}
+                          onChange={(e) => setAssignee(e.target.value)}
+                          className="block w-full pl-3 pr-10 py-2 text-sm border border-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                        >
+                          {assignees.map((option) => (
+                            <option key={option.id} value={option.id}>
+                              {option.username}
+                            </option>
+                          ))}
+                        </select>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -322,7 +355,7 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
         </div>
 
         {/* Modal Footer - Adjusted padding */}
-        <div className="px-6 py-4 flex justify-center space-x-4">
+        <div className="px-6 py-4 flex justify-center space-x-6">
           <button
             onClick={onClose}
             className="w-full px-5 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
