@@ -32,6 +32,30 @@ const UserFeedbackRender = ({ info, onStatusUpdate }) => {
     return text.substring(0, maxLength) + "...";
   };
 
+
+  const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return "";
+    
+    const date = new Date(dateTimeString);
+    
+    // Format date as YYYY-MM-DD
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    // Format time as HH:MMAM/PM
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    
+    hours = hours % 12;
+    hours = hours ? hours : 12; // Convert 0 to 12
+    const formattedHours = String(hours).padStart(2, '0');
+    
+    return `${year}-${month}-${day} - ${formattedHours}:${minutes}${ampm}`;
+  };
+
+
   // Function to open the modal
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -52,9 +76,9 @@ const UserFeedbackRender = ({ info, onStatusUpdate }) => {
   return (
     <>
       <tr className="border-b hover:bg-gray-50 text-sm text-gray-600">
-        <td className="py-3 px-6 whitespace-nowrap">{info.userId}</td>
+        <td className="py-3 px-6 whitespace-nowrap">{truncateText(info.userId,8).toUpperCase()}</td>
         <td className="py-3 whitespace-nowrap">{info.username}</td>
-        <td className="py-3 whitespace-nowrap">{info.dateTime}</td>
+        <td className="py-3 whitespace-nowrap">{formatDateTime(info.dateTime)}</td>
         <td className="py-3 max-w-xs">{truncateText(info.issueSummary, 40)}</td>
         <td className="py-3 whitespace-nowrap">
           {getStatusBadge(info.status)}
