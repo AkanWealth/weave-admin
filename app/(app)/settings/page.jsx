@@ -78,7 +78,7 @@ function SettingPage() {
 
     try {
       const formData = new FormData();
-      formData.append("headshot", profileImg);
+      // formData.append("headshot", profileImg);
       formData.append("firstName", userProfile.firstName);
       formData.append("lastName", userProfile.lastName);
       formData.append("username", userProfile.username);
@@ -93,10 +93,10 @@ function SettingPage() {
         },
       });
       if (response.status === 200) {
-        showMessage("Profile updated successfully", "success");
+        showMessage("Profile updated successfully","", "success");
       }
     } catch (error) {
-      showMessage("Error updating user profile", "error");
+      showMessage("Error updating user profile", "","error");
     } finally {
       setIsupdatinginfo(false);
     }

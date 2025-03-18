@@ -71,41 +71,84 @@ function EditAdmin({ userData, onSave, onCancel }) {
     }
   }, [userData]);
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setIsSubmitting(true);
+    
+  //   try {
+  //     // Prepare updated user data
+  //     const updatedUser = {
+  //       firstName: firstname,
+  //       lastName: lastname,
+  //       email: email,
+  //       username: username
+  //     };
+      
+  //     console.log("Sending data:", updatedUser);
+     
+  //     const response = await api.put(`/super-admin/profile/${userData.id}`, updatedUser);
+  //     console.log("User ID:", userData.id);
+     
+  //     if (response.status === 200) {
+  //       onSave({
+  //         ...userData,
+  //         firstName: firstname,
+  //         lastName: lastname,
+  //         email: email,
+  //         username: username
+  //       });
+  //     }
+    
+      
+      
+  //   } catch (error) {
+  //     console.error("Error updating user:", error);
+  //     alert("Failed to update user. Please try again.");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
+  // Handle the "Enable All" checkbox change
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
-      // Prepare updated user data
+      // Use the current state values (what the user typed in the form)
       const updatedUser = {
+        firstName: firstname, 
+        lastName: lastname,   
+        email: email,         
+        username: username 
+      };
+      
+      console.log("Sending updated data to API:", updatedUser);
+      
+      const response = await api.put(`/super-admin/profile/${userData.id}`, updatedUser);
+      
+      if (response.status === 200) {
+
+        onSave({
+          ...userData, // Keep all original fields
         firstName: firstname,
         lastName: lastname,
         email: email,
-        username: username
-      };
-      
-      console.log("Sending data:", updatedUser);
-      // Make API call to update admin profile
-      // const response = await api.put(`/super-admin/profile/${userData.id}`, updatedUser);
-      
-      // If successful, call the parent component's save function
-      // if (response.status === 200) {
-      //   onSave({
-      //     ...userData,
-      //     firstName: firstname,
-      //     lastName: lastname,
-      //     email: email,
-      //   });
-      // }
+        username: username,
+        });
+        return true;
+      }
+      return false;
     } catch (error) {
       console.error("Error updating user:", error);
-      // alert("Failed to update user. Please try again.");
+      return false;
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  // Handle the "Enable All" checkbox change
+  
+  
+  
   const handleEnableAllChange = (e) => {
     const isChecked = e.target.checked;
     setEnableAll(isChecked);
@@ -306,7 +349,7 @@ function EditAdmin({ userData, onSave, onCancel }) {
             <div className="flex-1 px-2">
             <button 
                       className="bg-weave-primary text-base-white px-4 py-2 w-full rounded-md"
-                      // onClick={handleSavePermissions}
+                      onClick={handleSubmit}
                       type="submit"
                       disabled={isSubmitting}
                     >

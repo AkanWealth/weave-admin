@@ -5,6 +5,7 @@ import NewSignups from "./NewSignups";
 import GrowthChart from "./GrowthChart";
 import PentagonWithCircleIcon from "@/components/elements/PentagonWithCircleIcon";
 
+
 export default function Dashboard() {
   return (
     <div>

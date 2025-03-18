@@ -182,7 +182,7 @@ function AppSummary() {
         <div className="flex justify-between items-start mb-4">
           <div className="whitespace-nowrap">
             <h5 className="text-gray-500 mb-2 text-sm">Average Check-In</h5>
-            <h6 className="font-rubikMedium text-2xl">{averageCheck}</h6>
+            <h6 className="font-rubikMedium text-2xl">{averageCheck.toFixed(2)}</h6>
           </div>
           <div className="flex justify-center items-center h-10 w-10 text-[#9747FF]">
             <FontAwesomeIcon icon={faClockRotateLeft} className="text-2xl" />
