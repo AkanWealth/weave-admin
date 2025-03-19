@@ -47,7 +47,7 @@ export default function OtpVerification() {
 
         console.log(resp);
         if (resp.status === 201) {
-          showMessage(resp.data.message, "success");
+          showMessage(resp.data.message, "","success");
           router.push(
             `/setup/password?token=${resp.data.setupToken}&email=${email}`
           );
@@ -56,7 +56,7 @@ export default function OtpVerification() {
     } catch (err) {
       console.log(err);
       if (err.response.status === 400) router.push("/setup/message");
-      showMessage(err.response.data.message || "Error verifying otp", "error");
+      showMessage(err.response.data.message || "Error verifying otp", "","error");
       setIsError(true);
     } finally {
       setIsLoading(false);
@@ -76,10 +76,10 @@ export default function OtpVerification() {
       const response = await api.post("/auth/resend-otp", {
         email,
       });
-      showMessage(response?.data.message, "success");
+      showMessage(response?.data.message,"", "success");
     } catch (error) {
       showMessage(
-        error.response.data.message || "Error Resending otp",
+        error.response.data.message || "Error Resending otp","",
         "error"
       );
     } finally {
