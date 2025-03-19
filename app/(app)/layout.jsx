@@ -8,7 +8,7 @@ import Modal from "@/components/elements/Modal";
 import LogoutBtn from "./LogoutBtn";
 import { FaSearch } from "react-icons/fa";
 import Usaflag from "@/assets/images/UsaFlag.png";
-import { ChevronDown, User, NotepadText,OctagonAlert } from "lucide-react";
+import { ChevronDown, User, NotepadText, OctagonAlert } from "lucide-react";
 import Pentagonwithclock from "@/components/elements/Pentagonwithclock";
 import { ToastContext } from "@/contexts/toast";
 import UserInfo from "./userInfo";
@@ -161,7 +161,8 @@ function Layout({ children }) {
                 className={
                   (pathname.startsWith("/user-reported-Issue")
                     ? "bg-weave-primary text-base-white "
-                    : "text-gray-600 ") + "rounded-md p-3 px-5  flex items-center"
+                    : "text-gray-600 ") +
+                  "rounded-md p-3 px-5  flex items-center"
                 }
               >
                 <OctagonAlert className="w-5 h-5 mr-4 flex-shrink-0" />
@@ -239,6 +240,7 @@ function Layout({ children }) {
 
             <section className="absolute top-[60px] right-0 left-0 bottom-0 p-4 font-rubikRegular overflow-auto">
               {children}
+              <></>
             </section>
           </main>
           <Modal />
