@@ -18,7 +18,8 @@ export default function OtpVerification() {
   const router = useRouter();
   const token = params.get("token");
 
-  const noOfEntry = usage === "reset-password" ? 6 : 4;
+  // Always use 4 inputs regardless of usage type
+  const noOfEntry = 4;
 
   const verifyOtp = async () => {
     setIsLoading(true);

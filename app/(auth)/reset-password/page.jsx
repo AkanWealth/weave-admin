@@ -27,7 +27,7 @@ function ResetPassword() {
   const resetPassword = async () => {
     setIsloading(true);
     try {
-      const response = await api.post("/super-admin/reset-password", {
+      const response = await api.post("/auth/reset-password", {
         token,
         newPassword,
       });
