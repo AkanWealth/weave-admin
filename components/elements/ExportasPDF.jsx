@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { SquareArrowOutUpRight, FileText, Download, ChevronDown } from "lucide-react";
 // Import jsPDF as a namespace import
 import { jsPDF } from "jspdf";
@@ -15,6 +15,26 @@ const TableExport = ({
   id = "export-button"
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Handle clicks outside the dropdown
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    }
+
+    // Add event listener when the dropdown is open
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    
+    // Clean up the event listener when component unmounts or dropdown closes
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDropdown]);
 
   const exportToPDF = () => {
     // Create a new document with proper import
@@ -114,7 +134,7 @@ const TableExport = ({
   };
 
   return (
-    <div className="relative" id={id}>
+    <div className="relative" id={id} ref={dropdownRef}>
       <button
         className="bg-weave-primary text-white py-2 px-4 rounded-xl font-medium flex items-center"
         onClick={toggleDropdown}

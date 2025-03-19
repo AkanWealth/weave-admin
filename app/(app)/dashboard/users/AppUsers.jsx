@@ -14,7 +14,9 @@ function AppUsers() {
   const router = useRouter();
   const [fetching, setIsFetching] = useState(true);
   const [copiedEmail, setCopiedEmail] = useState(null);
-
+  const resourceTypes = ["Active", "Inactive"];
+  const [resourceFilter, setResourceFilter] = useState("");
+  
   const columns = [
     { header: "User ID", accessor: (user) => user.id.split("-")[0] },
     { header: "Username", accessor: "username" },
@@ -63,19 +65,43 @@ function AppUsers() {
   }, []);
 
   useEffect(() => {
-    setFilteredList(appUsers);
+    // Apply both search and filter when app users change
+    applyFiltersAndSearch();
   }, [appUsers]);
 
+  // Apply filters whenever resourceFilter changes
   useEffect(() => {
-    if (searchKey === "") return;
-    const matchresult = appUsers.filter((user) =>
-      Object.values(user)
-        .join("    ")
-        .toLowerCase()
-        .includes(searchKey.toLowerCase())
-    );
-    setFilteredList(matchresult);
+    applyFiltersAndSearch();
+  }, [resourceFilter]);
+
+  // Apply search whenever searchKey changes
+  useEffect(() => {
+    applyFiltersAndSearch();
   }, [searchKey]);
+
+  // Function to apply both filters and search
+  const applyFiltersAndSearch = () => {
+    let result = [...appUsers];
+    
+    // Apply status filter
+    if (resourceFilter === "Active") {
+      result = result.filter(user => user.isActive);
+    } else if (resourceFilter === "Inactive") {
+      result = result.filter(user => !user.isActive);
+    }
+    
+    // Apply search
+    if (searchKey) {
+      result = result.filter((user) =>
+        Object.values(user)
+          .join("    ")
+          .toLowerCase()
+          .includes(searchKey.toLowerCase())
+      );
+    }
+    
+    setFilteredList(result);
+  };
 
   // Function to copy email to clipboard
   const copyToClipboard = (email) => {
@@ -118,10 +144,35 @@ function AppUsers() {
             title="Application Users"
             buttonText="Export"
           />
-          <button className="border py-2 px-4 rounded-md font-medium flex items-center">
-            Filter
-            <AlignLeft className="w-4 h-4 ml-2 rotate-180" />
-          </button>
+          <div className="relative">
+            <button className="relative dropdown border p-2 rounded-md font-medium flex items-center">
+              <span className="px-2">
+                {resourceFilter !== "" ? resourceFilter : "Filter"}
+                <AlignLeft className="w-4 h-4 ml-2 rotate-180 inline" />
+              </span>
+              <div className="absolute right-0 top-full mt-1 rounded-md p-1 shadow bg-white text-xs w-[200px] dropdown-menu z-10">
+                <div className="flex flex-col text-left">
+                  <a
+                    className="p-2 capitalize rounded-md mb-1 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => setResourceFilter("")}
+                  >
+                    All Users
+                  </a>
+                  {resourceTypes.map((type) => (
+                    <a
+                      className={`p-2 capitalize rounded-md mb-1 hover:bg-gray-100 cursor-pointer ${
+                        resourceFilter === type ? "bg-gray-200" : ""
+                      }`}
+                      onClick={() => setResourceFilter(type)}
+                      key={type}
+                    >
+                      {type}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -132,15 +183,17 @@ function AppUsers() {
       ) : appUsers.length === 0 ? (
         <div className="flex flex-col text-center justify-center py-12 max-w-[300px] mx-auto">
           <Image
-            src={signupFrame}
+            src="/images/empty-state.png" // Updated to use a placeholder path
+            width={80}
+            height={120}
             className="w-[80px] h-[120px] mx-auto"
-            alt="Frame"
+            alt="Empty state"
           />
           <h4 className="text-xl font-rubikMedium my-2">
             Your Community is Waiting to Grow!
           </h4>
           <h4 className="text-gray-400 text-sm">
-            It looks like there haven’t been any new sign-ups recently.
+            It looks like there haven't been any new sign-ups recently.
           </h4>
         </div>
       ) : (
@@ -154,7 +207,6 @@ function AppUsers() {
               <th className="py-3 px-8 text-left font-medium">Email</th>
               <th className="py-3 px-4 text-left font-medium">Date</th>
               <th className="py-3 px-4 text-left font-medium">Status</th>
-              {/* <th className="py-3 px-4 text-left font-medium">Device</th> */}
               <th className="py-3 px-4 text-left font-medium">Last Login</th>
               <th className="py-3 px-4 text-left font-medium"></th>
             </tr>
@@ -174,7 +226,7 @@ function AppUsers() {
               ).padStart(2, "0")} ${d.getHours() >= 12 ? "AM" : "PM"}`;
             };
             return (
-              <tr key={Math.random()}>
+              <tr key={user.id || Math.random()}>
                 <td>
                   <h6 className="font-medium text-black px-4">
                     {user.username}
@@ -217,9 +269,6 @@ function AppUsers() {
                     </button>
                   )}
                 </td>
-                {/* <td className="py-4 px-4">
-                  {user.device || (user.id % 2 === 0 ? "iOS" : "Android")}
-                </td> */}
                 <td className="whitespace-nowrap">
                   <div className="inline-block text-sm text-gray-600">
                     <span className="block">{formatDate(lastLogin)}</span>
