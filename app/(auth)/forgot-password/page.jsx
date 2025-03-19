@@ -26,7 +26,7 @@ function PasswordReset() {
         router.push(`/otp?email=${email}&usage=reset-password`);
       }
     } catch (error) {
-      showMessage(error.message, "","error");
+      showMessage("Too many request", error.message,"error");
     } finally {
       setIsLoading(false);
     }
