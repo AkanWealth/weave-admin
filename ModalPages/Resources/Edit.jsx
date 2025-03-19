@@ -1,7 +1,6 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
-
 import RichTextEditor from "@/components/elements/RichTextEditor";
 import ResourceLibraryProvider, {
   useResourceLibrary,
@@ -11,6 +10,8 @@ import { ToastContext, useToastContext } from "@/contexts/toast";
 import api from "@/lib/api";
 import { readAndUploadThumbnail } from "@/lib/uploadThumbnail";
 import { baseUrl } from "@/lib/envfile";
+
+
 
 function EditResource() {
   const searchParams = useSearchParams();

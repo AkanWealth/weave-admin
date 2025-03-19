@@ -17,16 +17,16 @@ function PasswordReset() {
 
   const requestOtp = async () => {
     try {
-      const response = await api.post("/super-admin/forgot-password", {
+      const response = await api.post("/auth/forgot-password", {
         email,
       });
       console.log(response.status);
-      if (response.status === 201) {
-        showMessage("Otp sent to email successfully", "success");
+      if (response.status === 200) {
+        showMessage("Otp sent to email successfully", "","success");
         router.push(`/otp?email=${email}&usage=reset-password`);
       }
     } catch (error) {
-      showMessage(error.message, "error");
+      showMessage(error.message, "","error");
     } finally {
       setIsLoading(false);
     }
