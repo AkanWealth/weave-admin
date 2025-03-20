@@ -48,7 +48,7 @@ function AddContent() {
             className="mr-2"
             onChange={(e) => setContentType(e.target.value)}
           />
-          Guide
+          Article
         </label>
         <label
           className={`border border-${

@@ -187,7 +187,7 @@ function ContentInfo() {
 
   return (
     <form name="content-form" onSubmit={(e) => e.preventDefault()}>
-      <h5 className="capitalize font-rubikBold text-xl">{contentType}</h5>
+      <h5 className="capitalize font-rubikBold text-2xl">{contentType}</h5>
       <p className="text-sm text-gray-500 my-2">
         Fill in the details below to add new content to the resource library.
       </p>
@@ -325,9 +325,8 @@ function ContentInfo() {
                     <span className="fa fa-trash"></span>
                   </button>
                   <label
-                    className={`border border-${
-                      thumbnail === item.fileUrl ? "weave-primary" : "gray-500"
-                    } rounded-md p-6  flex flex-col h-full`}
+                    className={`border border-${thumbnail === item.fileUrl ? "weave-primary" : "gray-500"
+                      } rounded-md p-6  flex flex-col h-full`}
                   >
                     <img
                       src={`${item.fileUrl}`}
@@ -447,7 +446,18 @@ function ContentInfo() {
                 margin: "15px auto",
               }}
             >
-              {resourceFile?.name || (
+              {/* {resourceFile?.name || (
+                <>
+                  <span>Drag or and drop your audio file here</span>
+                  <span className="text-gray-500">MP3, WAV</span>
+                  <span>
+                    <span className="inline-block px-4 py-2 text-md text-base-white bg-weave-primary rounded-xl">
+                      Select File
+                    </span>
+                  </span>
+                </>
+              )} */}
+              {fileUploadContent?.name || (
                 <>
                   <span>Drag or and drop your audio file here</span>
                   <span className="text-gray-500">MP3, WAV</span>

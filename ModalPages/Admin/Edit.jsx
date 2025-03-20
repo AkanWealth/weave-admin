@@ -128,7 +128,7 @@ function EditAdmin({ userData, onSave, onCancel }) {
       const response = await api.put(`/super-admin/profile/${userData.id}`, updatedUser);
       console.log(response)
       
-      // if (response.status === 200) {
+      if (response.status === 200) {
 
         onSave({
           ...userData, // Keep all original fields
@@ -138,7 +138,7 @@ function EditAdmin({ userData, onSave, onCancel }) {
         username: username,
         });
         return true;
-      // }
+      }
       console.log( ...userData, firstname,lastname,email,username,);
       return false;
     } catch (error) {
