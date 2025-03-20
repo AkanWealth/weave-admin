@@ -15,6 +15,7 @@ import EditResource from "@/ModalPages/Resources/Edit";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createContext, useContext } from "react";
 import { Bounce, toast, ToastContainer } from "react-toastify";
+import DeleteNotificationModal from "@/ModalPages/Notification/DeleteNotificationModal";
 
 const ModalContext = createContext();
 
@@ -131,7 +132,7 @@ export default function Modal() {
         </div>
       )}
 
-      <ToastContainer
+      {/* <ToastContainer
         position="top-right"
         autoClose={5000}
         hideProgressBar={false}
@@ -143,7 +144,7 @@ export default function Modal() {
         pauseOnHover
         theme="light"
         transition={Bounce}
-      />
+      /> */}
     </ModalContext.Provider>
   );
 }
@@ -163,6 +164,7 @@ const ModalContent = ({ usage, params }) => {
   if (usage === "edit-resource") return <EditResource />;
   if (usage === "add-notification") return <AddNotification />;
   if (usage === "send-message") return <SendMessage />;
+  if (usage === "delete-notification") return <DeleteNotificationModal/>;
 };
 
 export const useModalContext = () => useContext(ModalContext);

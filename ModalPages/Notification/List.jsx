@@ -1,17 +1,41 @@
 import Loader from "@/components/elements/Loader";
 import api from "@/lib/api";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import DeleteNotificationModal from "./DeleteNotificationModal";
 
 function Notifications() {
   const [notifications, setNotifications] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    fetchAllNotifications();
+
+    // Listen for the custom event to close modals
+    const handleCloseAllModals = (event) => {
+      const { exceptModalId } = event.detail;
+      if (exceptModalId !== 'notification-detail-modal') {
+        setIsNotificationModalOpen(false);
+      }
+    };
+
+    document.addEventListener('closeAllModals', handleCloseAllModals);
+
+    // Clean up the event listener when component unmounts
+    return () => {
+      document.removeEventListener('closeAllModals', handleCloseAllModals);
+    };
+  }, []);
 
   const fetchAllNotifications = async () => {
     setIsFetching(true);
-    // fetch all notifications from the server
+
     try {
       const response = await api.get("/notification/admin");
       if (response.status === 200) {
@@ -27,27 +51,34 @@ function Notifications() {
     }
   };
 
-  const openDeleteModal = (notification) => {
-    setSelectedNotification(notification);
-    setShowDeleteModal(true);
+  const handleDeleteClick = (notification) => {
+    router.push(`/users?modal=delete-notification&id=${notification.id}`);
   };
 
-  const closeDeleteModal = () => {
-    setShowDeleteModal(false);
+  const openDeleteModal = (notification) => {
+    // Close any other open modal
+    setIsNotificationModalOpen(false);
+
+    // Open the delete modal
+    setSelectedNotification(notification);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
     setSelectedNotification(null);
   };
 
   const handleDeleteNotification = async () => {
     if (isDeleting || !selectedNotification) return;
-    
+
     setIsDeleting(true);
     try {
       const response = await api.delete(`/notification/${selectedNotification.id}`);
       if (response.status === 200) {
-        // Remove the deleted notification from state
         setNotifications(notifications.filter(notification => notification.id !== selectedNotification.id));
         showMessage("Notification deleted successfully", "success");
-        closeDeleteModal();
+        closeModal();
       } else {
         showMessage(response.data.message, "error");
       }
@@ -59,16 +90,15 @@ function Notifications() {
     }
   };
 
-  // Utility function for displaying messages
   const showMessage = (message, type) => {
-    // Implement your message display logic here
-    // This could be a toast notification or other feedback mechanism
     console.log(`${type}: ${message}`);
   };
 
-  useEffect(() => {
-    fetchAllNotifications();
-  }, []);
+  // Add this function to open the notification detail modal
+  const openNotificationModal = (notification) => {
+    setSelectedNotification(notification);
+    setIsNotificationModalOpen(true);
+  };
 
   return (
     <div>
@@ -97,22 +127,30 @@ function Notifications() {
                   </p>
                   <button
                     className="text-red-500 hover:text-red-700"
-                    onClick={() => openDeleteModal(notification)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteClick(notification);
+                    }}
                     aria-label="Delete notification"
                   >
                     <i className="fa fa-trash"></i>
                   </button>
                 </div>
-                
-                <h6 className="font-rubikMedium my-2">
-                  {notification.title}
-                </h6>
 
-                <p className="text-gray-500 text-sm">{notification.content}</p>
-                <div className="my-2">
-                  <span className="p-1 px-4 text-sm text-base-white bg-weave-primary rounded-full inline-block capitalize">
-                    {notification.recipient}
-                  </span>
+                <div
+                  className="cursor-pointer"
+                  onClick={() => openNotificationModal(notification)}
+                >
+                  <h6 className="font-rubikMedium my-2">
+                    {notification.title}
+                  </h6>
+
+                  <p className="text-gray-500 text-sm">{notification.content}</p>
+                  <div className="my-2">
+                    <span className="p-1 px-4 text-sm text-base-white bg-weave-primary rounded-full inline-block capitalize">
+                      {notification.recipient}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -120,35 +158,19 @@ function Notifications() {
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-            <div className="flex flex-col items-center mb-4">
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
-                <i className="fa fa-trash text-red-500 text-xl"></i>
-              </div>
-              <h3 className="text-lg font-bold mb-2">Delete Notification</h3>
-              <p className="text-center text-gray-600">
-                Are you sure you want to delete this notification from the system? This action cannot be undone.
-              </p>
-            </div>
-            
-            <div className="flex flex-col gap-2 mt-6">
-              <button
-                onClick={handleDeleteNotification}
-                disabled={isDeleting}
-                className="w-full py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-              >
-                {isDeleting ? "Deleting..." : "Confirm"}
-              </button>
-              <button
-                onClick={closeDeleteModal}
-                className="w-full py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
+     
+
+      {isNotificationModalOpen && selectedNotification && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" id="notification-detail-modal">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+            <h3 className="text-lg font-bold mb-2">{selectedNotification.title}</h3>
+            <p className="text-gray-600 mb-4">{selectedNotification.content}</p>
+            <button
+              onClick={() => setIsNotificationModalOpen(false)}
+              className="w-full py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

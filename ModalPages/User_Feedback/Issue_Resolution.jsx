@@ -21,6 +21,8 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
   const [newStatus, setNewStatus] = useState(status);
   const [assignees, setAssignees] = useState([]);
   const [loadingAssignees, setLoadingAssignees] = useState(false);
+  const [attachment, setAttachment] = useState(null);
+
 
   // Function to toggle message expansion
   const toggleMessageExpansion = (id) => {
@@ -43,7 +45,7 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
     try {
       const response = await api.get('/usage-analytics/admin');
       console.log(response);
-      
+
       if (response.status === 200 && response.data) {
         // Add unassigned option at the beginning
         const assigneesData = [
@@ -52,7 +54,7 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
         ];
         setAssignees(assigneesData);
       } else {
-  
+
         setAssignees([{ id: 'unassigned', username: 'Unassigned' }]);
         showMessage("Failed to load assignees", "", "error");
       }
@@ -76,7 +78,9 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
     if (issueData) {
       setStatus(issueData.status || "New");
       setNewStatus(issueData.status || "New");
-      
+
+      setAttachment(issueData.attachmentUrl);
+
       // Set the conversation history based on the issue description from API
       setConversations([{
         id: 1,
@@ -97,16 +101,16 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
 
   const handleSubmitResponse = async () => {
     if (!response.trim()) return;
-    
+
     setLoading(true);
     try {
-      // Just show success message
+
       showMessage("Response sent successfully", "", "success");
-      
-      // Clear the response and close the modal
+
+
       setResponse("");
       onClose();
-      
+
       setLoading(false);
     } catch (error) {
       console.error(error);
@@ -114,7 +118,7 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
       setLoading(false);
     }
   };
-  
+
   const handleStatusChange = async (newStatus) => {
     setStatus(newStatus);
     if (onStatusUpdate) {
@@ -155,7 +159,7 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
             <X className="w-5 h-5" />
           </button>
         </div>
-        
+
         {/* Title centered below the close button */}
         <div className="text-center mb-4">
           <h2 className="text-xl font-medium">Issue Resolution</h2>
@@ -165,12 +169,12 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
         <div className="flex justify-center w-2/3 mx-auto">
           <button
             className={`flex items-center px-4 py-2 text-sm relative ${activeTab === "details"
-                ? "text-black font-medium"
-                : "text-gray-500"
+              ? "text-black font-medium"
+              : "text-gray-500"
               }`}
             onClick={() => setActiveTab("details")}
           >
-            <OctagonAlert className="w-5 h-5 mr-2"/>
+            <OctagonAlert className="w-5 h-5 mr-2" />
             Issue Details
             {activeTab === "details" && (
               <div className="absolute bottom-0 left-0 w-full h-0.5 bg-black"></div>
@@ -179,12 +183,12 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
 
           <button
             className={`flex items-center px-4 py-2 text-sm relative ${activeTab === "respond"
-                ? "text-black font-medium"
-                : "text-gray-500"
+              ? "text-black font-medium"
+              : "text-gray-500"
               }`}
             onClick={() => setActiveTab("respond")}
           >
-            <UserPen className="w-5 h-5 mr-2"/>
+            <UserPen className="w-5 h-5 mr-2" />
             Respond to User
             {activeTab === "respond" && (
               <div className="absolute bottom-0 left-0 w-full h-0.5 bg-black"></div>
@@ -201,17 +205,17 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
                   <label className="block text-sm font-medium text-gray-500 mb-1">Issue ID:</label>
                   <p className="text-gray-900 font-medium">{issueData?.userId || "WV1234"}</p>
                 </div>
-                
+
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-500 mb-1">Submitted on:</label>
                   <p className="text-gray-900">{issueData?.dateTime || "22-04-2025, 3:30PM"}</p>
                 </div>
-              
+
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-500 mb-1">Reported by:</label>
                   <p className="text-gray-900">{issueData?.username || "Taiwo Hassan"}</p>
                 </div>
-                
+
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-500 mb-1">Description:</label>
                   <p className="text-gray-900 bg-gray-50 rounded-md">
@@ -221,17 +225,33 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
 
                 <div className="mt-8 mb-4">
                   <label className="block text-sm font-medium text-gray-500 mb-2">Attached Screenshot:</label>
-                  <div 
-                  style={{ 
-                    border: '2px dotted #d1d5db', 
-                    borderRadius: '6px', 
-                    padding: '1.5rem' 
-                  }} 
-                  className=" rounded-md p-2 flex items-center justify-center">
-                    <div className="text-center">
+                  <div
+                    style={{
+                      border: '2px dotted #d1d5db',
+                      borderRadius: '6px',
+                      padding: '1.5rem'
+                    }}
+                    className=" rounded-md p-2 flex items-center justify-center">
+                    {/* <div className="text-center">
                       <Image src={Top} width={50} height={50} alt="Screenshot placeholder" className="mx-auto mb-2" />
                       <Image src={Bottom} width={50} height={50} alt="Screenshot placeholder" className="mx-auto" />
-                    </div>
+                    </div> */}
+                    {attachment ? (
+                      <div className="text-center">
+                        <Image
+                          src={attachment}
+                          width={300}
+                          height={200}
+                          alt="User submitted screenshot"
+                          className="mx-auto"
+                        />
+                      </div>
+                    ) : (
+                      <div className="text-center">
+                        <Image src={Top} width={50} height={50} alt="Screenshot placeholder" className="mx-auto mb-2" />
+                        <Image src={Bottom} width={50} height={50} alt="Screenshot placeholder" className="mx-auto" />
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -252,7 +272,7 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
                       </select>
                     </div>
                   </div>
-                  
+
                   <div className="w-3/4">
                     <label className="block text-sm text-gray-700 mb-2">Assignee:</label>
                     <div className="relative">
@@ -289,24 +309,24 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
                       <div className="flex items-start">
                         <div className="flex-1">
                           <p className="font-medium text-base">
-                           <span className="text-gray-600">User Reported:"</span> 
+                            <span className="text-gray-600">User Reported:"</span>
                             <span className="ml-1 text-black">
-                              {expandedMessageId === conversation.id 
-                                ? conversation.message 
+                              {expandedMessageId === conversation.id
+                                ? conversation.message
                                 : truncateText(conversation.message)}
                             </span>
                             {conversation.message && conversation.message.length > 50 && (
-                              <button 
-                                onClick={() => toggleMessageExpansion(conversation.id)} 
+                              <button
+                                onClick={() => toggleMessageExpansion(conversation.id)}
                                 className="text-weave-primary ml-2 text-sm hover:underline"
                               >
                                 {expandedMessageId === conversation.id ? "Collapse" : "Read more"}
                               </button>
                             )}"
-                           
+
                             <span className="text-xs text-gray-500 ml-2">[{conversation.timestamp}]</span>
                           </p>
-                         
+
                         </div>
                       </div>
                     </div>
@@ -365,11 +385,10 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
           <button
             onClick={activeTab === 'details' ? handleSaveChanges : handleSubmitResponse}
             disabled={loading || (activeTab === 'respond' && !response.trim())}
-            className={`w-full px-5 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-              (loading || (activeTab === 'respond' && !response.trim())) 
-                ? 'opacity-50 cursor-not-allowed' 
+            className={`w-full px-5 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${(loading || (activeTab === 'respond' && !response.trim()))
+                ? 'opacity-50 cursor-not-allowed'
                 : ''
-            }`}
+              }`}
           >
             {loading ? 'Processing...' : activeTab === 'details' ? 'Save Changes' : 'Send'}
           </button>
