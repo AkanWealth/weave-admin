@@ -126,7 +126,7 @@ function AdminList() {
       setFetchingUsers(true);
       // Fetch complete user details by ID
       const response = await api.get(`/users/profile/${user.id}`);
-console.log(response);
+      console.log(response);
 
       if (response.status === 200) {
         // Combine fetched data with complete role object
@@ -210,19 +210,44 @@ console.log(response);
 
 
 
+  // const handleUserUpdate = async (updatedUser) => {
+  //   try {
+  //     // Update local state
+  //     if (users) {
+  //       const updatedUsers = users.map(user => 
+  //         user.id === updatedUser.id ? updatedUser : user
+  //       );
+  //       setUsers(updatedUsers);
+  //       setFilteredlist(updatedUsers);
+  //     }
+      
+  //     showMessage("User updated successfully", "", "success");
+  //     closeEditModal();
+  //   } catch (error) {
+  //     console.error("Error updating user:", error);
+  //     showMessage(
+  //       "Error updating user",
+  //       "",
+  //       "error"
+  //     );
+  //   }
+  // };
   const handleUserUpdate = async (updatedUser) => {
     try {
-      // Update local state
+      console.log("iutre",users);
       if (users) {
         const updatedUsers = users.map(user => 
           user.id === updatedUser.id ? updatedUser : user
         );
+        console.log("user piyrtej",updatedUsers);
         setUsers(updatedUsers);
         setFilteredlist(updatedUsers);
       }
       
       showMessage("User updated successfully", "", "success");
       closeEditModal();
+      
+      await fetchUsers();
     } catch (error) {
       console.error("Error updating user:", error);
       showMessage(
@@ -232,7 +257,6 @@ console.log(response);
       );
     }
   };
-
 
 
 

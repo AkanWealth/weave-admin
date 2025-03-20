@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import InputField from "@/components/elements/TextField";
 import Button from "@/components/elements/Button";
+import axios from "axios";
 import api from "@/lib/api";
 import Image from "next/image";
 import avatar from "@/assets/images/3d_avatar_1.png";
 import { UserPen, Settings2 } from "lucide-react";
+import { useToastContext } from "@/contexts/toast";
 
 function EditAdmin({ userData, onSave, onCancel }) {
 
@@ -20,6 +22,7 @@ function EditAdmin({ userData, onSave, onCancel }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
   const [isLoading, setIsLoading] = useState(false);
+  const { showMessage } = useToastContext();
   
   // Add state for permissions checkboxes
   const [permissions, setPermissions] = useState({
@@ -110,39 +113,139 @@ function EditAdmin({ userData, onSave, onCancel }) {
   // };
 
   // Handle the "Enable All" checkbox change
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setIsSubmitting(true);
+    
+  //   try {
+  //     // Use the current state values (what the user typed in the form)
+  //     const updatedUser = {
+  //       firstName: firstname, 
+  //       lastName: lastname,   
+  //       email: email,         
+  //       username: username 
+  //     };
+      
+  //     console.log("Sending updated data to API:", updatedUser);
+      
+  //     const response = await api.put(`/super-admin/profile/${userData.id}`, updatedUser);
+  //     console.log(response)
+      
+  //     if (response.status === 200) {
+
+  //       onSave({
+  //         ...userData, // Keep all original fields
+  //       firstName: firstname,
+  //       lastName: lastname,
+  //       email: email,
+  //       username: username,
+  //       });
+  //       return true;
+  //     }
+  //     console.log( ...userData, firstname,lastname,email,username,);
+  //     return false;
+  //   } catch (error) {
+  //     console.error("Error updating user:", error);
+  //     return false;
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setIsSubmitting(true);
+    
+  //   try {
+  //     // Include the role ID in the update request
+  //     const updatedUser = {
+  //       firstName: firstname,
+  //       lastName: lastname,
+  //       email: email,
+  //       username: username
+  //     };
+      
+      
+
+  //     console.log("Sending updated data to API:", updatedUser);
+  //     const updateUser = async (userId, updatedData) => {
+  //       try {
+  //         const response = await axios.put(`https://founderstripe-c2848f6b7a1c.herokuapp.com/api/v1/super-admin/profile/${userData.id}`, updatedData, {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,  // Ensure you are passing the correct auth token
+  //             'Content-Type': 'application/json',
+  //           },
+  //         });
+      
+  //         console.log('Update response:', response.data);
+  //       } catch (error) {
+  //         console.error('Error updating user:', error.response?.data || error.message);
+  //       }
+  //     };
+      
+
+  //     // const response = await api.put(`/super-admin/profile/${userData.id}`, updatedUser);
+      
+  //     if (updateUser.status === 200) {
+  
+  //       onSave({
+  //         ...userData,
+  //         firstName: firstname,
+  //         lastName: lastname,
+  //         email: email,
+  //         username: username,
+  //         role: { id: role, name: roles.find(r => r.id === role)?.name || userData.role?.name }
+  //       });
+  //       return true;
+  //     }
+  //     return false;
+  //   } catch (error) {
+  //     console.error("Error updating user:", error);
+  //     return false;
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
-      // Use the current state values (what the user typed in the form)
-      const updatedUser = {
-        firstName: firstname, 
-        lastName: lastname,   
-        email: email,         
-        username: username 
-      };
-      
-      console.log("Sending updated data to API:", updatedUser);
-      
-      const response = await api.put(`/super-admin/profile/${userData.id}`, updatedUser);
-      console.log(response)
-      
-      if (response.status === 200) {
 
-        onSave({
-          ...userData, // Keep all original fields
+      const updatedData = {
         firstName: firstname,
         lastName: lastname,
         email: email,
-        username: username,
-        });
+        username: username
+      };
+      
+      console.log("Sending updated data to API:", updatedData);
+     const response = await api.put(`/super-admin/profile/${userData.id}`, updatedData);
+      
+      if (response.status === 200) {
+
+        const updatedUserObject = {
+          ...userData,
+          firstName: firstname,
+          lastName: lastname,
+          email: email,
+          username: username,
+          role: { 
+            id: role, 
+            name: roles.find(r => r.id === role)?.name || userData.role?.name 
+          }
+        };
+
+        onSave(updatedUserObject);
+  
+
         return true;
+        
       }
-      console.log( ...userData, firstname,lastname,email,username,);
       return false;
     } catch (error) {
-      console.error("Error updating user:", error);
+      console.error("Error in handleSubmit:", error);
       return false;
     } finally {
       setIsSubmitting(false);
@@ -215,6 +318,13 @@ function EditAdmin({ userData, onSave, onCancel }) {
           roleId: role
         
       };
+      onSave({
+            ...userData,
+            role: { id: role },
+            permissions: permissions
+          });
+      
+      return true;
       
       // Make API call to update permissions
       // const response = await api.put(`/super-admin/update-admin-permissions/${userData.id}`, permissionsData);
