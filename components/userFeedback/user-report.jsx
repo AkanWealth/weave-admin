@@ -87,6 +87,7 @@ function UserReport() {
           username: issue.email,
           dateTime: new Date(issue.created_at).toLocaleString(),
           issueSummary: `${issue.description}`,
+          attachmentUrl: issue.attachmentUrl, 
           status: issue.status 
         }));
         setUsers(mappedData);

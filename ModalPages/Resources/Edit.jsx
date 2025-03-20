@@ -145,7 +145,7 @@ function EditResource() {
         }
       );
       const respbody = await response.json();
-      showMessage(respbody.message, "", "success");
+      showMessage("Update Successful",respbody.message, "success");
 
       if (response.status) {
         router.push("/contentsManagement");
