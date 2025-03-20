@@ -1,4 +1,5 @@
 import { useModalContext } from "@/components/elements/Modal";
+import { useToastContext } from "@/contexts/toast";
 import InputField from "@/components/elements/TextField";
 import React, { useState, useEffect } from "react";
 import ParagraphInput from "@/components/elements/TextArea";
@@ -14,7 +15,9 @@ function AddNotification() {
   // const [searchName, setSearchName] = useState("");
   // const [recipientGroup, setRecipientGroup] = useState([]);
   const [recipientGroup, setRecipientGroup] = useState("");
-  const { closeModal, showMessage } = useModalContext();
+  const { showMessage} = useToastContext(); 
+
+const { closeModal } = useModalContext();
 
   // const addToRecipient = (recipient) => {
   //   const recipientExist = recipientGroup.find(
@@ -52,7 +55,7 @@ function AddNotification() {
       }
     } catch (error) {
       console.log(error);
-      showMessage("An error occurred while fetching users", "error");
+      showMessage("An error occurred while fetching users", "","error");
     } finally {
       setIsFetching(false);
     }
@@ -78,15 +81,16 @@ function AddNotification() {
       const response = await api.post("/notification", data);
       if (response.status === 201) {
         console.log(response.data);
-        showMessage("Notification sent successfully", "success");
+        showMessage("Notification sent successfully", "","success");
         closeModal();
       }
     } catch (error) {
       showMessage(
         error.response.data.message ||
-          "An error occurred while sending notification",
+          "An error occurred while sending notification","",
         "error"
       );
+      closeModal();
       console.log(error);
     } finally {
       setIsSending(false);
