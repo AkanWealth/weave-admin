@@ -123,7 +123,7 @@ function Notifications() {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
             <div className="flex flex-col items-center mb-4">
               <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
                 <i className="fa fa-trash text-red-500 text-xl"></i>
