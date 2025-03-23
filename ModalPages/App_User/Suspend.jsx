@@ -22,7 +22,11 @@ function SuspendAppUser() {
           "success"
         );
         router.back();
+        
+      
         return;
+
+        
       }
 
       showMessage("Error executing action","Try Again", "error");

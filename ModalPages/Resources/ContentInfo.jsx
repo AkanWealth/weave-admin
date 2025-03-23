@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 
 import RichTextEditor from "@/components/elements/RichTextEditor";
 import { useModalContext } from "@/components/elements/Modal";
+import { useToastContext } from "@/contexts/toast";
 import api from "@/lib/api";
 import Cookies from "js-cookie";
 import { baseUrl } from "@/lib/envfile";
@@ -24,6 +25,40 @@ function ContentInfo() {
   const [tags, setTags] = useState([]);
   const [tagname, setTagName] = useState("");
   const [fileUploadContent, setFileUploadContent] = useState(null);
+  const [category, setCategory] = useState("");
+
+  // Form validation states
+  const [infoTabValid, setInfoTabValid] = useState(false);
+  const [detailsTabValid, setDetailsTabValid] = useState(false);
+
+  // Validate info tab inputs whenever they change
+  useEffect(() => {
+    const isInfoTabValid = 
+      title.trim() !== "" && 
+      description.trim() !== "" && 
+      category !== "" && 
+      thumbnail !== "";
+    
+    setInfoTabValid(isInfoTabValid);
+  }, [title, description, category, thumbnail]);
+
+  // Validate details tab inputs whenever they change
+  useEffect(() => {
+    let isDetailsTabValid = false;
+    
+    if (contentType === "article") {
+      isDetailsTabValid = 
+        articleBody.trim() !== "" && 
+        duration.trim() !== "" && 
+        author.trim() !== "";
+    } else {
+      isDetailsTabValid = 
+        fileUploadContent !== null && 
+        author.trim() !== "";
+    }
+    
+    setDetailsTabValid(isDetailsTabValid);
+  }, [contentType, articleBody, duration, author, fileUploadContent]);
 
   const addToTag = (tag) => {
     if (tag == "") return;
@@ -39,7 +74,7 @@ function ContentInfo() {
     setTags(otherTags);
   };
 
-  const { showMessage } = useModalContext();
+  const { showMessage } = useToastContext();
   const accessToken = Cookies.get("session");
 
   const [loadingThumbnail, setLoadingThumbnail] = useState(false);
@@ -100,9 +135,8 @@ function ContentInfo() {
 
   const submitForm = async (status) => {
     setIsSubmitting(true);
-    const form = document.forms["content-form"];
-    const category = form["category"].value;
-    const thumbnailUrl = form["thumbnail"].value;
+    // Get category value from state instead of form
+    const thumbnailUrl = thumbnail;
 
     let btn = document.getElementById(`${status.toLowerCase()}-btn`);
     let btnTitle = btn.textContent;
@@ -123,8 +157,11 @@ function ContentInfo() {
           status,
         });
 
-        showMessage(resp.data.message, "success");
-        router.push("/contentsManagement");
+        showMessage(resp.data.message, "", "success");
+  
+        setTimeout(() => {
+          router.push("/contentsManagement?refresh=" + Date.now());
+        }, 1000);
       } else {
         let formdata = new FormData();
         formdata.append("file", fileUploadContent);
@@ -150,12 +187,22 @@ function ContentInfo() {
         console.log({ respstatus });
         console.log(respbody);
 
-        showMessage(respbody.message, "success");
-        router.push("/contentsManagement");
+        
+        if (response.ok) {
+          showMessage(respbody.message || "Content uploaded successfully", "","success");
+          
+          setTimeout(() => {
+            router.push("/contentsManagement?refresh=" + Date.now());
+          }, 1000);
+        } else {
+          showMessage(respbody.message || "Error uploading content", "","error");
+        }
+      
+
       }
     } catch (err) {
       console.log(err);
-      showMessage("Error uploading content", "error");
+      showMessage("Error uploading content", "","error");
     } finally {
       setIsSubmitting(false);
 
@@ -172,17 +219,22 @@ function ContentInfo() {
     try {
       console.log(thumbnailToDelete);
       const response = await api.delete(`/thumbnails/${thumbnailToDelete}`);
-      showMessage(response.data.message, "success");
+      showMessage(response.data.message, "","success");
       getThumbnails();
     } catch (error) {
       console.log(error);
       showMessage(
-        error.response.data.message || "Error deleting thumbnail",
+        error.response.data.message || "Error deleting thumbnail","",
         "error"
       );
     } finally {
       setIsdeletingThumbnail(false);
     }
+  };
+
+  // Handle category selection
+  const handleCategoryChange = (e) => {
+    setCategory(e.target.value);
   };
 
   return (
@@ -219,16 +271,18 @@ function ContentInfo() {
           value={title}
           setValue={setTitle}
           className={"mb-3"}
+          required={true}
         />
         <InputField
           label={"Description"}
           value={description}
           setValue={setDescription}
+          required={true}
         />
 
         <div className="my-4">
           <label htmlFor="" className="font-rubikMedium">
-            Category
+            Category <span className="text-red-500">*</span>
           </label>
           <br />
           <div className="inline-block">
@@ -236,8 +290,10 @@ function ContentInfo() {
               <input
                 type="radio"
                 name="category"
-                value={"Sleep"}
+                value="Sleep"
                 className="mx-2"
+                checked={category === "Sleep"}
+                onChange={handleCategoryChange}
               />{" "}
               Sleep
             </label>
@@ -247,8 +303,10 @@ function ContentInfo() {
               <input
                 type="radio"
                 name="category"
-                value={"Happiness"}
+                value="Happiness"
                 className="mx-2"
+                checked={category === "Happiness"}
+                onChange={handleCategoryChange}
               />{" "}
               Happiness
             </label>
@@ -258,8 +316,10 @@ function ContentInfo() {
               <input
                 type="radio"
                 name="category"
-                value={"Meditation"}
+                value="Meditation"
                 className="mx-2"
+                checked={category === "Meditation"}
+                onChange={handleCategoryChange}
               />
               Meditation
             </label>
@@ -269,15 +329,19 @@ function ContentInfo() {
               <input
                 type="radio"
                 name="category"
-                value={"Sophrology"}
+                value="Sophrology"
                 className="mx-2"
+                checked={category === "Sophrology"}
+                onChange={handleCategoryChange}
               />
               Sophrology
             </label>
           </div>
         </div>
 
-        <div className="">Thumbnail/Illustration</div>
+        <div className="">
+          Thumbnail/Illustration <span className="text-red-500">*</span>
+        </div>
         <div className="border border-gray-500 p-4 my-4 rounded-xl">
           <div
             className="flex flex-row p-2 px-4 text-sm text-red-500 rounded-xl"
@@ -381,21 +445,16 @@ function ContentInfo() {
               Back
             </button>
           </div>
-          {/* <div className="flex-1">
-            <button
-              className="bg-gray-300 text-black py-2 w-full font-rubikMedium rounded-md"
-              type="button"
-            >
-              Save as Draft
-            </button>
-          </div> */}
           <div className="flex-1">
             <button
-              className="bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md"
+              className={`bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md ${
+                !infoTabValid ? "opacity-50 cursor-not-allowed" : ""
+              }`}
               onClick={() => {
                 setActiveTab("file");
               }}
               type="button"
+              disabled={!infoTabValid}
             >
               Continue
             </button>
@@ -406,7 +465,7 @@ function ContentInfo() {
         {contentType === "article" ? (
           <>
             <h6 className="text-xl font-rubikBold my-2 capitalize">
-              Content Body
+              Content Body <span className="text-red-500">*</span>
             </h6>
 
             <div className="mb-4">
@@ -419,12 +478,13 @@ function ContentInfo() {
               value={duration}
               setValue={setDuration}
               className="mb-3"
+              required={true}
             />
           </>
         ) : (
           <>
             <h6 className="text-xl font-rubikBold my-2 capitalize">
-              {contentType} File Upload
+              {contentType} File Upload <span className="text-red-500">*</span>
             </h6>
 
             <input
@@ -446,17 +506,6 @@ function ContentInfo() {
                 margin: "15px auto",
               }}
             >
-              {/* {resourceFile?.name || (
-                <>
-                  <span>Drag or and drop your audio file here</span>
-                  <span className="text-gray-500">MP3, WAV</span>
-                  <span>
-                    <span className="inline-block px-4 py-2 text-md text-base-white bg-weave-primary rounded-xl">
-                      Select File
-                    </span>
-                  </span>
-                </>
-              )} */}
               {fileUploadContent?.name || (
                 <>
                   <span>Drag or and drop your audio file here</span>
@@ -478,6 +527,7 @@ function ContentInfo() {
           value={author}
           setValue={setAuthor}
           className="mb-2"
+          required={true}
         />
 
         <label className="capitalize font-rubikMedium">Tags </label>
@@ -540,12 +590,14 @@ function ContentInfo() {
           <div className="flex-1">
             <button
               type="button"
-              className="bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md"
+              className={`bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md ${
+                !detailsTabValid ? "opacity-50 cursor-not-allowed" : ""
+              }`}
               onClick={(e) => {
                 e.preventDefault();
                 submitForm("Published");
               }}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !detailsTabValid}
               id="published-btn"
             >
               Publish
@@ -556,20 +608,5 @@ function ContentInfo() {
     </form>
   );
 }
-
-// const AddResourceInfo = ({}) => {
-//   const [title, setTitle] = useState("");
-//   const [activeTab, setActiveTab] = useState("");
-
-//   const [thumbnail, setThumbnail] = useState("");
-//   const searchParams = useSearchParams();
-//   const contentType = searchParams.get("contentType");
-
-//   // const [title, setTitle] = useState("");
-
-//   return (
-
-//   );
-// };
 
 export default ContentInfo;

@@ -4,10 +4,11 @@ import ResourceLibraryProvider, {
 } from "@/contexts/ResourceLibraryContext";
 import { ToastContext } from "@/contexts/toast";
 import api from "@/lib/api";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams,useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 function DeleteResource() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const itemId = searchParams.get("resource_id");
   const [deleting, setDeleting] = useState(false);
@@ -25,7 +26,9 @@ function DeleteResource() {
     try {
       const response = await api.delete(`/resource-library/${itemId}`);
       showMessage(response.data.message, "success");
-      closeModal();
+      setTimeout(() => {
+        router.push("/contentsManagement?refresh=" + Date.now());
+      }, 1000);
     } catch (error) {
       console.log(error);
       showMessage("Error deleting resource", "error");

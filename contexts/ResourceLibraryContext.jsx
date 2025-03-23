@@ -10,6 +10,7 @@ export default function ResourceLibraryProvider({ children }) {
 
   const [resources, setResources] = useState([]);
   const fetchResources = async () => {
+    setIsLoading(true);
     try {
       const response = await api.get("/resource-library/resources");
 
@@ -24,6 +25,10 @@ export default function ResourceLibraryProvider({ children }) {
     }
   };
 
+  const refreshResources = async () => {
+    await fetchResources(); // Re-fetch resources
+    return true; // Return success status for chaining
+  };
   const getSingleProduct = (resource_id) => {
     const resource = resources.find((resource) => resource.id === resource_id);
     console.log(resource);
@@ -36,7 +41,7 @@ export default function ResourceLibraryProvider({ children }) {
 
   return (
     <ResourceLibraryContext.Provider
-      value={{ resources, isLoading, getSingleProduct }}
+      value={{ resources, isLoading, getSingleProduct, refreshResources }}
     >
       {children}
     </ResourceLibraryContext.Provider>

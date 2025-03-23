@@ -28,6 +28,7 @@ function ResourcesRender() {
   }, [resourceFilter]);
 
   useEffect(() => {
+
     setFilteredResources(resources);
   }, [resources]);
 
@@ -56,6 +57,7 @@ function ResourcesRender() {
       ["title", "tags", "resourceType", "date_created", "status"],
       "resources"
     );
+
   };
 
   return (

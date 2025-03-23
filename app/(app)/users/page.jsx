@@ -1,11 +1,27 @@
+
+"use client";
 import Link from "next/link";
 import React from "react";
+import { useState,useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import users from "@/dummyData/adminUser";
 import Analytics from "@/components/usersList/analytics";
 import AdminList from "@/components/usersList/adminList";
 import { ToastContext } from "@/contexts/toast";
 import { User } from "lucide-react";
+
 function Page() {
+  const [key, setKey] = useState(0);
+
+  const searchParams = useSearchParams();
+  const refreshParam = searchParams.get("refresh");
+  
+  useEffect(() => {
+    // When refresh parameter changes, update the key
+    if (refreshParam) {
+      setKey(prevKey => prevKey + 1);
+    }
+  }, [refreshParam]);
   return (
     <div>
       <h3 className="text-2xl flex items-center">
@@ -34,7 +50,7 @@ function Page() {
 
       {/* search pane */}
 
-      <AdminList />
+      <AdminList key={key}/>
     </div>
   );
 }
