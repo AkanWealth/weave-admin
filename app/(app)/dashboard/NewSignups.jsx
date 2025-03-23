@@ -15,7 +15,6 @@ function NewSignups() {
   const getNewSignups = async () => {
     try {
       const newsignups = await api.get("/usage-analytics/new-signups");
-      // console.log(newsignups.data);
       if (newsignups.status == 200) {
         setNewSignups(newsignups.data);
       }

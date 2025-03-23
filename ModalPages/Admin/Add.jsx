@@ -83,7 +83,9 @@ function AddAdmin() {
       if (response.status === 201) {
         showMessage("User invite sent successfully", "","success");
         // Navigate back to users page on success
-        router.push('/users');
+        setTimeout(() => {
+          router.push("/users?refresh=" + Date.now());
+        }, 100);
       } else {
         showMessage("Error sending invite", "","error");
       }

@@ -27,7 +27,7 @@ function EditResource() {
   const { showMessage } = useToastContext();
 
   const [resourceInfo, setResourceInfo] = useState(null);
-  const { resources, getSingleProduct } = useResourceLibrary();
+  const { resources, getSingleProduct,refreshResources } = useResourceLibrary();
 
   const addToTag = (tag) => {
     if (tag == "") return;
@@ -72,17 +72,41 @@ function EditResource() {
   const [isUploadingThumbnail, setIsuploadingThumbnail] = useState(false);
 
   const accessToken = Cookies.get("session");
+  // useEffect(() => {
+  //   if (!thumbNailSelected) return;
+  //   setIsuploadingThumbnail(true);
+  //   const uploadThumbnail = async () =>
+  //     await readAndUploadThumbnail(thumbNailSelected);
+
+  //   if (uploadThumbnail.status === "success") {
+  //     showMessage("Thumbnail uploaded", "", "success");
+  //     // getThumbnails();
+  //   } else {
+  //     showMessage("Error uploading thumbail", "", "error");
+  //   }
+  // }, [thumbNailSelected]);
+
   useEffect(() => {
+    console.log("upload",thumbNailSelected);
     if (!thumbNailSelected) return;
     setIsuploadingThumbnail(true);
-    const uploadThumbnail = async () =>
-      await readAndUploadThumbnail(thumbNailSelected);
-
-    if (uploadThumbnail.status === "success") {
-      showMessage("Thumbnail uploaded", "", "success");
-    } else {
-      showMessage("Error uploading thumbail", "", "error");
-    }
+    
+    const uploadThumbnail = async () => {
+      const result = await readAndUploadThumbnail(thumbNailSelected);
+      console.log("result", result);
+      if (result && result.status === "success") {
+        showMessage("Thumbnail uploaded", "","success");
+        // Reload thumbnails after successful upload
+        getThumbnails();
+      } else {
+        showMessage("Error uploading thumbnail", "","error");
+      }
+      
+      setIsuploadingThumbnail(false);
+      setThumbnailSelected(null);  // Reset selected file
+    };
+    
+    uploadThumbnail();
   }, [thumbNailSelected]);
 
   const getThumbnails = async () => {
@@ -97,6 +121,7 @@ function EditResource() {
       showMessage("Unable to fetch thumbnails", "", "error");
     } finally {
       setLoadingThumbnail(false);
+      
     }
   };
 
@@ -109,19 +134,17 @@ function EditResource() {
   // }, [articleBody]);
 
   const updateResource = async (status) => {
-    // console.log(resourceInfo.content);
-    // return;
     setIsSubmitting(true);
     let btn = document.getElementById(`${status.toLowerCase()}-btn`);
     let btnTitle = btn.textContent;
     btn.disabled = true;
     btn.textContent = "Please wait...";
-
+  
     try {
       let formdata = new FormData();
-
+  
       if (resourceFile) formdata.append("file", resourceFile);
-
+  
       formdata.append("title", resourceInfo.title);
       formdata.append("category", resourceInfo.category);
       formdata.append("thumbnailUrl", resourceInfo.thumbnailUrl);
@@ -129,10 +152,10 @@ function EditResource() {
       formdata.append("description", resourceInfo.description);
       if (contentType === "Article")
         formdata.append("content", resourceInfo.content);
-
+  
       formdata.append("tags", resourceInfo.tags);
       formdata.append("status", status);
-
+  
       const response = await fetch(
         `${baseUrl}/resource-library/${resourceInfo.id}`,
         {
@@ -145,10 +168,16 @@ function EditResource() {
         }
       );
       const respbody = await response.json();
-      showMessage("Update Successful",respbody.message, "success");
+      
+     
+      showMessage("Update Successful", respbody.message, "success");
+    
+      if (response.ok) {
+        await refreshResources();
+        setTimeout(() => {
+          router.push("/contentsManagement?refresh=" + Date.now());
 
-      if (response.status) {
-        router.push("/contentsManagement");
+        }, 1000);
       }
     } catch (err) {
       console.log(err);
@@ -166,8 +195,12 @@ function EditResource() {
   const deleteThumbnail = async () => {
     setIsdeletingThumbnail(true);
     try {
-      const response = await api.delete(`/thumbnails/${thumbNailSelected}`);
+      console.log(thumbnailToDelete);
+
+      const response = await api.delete(`/thumbnails/${thumbnailToDelete}`);
       showMessage(response.data.message, "", "success");
+      getThumbnails();
+    setThumbnailToDelete("");
     } catch (error) {
       showMessage(
         "Error",

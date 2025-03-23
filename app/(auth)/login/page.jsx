@@ -71,7 +71,7 @@ function Login() {
           }
 
           router.push("/dashboard");
-        }, 1500);
+        }, 500);
 
         return;
       }
