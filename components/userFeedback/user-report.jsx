@@ -45,6 +45,10 @@ function UserReport() {
     if (backendStatus === "Pending") {
       return "In-progress";
     }
+    else if (backendStatus === "In Progress") {
+      return "In-progress";
+
+    }
     return backendStatus;
   };
 
@@ -73,10 +77,10 @@ function UserReport() {
   const fetchUsers = async () => {
     setFetchingUsers(true);
     try {
-      // Make API call to the correct endpoint
+
       const response = await api.get('/help-support/issue-report');
       console.log(response.status);
-      console.log(response.data.issueReports);
+      console.log("issue:",response.data.issueReports);
       
       
       if (response.status === 200 && response.data.issueReports) {

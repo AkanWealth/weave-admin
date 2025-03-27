@@ -161,7 +161,7 @@ function ContentInfo() {
   
         setTimeout(() => {
           router.push("/contentsManagement?refresh=" + Date.now());
-        }, 1000);
+        }, 100);
       } else {
         let formdata = new FormData();
         formdata.append("file", fileUploadContent);
@@ -193,7 +193,7 @@ function ContentInfo() {
           
           setTimeout(() => {
             router.push("/contentsManagement?refresh=" + Date.now());
-          }, 1000);
+          }, 100);
         } else {
           showMessage(respbody.message || "Error uploading content", "","error");
         }
