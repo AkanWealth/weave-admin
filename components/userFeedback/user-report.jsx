@@ -92,8 +92,13 @@ function UserReport() {
           dateTime: new Date(issue.created_at).toLocaleString(),
           issueSummary: `${issue.description}`,
           attachmentUrl: issue.attachmentUrl, 
-          status: issue.status 
+          status: issue.status,
+          assignedAdmin: {
+            id: issue.assignedAdmin?.id || null,
+            username: issue.assignedAdmin?.username || 'Unassigned'
+          },
         }));
+        console.log("map", mappedData)
         setUsers(mappedData);
         setFilteredlist(mappedData);
       } else {
@@ -194,7 +199,14 @@ function UserReport() {
                   username: item.username || item.name,
                   dateTime: item.dateTime || item.created_at,
                   issueSummary: item.issueSummary || item.summary,
-                  status: mapStatusForDisplay(item.status) 
+                  status: mapStatusForDisplay(item.status),
+                  assignedAdmin: item.assignedAdmin ? {
+                    id: item.assignedAdmin.id || 'unassigned',
+                    username: item.assignedAdmin.username || item.assignedAdmin || 'Unassigned'
+                  } : {
+                    id: 'unassigned',
+                    username: 'Unassigned'
+                  },
                 }}
                 key={item.id || Math.random()}
               />

@@ -74,185 +74,58 @@ function EditAdmin({ userData, onSave, onCancel }) {
     }
   }, [userData]);
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setIsSubmitting(true);
-    
-  //   try {
-  //     // Prepare updated user data
-  //     const updatedUser = {
-  //       firstName: firstname,
-  //       lastName: lastname,
-  //       email: email,
-  //       username: username
-  //     };
-      
-  //     console.log("Sending data:", updatedUser);
-     
-  //     const response = await api.put(`/super-admin/profile/${userData.id}`, updatedUser);
-  //     console.log("User ID:", userData.id);
-     
-  //     if (response.status === 200) {
-  //       onSave({
-  //         ...userData,
-  //         firstName: firstname,
-  //         lastName: lastname,
-  //         email: email,
-  //         username: username
-  //       });
-  //     }
-    
-      
-      
-  //   } catch (error) {
-  //     console.error("Error updating user:", error);
-  //     alert("Failed to update user. Please try again.");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
-  // Handle the "Enable All" checkbox change
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setIsSubmitting(true);
-    
-  //   try {
-  //     // Use the current state values (what the user typed in the form)
-  //     const updatedUser = {
-  //       firstName: firstname, 
-  //       lastName: lastname,   
-  //       email: email,         
-  //       username: username 
-  //     };
-      
-  //     console.log("Sending updated data to API:", updatedUser);
-      
-  //     const response = await api.put(`/super-admin/profile/${userData.id}`, updatedUser);
-  //     console.log(response)
-      
-  //     if (response.status === 200) {
-
-  //       onSave({
-  //         ...userData, // Keep all original fields
-  //       firstName: firstname,
-  //       lastName: lastname,
-  //       email: email,
-  //       username: username,
-  //       });
-  //       return true;
-  //     }
-  //     console.log( ...userData, firstname,lastname,email,username,);
-  //     return false;
-  //   } catch (error) {
-  //     console.error("Error updating user:", error);
-  //     return false;
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setIsSubmitting(true);
-    
-  //   try {
-  //     // Include the role ID in the update request
-  //     const updatedUser = {
-  //       firstName: firstname,
-  //       lastName: lastname,
-  //       email: email,
-  //       username: username
-  //     };
-      
-      
-
-  //     console.log("Sending updated data to API:", updatedUser);
-  //     const updateUser = async (userId, updatedData) => {
-  //       try {
-  //         const response = await axios.put(`https://founderstripe-c2848f6b7a1c.herokuapp.com/api/v1/super-admin/profile/${userData.id}`, updatedData, {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,  // Ensure you are passing the correct auth token
-  //             'Content-Type': 'application/json',
-  //           },
-  //         });
-      
-  //         console.log('Update response:', response.data);
-  //       } catch (error) {
-  //         console.error('Error updating user:', error.response?.data || error.message);
-  //       }
-  //     };
-      
-
-  //     // const response = await api.put(`/super-admin/profile/${userData.id}`, updatedUser);
-      
-  //     if (updateUser.status === 200) {
-  
-  //       onSave({
-  //         ...userData,
-  //         firstName: firstname,
-  //         lastName: lastname,
-  //         email: email,
-  //         username: username,
-  //         role: { id: role, name: roles.find(r => r.id === role)?.name || userData.role?.name }
-  //       });
-  //       return true;
-  //     }
-  //     return false;
-  //   } catch (error) {
-  //     console.error("Error updating user:", error);
-  //     return false;
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    try {
 
+    try {
       const updatedData = {
         firstName: firstname,
         lastName: lastname,
         email: email,
-        username: username
+        username: username,
       };
-      
-      console.log("Sending updated data to API:", updatedData);
-     const response = await api.put(`/super-admin/profile/${userData.id}`, updatedData);
-      
-      if (response.status === 200) {
 
+      console.log("Payload being sent:", updatedData);
+      console.log("User ID being sent:", userData.id);
+
+      const response = await api.put(`/super-admin/profile/${userData.id}`, updatedData);
+      console.log("API Response:", response);
+
+      if (response.status === 200) {
         const updatedUserObject = {
           ...userData,
           firstName: firstname,
           lastName: lastname,
           email: email,
           username: username,
-          role: { 
-            id: role, 
-            name: roles.find(r => r.id === role)?.name || userData.role?.name 
-          }
+          role: {
+            id: role,
+            name: roles.find((r) => r.id === role)?.name || userData.role?.name,
+          },
         };
 
+        console.log("Updated user object:", updatedUserObject);
         onSave(updatedUserObject);
-  
-
         return true;
-        
+      } else {
+        console.error("Error response from API:", response.data);
+        showMessage("Failed to update user", "error");
+        return false;
       }
-      return false;
     } catch (error) {
       console.error("Error in handleSubmit:", error);
+      if (error.response) {
+        console.error("Backend error:", error.response.data);
+        showMessage(error.response.data.message || "Failed to update user", "error");
+      } else {
+        showMessage("An unexpected error occurred", "error");
+      }
       return false;
     } finally {
       setIsSubmitting(false);
     }
   };
-  
-  
   
   const handleEnableAllChange = (e) => {
     const isChecked = e.target.checked;
@@ -311,33 +184,39 @@ function EditAdmin({ userData, onSave, onCancel }) {
       // Prepare permissions data
       const permissionsData = {
 
-          id: userData.id,
-          firstName: firstname,
-          lastName: lastname,
-          email: email,
-          roleId: role
+          adminId: userData.id,
+          roleId: role,
+          permissions: {
+            dashboard: permissions.dashboard,
+            userManagement: permissions.userManagement,
+            contentManagement: permissions.contentManagement,
+            auditLogs: permissions.auditLogs
+          }
         
       };
-      onSave({
-            ...userData,
-            role: { id: role },
-            permissions: permissions
-          });
+      console.log("Permissions data to send:", permissionsData);
+      // onSave({
+      //       ...userData,
+      //       role: { id: role },
+      //       permissions: permissions
+      //     });
       
-      return true;
+      // return true;
       
       // Make API call to update permissions
-      // const response = await api.put(`/super-admin/update-admin-permissions/${userData.id}`, permissionsData);
+      const response = await api.put(`/role/update-role-permissions`, permissionsData);
       
-      // if (response.status === 200) {
-      //   alert("Permissions saved successfully!");
-      //   // Update the parent component with new data
-      //   onSave({
-      //     ...userData,
-      //     role: { id: role },
-      //     permissions: permissions
-      //   });
-      // }
+      if (response.status === 200) {
+        alert("Permissions saved successfully!");
+        // Update the parent component with new data
+        onSave({
+          ...userData,
+          role: { id: role },
+          permissions: permissions
+        });
+        return true;
+      }
+      
     } catch (error) {
       console.error("Error updating permissions:", error);
       // alert("Failed to update permissions. Please try again.");

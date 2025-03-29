@@ -14,7 +14,7 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(issueData?.status || "New");
   const [assignee, setAssignee] = useState("unassigned");
-  const [notificationType, setNotificationType] = useState("in-app");
+  const [notificationType, setNotificationType] = useState(true);
   const { showMessage } = useToastContext();
   const [conversations, setConversations] = useState([]);
   const [expandedMessageId, setExpandedMessageId] = useState(null);
@@ -44,23 +44,33 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
     setLoadingAssignees(true);
     try {
       const response = await api.get('/usage-analytics/admin');
-      console.log(response);
-
+      
       if (response.status === 200 && response.data) {
         // Add unassigned option at the beginning
         const assigneesData = [
           { id: 'unassigned', username: 'Unassigned' },
           ...response.data
         ];
+        
+        // If the current issue has an assigned admin, ensure it's in the list
+        if (issueData?.assignedAdmin && issueData.assignedAdmin.id !== 'unassigned') {
+          const isAdminInList = assigneesData.some(admin => admin.id === issueData.assignedAdmin.id);
+          
+          if (!isAdminInList) {
+            assigneesData.push({
+              id: issueData.assignedAdmin.id,
+              username: issueData.assignedAdmin.username
+            });
+          }
+        }
+        
         setAssignees(assigneesData);
       } else {
-
         setAssignees([{ id: 'unassigned', username: 'Unassigned' }]);
         showMessage("Failed to load assignees", "", "error");
       }
     } catch (error) {
       console.error("Error fetching assignees:", error);
-      // Fallback data in case of error
       setAssignees([{ id: 'unassigned', username: 'Unassigned' }]);
       showMessage("Failed to load assignees", "", "error");
     } finally {
@@ -80,6 +90,8 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
       setNewStatus(issueData.status || "New");
 
       setAttachment(issueData.attachmentUrl);
+      setAssignee(issueData.assignedAdmin?.id || 'unassigned');
+      console.log("assiggnAdmin",issueData.assignedAdmin?.id )
 
       // Set the conversation history based on the issue description from API
       setConversations([{
@@ -101,20 +113,50 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
 
   const handleSubmitResponse = async () => {
     if (!response.trim()) return;
-
+  
     setLoading(true);
     try {
+      // Prepare the request payload
+      const payload = {
+        response: response.trim(),
+        sendInAppNotification: notificationType
+      };
+  console.log("payload",payload);
+  console.log("token",localStorage.getItem('token'));
+  
+      // Make the API call to respond to the issue
+      const result = await api.post(`/help-support/respond-to-issue/${issueData.userId}`, payload, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`, 
+          'Content-Type': 'application/json'
+        }
+      });
 
-      showMessage("Response sent successfully", "", "success");
+  console.log("result",result);
 
-
-      setResponse("");
-      onClose();
-
-      setLoading(false);
+      if (result.status === 200) {
+        showMessage("Response sent successfully", "", "success");
+        
+        // Update conversation history
+        setConversations(prev => [
+          ...prev, 
+          {
+            id: prev.length + 1,
+            message: response,
+            timestamp: new Date().toLocaleString(),
+            isUser: false
+          }
+        ]);
+  
+        setResponse("");
+        onClose();
+      } else {
+        showMessage("Failed to send response", "", "error");
+      }
     } catch (error) {
       console.error(error);
-      showMessage("Failed to send response", "", "error");
+      showMessage("Failed to send response", error.response?.data?.message || "An error occurred", "error");
+    } finally {
       setLoading(false);
     }
   };
@@ -128,20 +170,25 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
 
   const handleSaveChanges = async () => {
     try {
-      // In a real app, you would make an API call here
-      // const result = await api.put(`/help-support/issues/${issueData.userId}`, {
-      //   status: status,
-      //   assignee: assignee
-      // });
 
+
+      const result = await api.put(`/help-support/assign-admin/${issueData.userId}`, {
+        // status: status,
+        assignee: assignee
+      });
+console.log(result);
+      if (result.status === 200) {  
       // Simulate API call
       setTimeout(() => {
-        showMessage("Changes saved successfully", "", "success");
+        showMessage("Changes saved successfully", result.data.message, "success");
         if (onStatusUpdate) {
           onStatusUpdate(issueData?.userId, status);
         }
         onClose();
       }, 500);
+      } else {
+        showMessage("Failed to save changes", "", "error");
+      }
     } catch (error) {
       console.error(error);
       showMessage("Failed to save changes", "", "error");
@@ -283,7 +330,7 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
                         </div>
                       ) : (
                         <select
-                          value={assignee}
+                          value={assignee || issueData?.assignedAdmin?.id || "unassigned"}
                           onChange={(e) => setAssignee(e.target.value)}
                           className="block w-full pl-3 pr-10 py-2 text-sm border border-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                         >
@@ -353,8 +400,8 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
                       type="radio"
                       name="notification"
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      checked={notificationType === "in-app"}
-                      onChange={() => setNotificationType("in-app")}
+                      checked={notificationType === true} // Set to true for "In-app Notification"
+                      onChange={() => setNotificationType(true)} // Set to true
                     />
                     <span className="ml-2 text-sm text-gray-700">In-app Notification</span>
                   </label>
@@ -363,8 +410,8 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
                       type="radio"
                       name="notification"
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 ml-2"
-                      checked={notificationType === "email"}
-                      onChange={() => setNotificationType("email")}
+                      checked={notificationType === false} // Set to false for "Email Notification"
+                      onChange={() => setNotificationType(false)} // Set to false
                     />
                     <span className="ml-2 text-sm text-gray-700">Email Notification</span>
                   </label>

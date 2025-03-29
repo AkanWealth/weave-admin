@@ -21,6 +21,8 @@ function PasswordForm() {
   const { showMessage } = useMessageContext();
   const [isLoading, setIsLoading] = useState(false);
 
+  const [temporaryPassword, setTemporaryPassword] = useState("");
+  const [temporaryPasswordError, setTemporaryPasswordError] = useState("");
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -34,15 +36,19 @@ function PasswordForm() {
 
   const savePassword = async () => {
     try {
-      if (password.length < 8)
-        return setPasswordError("Password must be up to 8 character");
-      if (password !== confirmPassword)
-        return setconfirmPasswordError(
-          "Password does not match Confirm Password"
-        );
+      if (!temporaryPassword) {
+        return setTemporaryPasswordError("Temporary password is required");
+      }
+      if (password.length < 8) {
+        return setPasswordError("Password must be at least 8 characters");
+      }
+      if (password !== confirmPassword) {
+        return setconfirmPasswordError("Password does not match Confirm Password");
+      }
 
       const resp = await api.post("/super-admin/password-setup", {
         token,
+        temporaryPassword, // Include the temporary password
         password,
       });
 
@@ -50,7 +56,6 @@ function PasswordForm() {
       if (resp.status === 201) {
         showMessage(resp.data.message, "success");
         router.push(`/setup/profile?token=${resp.data.profileToken}`);
-       
         return;
       }
       showMessage(resp.data.message, "error");
@@ -59,18 +64,22 @@ function PasswordForm() {
       showMessage("Error setting up password, please retry", "error");
     } finally {
       setIsLoading(false);
-      // setIsError(false)
     }
-
-    // redirect("/setup/profile");
   };
 
   return (
-    <div>
+    <div className="h-sreen">
       <Nav active="password" />
       <h1 className="font-rubikBold text-3xl mt-4"> Secure Your Account </h1>
 
       <div className="flex-column space-y-4 font-rubikMedium my-6">
+        <PasswordField
+          label={"Temporary Password"}
+          placeholder={"Temporary Password"}
+          value={temporaryPassword}
+          setValue={setTemporaryPassword}
+          error={temporaryPasswordError}
+        />
         <PasswordField
           label={"Password"}
           placeholder={"Password"}
