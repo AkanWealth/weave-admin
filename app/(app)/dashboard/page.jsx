@@ -1,12 +1,29 @@
+"use client";
+import { useState, useEffect } from "react";
 import React from "react";
 import Link from "next/link";
 import AppSummary from "./AppSummary";
 import NewSignups from "./NewSignups";
+import { useSearchParams } from "next/navigation";
 import GrowthChart from "./GrowthChart";
 import PentagonWithCircleIcon from "@/components/elements/PentagonWithCircleIcon";
 
 
 export default function Dashboard() {
+  const [key, setKey] = useState(0);
+  
+    const searchParams = useSearchParams();
+    const refreshParam = searchParams.get("refresh");
+
+
+    useEffect(() => {
+        // When refresh parameter changes, update the key
+        if (refreshParam) {
+          setKey(prevKey => prevKey + 1);
+        }
+      }, [refreshParam]);
+
+
   return (
     <div>
       <h1 className="text-2xl flex items-center">
@@ -38,7 +55,7 @@ export default function Dashboard() {
           </Link>
         </h3>
 
-        <NewSignups />
+        <NewSignups key={key}/>
       </div>
     </div>
   );

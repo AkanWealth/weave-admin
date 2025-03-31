@@ -11,6 +11,7 @@ function NewSignups() {
   const [newSignups, setNewSignups] = useState([]);
   const router = useRouter();
   const [copiedEmail, setCopiedEmail] = useState(null);
+   
 
   const getNewSignups = async () => {
     try {

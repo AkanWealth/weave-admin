@@ -44,18 +44,18 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
     setLoadingAssignees(true);
     try {
       const response = await api.get('/usage-analytics/admin');
-      
+
       if (response.status === 200 && response.data) {
         // Add unassigned option at the beginning
         const assigneesData = [
           { id: 'unassigned', username: 'Unassigned' },
           ...response.data
         ];
-        
+
         // If the current issue has an assigned admin, ensure it's in the list
         if (issueData?.assignedAdmin && issueData.assignedAdmin.id !== 'unassigned') {
           const isAdminInList = assigneesData.some(admin => admin.id === issueData.assignedAdmin.id);
-          
+
           if (!isAdminInList) {
             assigneesData.push({
               id: issueData.assignedAdmin.id,
@@ -63,7 +63,7 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
             });
           }
         }
-        
+
         setAssignees(assigneesData);
       } else {
         setAssignees([{ id: 'unassigned', username: 'Unassigned' }]);
@@ -91,7 +91,7 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
 
       setAttachment(issueData.attachmentUrl);
       setAssignee(issueData.assignedAdmin?.id || 'unassigned');
-      console.log("assiggnAdmin",issueData.assignedAdmin?.id )
+      console.log("assiggnAdmin", issueData.assignedAdmin?.id)
 
       // Set the conversation history based on the issue description from API
       setConversations([{
@@ -113,7 +113,7 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
 
   const handleSubmitResponse = async () => {
     if (!response.trim()) return;
-  
+
     setLoading(true);
     try {
       // Prepare the request payload
@@ -121,25 +121,25 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
         response: response.trim(),
         sendInAppNotification: notificationType
       };
-  console.log("payload",payload);
-  console.log("token",localStorage.getItem('token'));
-  
+      console.log("payload", payload);
+      console.log("token", localStorage.getItem('token'));
+
       // Make the API call to respond to the issue
       const result = await api.post(`/help-support/respond-to-issue/${issueData.userId}`, payload, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`, 
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
         }
       });
 
-  console.log("result",result);
+      console.log("result", result);
 
       if (result.status === 200) {
         showMessage("Response sent successfully", "", "success");
-        
+
         // Update conversation history
         setConversations(prev => [
-          ...prev, 
+          ...prev,
           {
             id: prev.length + 1,
             message: response,
@@ -147,7 +147,7 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
             isUser: false
           }
         ]);
-  
+
         setResponse("");
         onClose();
       } else {
@@ -170,22 +170,24 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
 
   const handleSaveChanges = async () => {
     try {
+      console.log("assignee", assignee);
+      console.log("status", status);
+      const formattedAssignee = assignee ? String(assignee) : "unassigned";
 
-
-      const result = await api.put(`/help-support/assign-admin/${issueData.userId}`, {
-        // status: status,
-        assignee: assignee
+      const result = await api.put(`/help-support/${issueData.userId}`, {
+        status: status,
+        adminId: formattedAssignee
       });
-console.log(result);
-      if (result.status === 200) {  
-      // Simulate API call
-      setTimeout(() => {
-        showMessage("Changes saved successfully", result.data.message, "success");
-        if (onStatusUpdate) {
-          onStatusUpdate(issueData?.userId, status);
-        }
-        onClose();
-      }, 500);
+      console.log("result: ", result);
+      if (result.status === 200) {
+        // Simulate API call
+        setTimeout(() => {
+          showMessage("Changes saved successfully", result.data.message, "success");
+          if (onStatusUpdate) {
+            onStatusUpdate(issueData?.userId, status);
+          }
+          onClose();
+        }, 500);
       } else {
         showMessage("Failed to save changes", "", "error");
       }
@@ -433,8 +435,8 @@ console.log(result);
             onClick={activeTab === 'details' ? handleSaveChanges : handleSubmitResponse}
             disabled={loading || (activeTab === 'respond' && !response.trim())}
             className={`w-full px-5 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${(loading || (activeTab === 'respond' && !response.trim()))
-                ? 'opacity-50 cursor-not-allowed'
-                : ''
+              ? 'opacity-50 cursor-not-allowed'
+              : ''
               }`}
           >
             {loading ? 'Processing...' : activeTab === 'details' ? 'Save Changes' : 'Send'}
