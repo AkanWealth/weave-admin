@@ -22,6 +22,7 @@ function EditResource() {
   const [thumbnail, setThumbnail] = useState("");
   const [articleBody, setArticleBody] = useState("");
   const [resourceFile, setResourceFile] = useState(null);
+  const [transcript, setTranscript] = useState("");
   const router = useRouter();
 
   const { showMessage } = useToastContext();
@@ -52,6 +53,7 @@ function EditResource() {
     if (!resource) return;
     setResourceInfo(resource);
     setArticleBody(resource.content);
+    setTranscript(resource.transcript || "");
   }, [resource_id, resources]);
 
   // useEffect(() => {
@@ -158,11 +160,14 @@ function EditResource() {
       formdata.append("thumbnailUrl", resourceInfo.thumbnailUrl);
       formdata.append("author", resourceInfo.author);
       formdata.append("description", resourceInfo.description);
+      formdata.append("transcript", transcript); 
       if (contentType === "Article")
         formdata.append("content", resourceInfo.content);
   
       formdata.append("tags", resourceInfo.tags);
       formdata.append("status", status);
+
+      console.log("formdata", formdata);
   
       const response = await fetch(
         `${baseUrl}/resource-library/${resourceInfo.id}`,
@@ -605,6 +610,18 @@ function EditResource() {
                   onBlur={(e) => addToTag(e.target.value)}
                 />
               </div>
+
+              {contentType !== "Article" && (
+                <>
+                  <label className="capitalize font-rubikMedium">Transcript</label>
+                  <input
+                    type="text"
+                    className={`w-full p-2 border border-base-black focus:border-weave-primary focus:outline-none rounded-md font-rubikRegular mb-3`}
+                    value={transcript}
+                    onChange={(e) => setTranscript(e.target.value)}
+                  />
+                </>
+              )}
 
               <div className="flex" style={{ gap: 20, marginTop: 20 }}>
                 <div className="flex-1"> </div>
