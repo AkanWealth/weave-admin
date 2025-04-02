@@ -289,6 +289,7 @@ function EditAdmin({ userData, onSave, onCancel }) {
               placeholder={"Enter user Firstname"}
               required={true}
             />
+
             <InputField
               value={lastname}
               setValue={setLastname}
@@ -296,6 +297,7 @@ function EditAdmin({ userData, onSave, onCancel }) {
               placeholder={"Enter user Last name"}
               required={true}
             />
+            
             <InputField
               value={email}
               setValue={setEmail}

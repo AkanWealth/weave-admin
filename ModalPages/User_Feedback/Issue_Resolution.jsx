@@ -134,7 +134,7 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
 
       console.log("result", result);
 
-      if (result.status === 200) {
+      if (result.status === 201) {
         showMessage("Response sent successfully", "", "success");
 
         // Update conversation history
@@ -172,6 +172,7 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
     try {
       console.log("assignee", assignee);
       console.log("status", status);
+      console.log("userId", issueData.userId);
       const formattedAssignee = assignee ? String(assignee) : "unassigned";
 
       const result = await api.put(`/help-support/${issueData.userId}`, {
