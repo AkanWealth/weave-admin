@@ -105,10 +105,10 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
 
   // Status options from your component
   const statuses = [
-    { id: 1, name: "New" },
-    { id: 2, name: "In-progress" },
-    { id: 3, name: "Resolved" },
-    { id: 4, name: "Closed" }
+    // { id: 1, name: "New" },
+    { id: 1, name: "In Progress" },
+    { id: 2, name: "Resolved" },
+    { id: 3, name: "Closed" }
   ];
 
   const handleSubmitResponse = async () => {

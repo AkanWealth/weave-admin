@@ -56,10 +56,10 @@ function UserReport() {
     try {
       // For testing, dummy statuses instead of API call
       const dummyStatuses = [
-        { id: 1, name: "New" },
-        { id: 2, name: "In-progress" },
-        { id: 3, name: "Resolved" },
-        { id: 4, name: "Closed" }
+        // { id: 1, name: "New" },
+        { id: 1, name: "In-progress" },
+        { id: 2, name: "Resolved" },
+        { id: 3, name: "Closed" }
       ];
       setStatuses(dummyStatuses);
     } catch (error) {
