@@ -1,12 +1,15 @@
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Avatar from "@/assets/images/Avatar.png";
 import Image from "next/image";
 import { Copy, CheckCircle } from "lucide-react";
+import api from "@/lib/api";
 
 function UserRender({ info, date, resendInvite, onEditClick }) {
   const [copiedEmail, setCopiedEmail] = useState(null);
+  const [headshot, setHeadshot] = useState(null); // State for headshot
   const role = info.role.name.replace(/_/, " ");
+  
   const formatDate = () => {
     if (!date || !(date instanceof Date) || isNaN(date)) {
       return { dateStr: "N/A", timeStr: "N/A" };
@@ -38,6 +41,22 @@ function UserRender({ info, date, resendInvite, onEditClick }) {
       });
   };
 
+  // Fetch headshot when the component mounts or info.id changes
+  useEffect(() => {
+    const fetchHeadshot = async () => {
+      try {
+        const response = await api.get(`/users/profile/${info.id}`); // Replace with your actual endpoint
+        setHeadshot(response.data.headshot); // Assuming the API returns a `headshotUrl`
+      } catch (error) {
+        console.error("Error fetching headshot:", error);
+      }
+    };
+
+    if (info.id) {
+      fetchHeadshot();
+    }
+  }, [info.id]);
+
   // Get formatted date strings
   const { dateStr, timeStr } = formatDate();
 
@@ -47,14 +66,20 @@ function UserRender({ info, date, resendInvite, onEditClick }) {
         <div className="flex items-center">
           {/* Profile image */}
           <div className="w-8 h-8 rounded-full overflow-hidden mr-3 flex-shrink-0">
-            {info.profileImage ? (
+            {headshot ? (
+              <img
+                src={headshot}
+                alt={`${info.username}'s profile`}
+                className="w-full h-full object-cover"
+              />
+            ) : info.profileImage ? (
               <img
                 src={info.profileImage}
                 alt={`${info.username}'s profile`}
                 className="w-full h-full object-cover"
               />
             ) : (
-              // Fallback for users without profile image
+              // Fallback for users without profile image or headshot
               <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white font-medium">
                 <Image
                   src={Avatar}

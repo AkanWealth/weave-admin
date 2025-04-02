@@ -45,6 +45,10 @@ function UserReport() {
     if (backendStatus === "Pending") {
       return "In-progress";
     }
+    else if (backendStatus === "In Progress") {
+      return "In-progress";
+
+    }
     return backendStatus;
   };
 
@@ -52,10 +56,10 @@ function UserReport() {
     try {
       // For testing, dummy statuses instead of API call
       const dummyStatuses = [
-        { id: 1, name: "New" },
-        { id: 2, name: "In-progress" },
-        { id: 3, name: "Resolved" },
-        { id: 4, name: "Closed" }
+        // { id: 1, name: "New" },
+        { id: 1, name: "In-progress" },
+        { id: 2, name: "Resolved" },
+        { id: 3, name: "Closed" }
       ];
       setStatuses(dummyStatuses);
     } catch (error) {
@@ -73,10 +77,10 @@ function UserReport() {
   const fetchUsers = async () => {
     setFetchingUsers(true);
     try {
-      // Make API call to the correct endpoint
+
       const response = await api.get('/help-support/issue-report');
       console.log(response.status);
-      console.log(response.data.issueReports);
+      console.log("issue:",response.data.issueReports);
       
       
       if (response.status === 200 && response.data.issueReports) {
@@ -88,8 +92,13 @@ function UserReport() {
           dateTime: new Date(issue.created_at).toLocaleString(),
           issueSummary: `${issue.description}`,
           attachmentUrl: issue.attachmentUrl, 
-          status: issue.status 
+          status: issue.status,
+          assignedAdmin: {
+            id: issue.assignedAdmin?.id || null,
+            username: issue.assignedAdmin?.username || 'Unassigned'
+          },
         }));
+        console.log("map", mappedData)
         setUsers(mappedData);
         setFilteredlist(mappedData);
       } else {
@@ -190,7 +199,14 @@ function UserReport() {
                   username: item.username || item.name,
                   dateTime: item.dateTime || item.created_at,
                   issueSummary: item.issueSummary || item.summary,
-                  status: mapStatusForDisplay(item.status) 
+                  status: mapStatusForDisplay(item.status),
+                  assignedAdmin: item.assignedAdmin ? {
+                    id: item.assignedAdmin.id || 'unassigned',
+                    username: item.assignedAdmin.username || item.assignedAdmin || 'Unassigned'
+                  } : {
+                    id: 'unassigned',
+                    username: 'Unassigned'
+                  },
                 }}
                 key={item.id || Math.random()}
               />

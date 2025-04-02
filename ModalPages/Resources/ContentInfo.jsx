@@ -16,6 +16,7 @@ function ContentInfo() {
   const contentType = searchParams.get("contentType");
   const [activeTab, setActiveTab] = useState("info");
 
+  const [transcript, setTranscript] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [thumbnail, setThumbnail] = useState("");
@@ -155,13 +156,14 @@ function ContentInfo() {
           duration,
           tags,
           status,
+          transcript,
         });
 
         showMessage(resp.data.message, "", "success");
   
         setTimeout(() => {
           router.push("/contentsManagement?refresh=" + Date.now());
-        }, 1000);
+        }, 100);
       } else {
         let formdata = new FormData();
         formdata.append("file", fileUploadContent);
@@ -173,6 +175,7 @@ function ContentInfo() {
         formdata.append("tags", tags);
         formdata.append("resourceType", contentType);
         formdata.append("status", status);
+        formdata.append("transcript", transcript); 
 
         const response = await fetch(`${baseUrl}/resource-library`, {
           method: "POST",
@@ -193,7 +196,7 @@ function ContentInfo() {
           
           setTimeout(() => {
             router.push("/contentsManagement?refresh=" + Date.now());
-          }, 1000);
+          }, 100);
         } else {
           showMessage(respbody.message || "Error uploading content", "","error");
         }
@@ -472,6 +475,7 @@ function ContentInfo() {
               <RichTextEditor setValue={setArticleBody} />
             </div>
 
+
             <InputField
               label={"Duration"}
               placeholder={"e.g 3min 4sec"}
@@ -518,8 +522,20 @@ function ContentInfo() {
                 </>
               )}
             </label>
+
+            {contentType !== "article" && (
+      <InputField
+        label={"Transcript"}
+        placeholder={"Enter transcript"}
+        value={transcript}
+        setValue={setTranscript}
+        className="mb-3"
+        required={false}
+      />
+    )}
           </>
         )}
+        
 
         <InputField
           label={"Author"}

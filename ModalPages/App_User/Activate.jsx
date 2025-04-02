@@ -18,10 +18,12 @@ function ActivateAppUser() {
       console.log(response);
       if (response.status === 200) {
         showMessage(
-          "User reactivated successfully, refresh to see changes","",
+          "User reactivated successfully","",
           "success"
         );
-        router.back();
+        setTimeout(() => {
+          router.push("/dashboard/users?refresh=" + Date.now());
+        }, 100);
         return;
       }
 

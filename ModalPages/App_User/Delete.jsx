@@ -23,7 +23,9 @@ function DeleteAppUser() {
 
       if (response.status === 200) {
         showMessage("App User Deleted", "The user account has been deleted successfully.", "success");
-        router.push("/dashboard/users");
+        setTimeout(() => {
+          router.push("/dashboard/users?refresh=" + Date.now());
+        }, 100);
         return;
       }
       showMessage("Error deleting user", "Please try again later", "error");

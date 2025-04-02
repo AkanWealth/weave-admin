@@ -108,7 +108,13 @@ const UserFeedbackRender = ({ info, onStatusUpdate }) => {
           <IssueResolutionModal 
             isOpen={isModalOpen} 
             onClose={handleCloseModal} 
-            issueData={info}
+             issueData={{
+        ...info,
+        assignedAdmin: {
+          id: info.assignedAdmin?.id || 'unassigned',
+          username: info.assignedAdmin?.username || 'Unassigned'
+        }
+      }}
             onStatusUpdate={handleStatusUpdate}
           />,
           document.body

@@ -39,7 +39,8 @@ function SendMessage() {
         subject,
         content,
       });
-      if (response.status === 200) {
+      console.log(response.status);
+      if (response.status === 201) {
         showMessage(response.data.message, "success");
         closeModal();
         return;

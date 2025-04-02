@@ -18,12 +18,12 @@ function SuspendAppUser() {
       console.log(response);
       if (response.status === 200) {
         showMessage(
-          "User suspended successfully", "refresh to see changes",
+          "User suspended successfully", "",
           "success"
         );
-        router.back();
-        
-      
+        setTimeout(() => {
+          router.push("/dashboard/users?refresh=" + Date.now());
+        }, 100);
         return;
 
         

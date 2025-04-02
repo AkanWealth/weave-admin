@@ -59,6 +59,12 @@ function ResourcesRender() {
     );
 
   };
+  const formatDate = (d) => {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+  const formatTime = (d) => {
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${d.getHours() >= 12 ? 'AM' : 'PM'}`;
+  };
 
   return (
     <>
@@ -187,7 +193,8 @@ function ResourcesRender() {
                 </td>
                 <td>{resource.resourceType}</td>
                 <td>
-                  <DateRender date={resource.created_at} />
+                <span className="block">{formatDate(new Date(resource.created_at))}</span>
+                <span className="block">{formatTime(new Date(resource.created_at))}</span>
                 </td>
                 <td>
                   <button

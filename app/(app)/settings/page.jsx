@@ -78,7 +78,7 @@ function SettingPage() {
 
     try {
       const formData = new FormData();
-      // formData.append("headshot", profileImg);
+      formData.append("headshot", profileImg);
       formData.append("firstName", userProfile.firstName);
       formData.append("lastName", userProfile.lastName);
       formData.append("username", userProfile.username);
