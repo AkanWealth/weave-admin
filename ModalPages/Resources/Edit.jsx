@@ -152,7 +152,7 @@ function EditResource() {
       formdata.append("thumbnailUrl", resourceInfo.thumbnailUrl);
       formdata.append("author", resourceInfo.author);
       formdata.append("description", resourceInfo.description);
-      formdata.append("transcript", transcript); 
+      // formdata.append("transcript", transcript); 
       if (contentType === "Article")
         formdata.append("content", resourceInfo.content);
   
@@ -603,7 +603,7 @@ function EditResource() {
                 />
               </div>
 
-              {contentType !== "Article" && (
+              {/* {contentType !== "Article" && (
                 <>
                   <label className="capitalize font-rubikMedium">Transcript</label>
                   <input
@@ -613,7 +613,7 @@ function EditResource() {
                     onChange={(e) => setTranscript(e.target.value)}
                   />
                 </>
-              )}
+              )} */}
 
               <div className="flex" style={{ gap: 20, marginTop: 20 }}>
                 <div className="flex-1"> </div>

@@ -73,6 +73,8 @@ const UserFeedbackRender = ({ info, onStatusUpdate }) => {
     }
   };
 
+  console.log("Info Object:", info);
+
   return (
     <>
       <tr className="border-b hover:bg-gray-50 text-sm text-gray-600">
@@ -110,6 +112,7 @@ const UserFeedbackRender = ({ info, onStatusUpdate }) => {
             onClose={handleCloseModal} 
              issueData={{
         ...info,
+        attachmentUrl: info.attachmentUrl || null, // Explicitly pass attachmentUrl
         assignedAdmin: {
           id: info.assignedAdmin?.id || 'unassigned',
           username: info.assignedAdmin?.username || 'Unassigned'
