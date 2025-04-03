@@ -78,7 +78,14 @@ function SettingPage() {
 
     try {
       const formData = new FormData();
-      formData.append("headshot", profileImg);
+
+      // Check if a new image is uploaded, otherwise use the existing one
+      if (profileImg) {
+        formData.append("headshot", profileImg);
+      } else if (userProfile.headshot) {
+        formData.append("headshot", userProfile.headshot);
+      }
+
       formData.append("firstName", userProfile.firstName);
       formData.append("lastName", userProfile.lastName);
       formData.append("username", userProfile.username);
@@ -92,11 +99,12 @@ function SettingPage() {
           Authorization: `Bearer ${accessToken}`,
         },
       });
+
       if (response.status === 200) {
-        showMessage("Profile updated successfully","", "success");
+        showMessage("Profile updated successfully", "", "success");
       }
     } catch (error) {
-      showMessage("Error updating user profile", "","error");
+      showMessage("Error updating user profile", "", "error");
     } finally {
       setIsupdatinginfo(false);
     }
