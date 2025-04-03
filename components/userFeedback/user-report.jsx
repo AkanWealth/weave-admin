@@ -43,10 +43,10 @@ function UserReport() {
   // Function to map backend status to frontend display status
   const mapStatusForDisplay = (backendStatus) => {
     if (backendStatus === "Pending") {
-      return "In-progress";
+      return "In Progress";
     }
     else if (backendStatus === "In Progress") {
-      return "In-progress";
+      return "In Progress";
 
     }
     return backendStatus;
@@ -57,7 +57,7 @@ function UserReport() {
       // For testing, dummy statuses instead of API call
       const dummyStatuses = [
         // { id: 1, name: "New" },
-        { id: 1, name: "In-progress" },
+        { id: 1, name: "In Progress" },
         { id: 2, name: "Resolved" },
         { id: 3, name: "Closed" }
       ];

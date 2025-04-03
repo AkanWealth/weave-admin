@@ -180,33 +180,40 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
 
   const handleSaveChanges = async () => {
     try {
-      console.log("assignee", assignee);
-      console.log("status", status);
-      console.log("userId", issueData.userId);
-      const formattedAssignee = assignee ? String(assignee) : "unassigned";
+      console.log("Assignee:", assignee);
+      console.log("Status:", status);
+      console.log("User ID:", issueData.userId);
+
+      // Use the current values from `issueData` if the user hasn't changed them
+      const formattedStatus = status || issueData.status;
+      const formattedAssignee = assignee || issueData.assignedAdmin?.id || "unassigned";
 
       const result = await api.put(`/help-support/${issueData.userId}`, {
-        status: status,
-        adminId: formattedAssignee
+        status: formattedStatus,
+        adminId: formattedAssignee,
       });
-      console.log("result: ", result);
+
+      console.log("Result:", result);
+
       if (result.status === 200) {
         // Simulate API call
         setTimeout(() => {
           showMessage("Changes saved successfully", result.data.message, "success");
+
+          // Call the `onStatusUpdate` callback if provided
           if (onStatusUpdate) {
-            onStatusUpdate(issueData?.userId, status);
+            onStatusUpdate(issueData?.userId, formattedStatus);
           }
+
+          // Close the modal and refresh the page
           onClose();
-          
           router.push("/user-reported-Issue?refresh=" + Date.now());
-  
         }, 500);
       } else {
         showMessage("Failed to save changes", "", "error");
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error saving changes:", error);
       showMessage("Failed to save changes", "", "error");
     }
   };

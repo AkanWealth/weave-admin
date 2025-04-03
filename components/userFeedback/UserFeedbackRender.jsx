@@ -10,8 +10,8 @@ const UserFeedbackRender = ({ info, onStatusUpdate }) => {
   // Function to get the appropriate status badge color
   const getStatusBadge = (status) => {
     const statusStyles = {
-      "New": "bg-teal-500 text-white",
-      "In-progress": "bg-orange-500 text-white",
+      // "New": "bg-teal-500 text-white",
+      "In Progress": "bg-orange-500 text-white",
       "Resolved": "bg-[#24983F] text-white",
       "Closed": "bg-gray-500 text-white",
       "default": "bg-gray-200 text-gray-800"
