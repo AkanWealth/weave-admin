@@ -156,7 +156,6 @@ function ContentInfo() {
           duration,
           tags,
           status,
-          transcript,
         });
 
         showMessage(resp.data.message, "", "success");

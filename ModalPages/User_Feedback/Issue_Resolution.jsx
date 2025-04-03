@@ -5,6 +5,7 @@ import api from "@/lib/api";
 import Top from "@/assets/images/ScreenshotTop.png";
 import Bottom from "@/assets/images/SceenShotBottom.png";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import { useToastContext } from "@/contexts/toast";
 
@@ -22,6 +23,7 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
   const [assignees, setAssignees] = useState([]);
   const [loadingAssignees, setLoadingAssignees] = useState(false);
   const [attachment, setAttachment] = useState(null);
+  const router = useRouter();
 
 
   // Function to toggle message expansion
@@ -103,6 +105,13 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
     }
   }, [issueData]);
 
+  useEffect(() => {
+    if (issueData) {
+      // console.log("Attachment URL:", issueData.attachmentUrl); // Debugging
+      setAttachment(issueData.attachmentUrl);
+    }
+  }, [issueData]);
+
   // Status options from your component
   const statuses = [
     // { id: 1, name: "New" },
@@ -136,6 +145,7 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
 
       if (result.status === 201) {
         showMessage("Response sent successfully", "", "success");
+        router.push("/user-reported-Issue?refresh=" + Date.now());
 
         // Update conversation history
         setConversations(prev => [
@@ -188,6 +198,9 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
             onStatusUpdate(issueData?.userId, status);
           }
           onClose();
+          
+          router.push("/user-reported-Issue?refresh=" + Date.now());
+  
         }, 500);
       } else {
         showMessage("Failed to save changes", "", "error");

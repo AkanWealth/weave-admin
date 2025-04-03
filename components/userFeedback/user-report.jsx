@@ -81,6 +81,7 @@ function UserReport() {
       const response = await api.get('/help-support/issue-report');
       console.log(response.status);
       console.log("issue:",response.data.issueReports);
+      console.log("attachmentUrl:",response.data.issueReports.attachmentUrl);
       
       
       if (response.status === 200 && response.data.issueReports) {
@@ -199,6 +200,7 @@ function UserReport() {
                   username: item.username || item.name,
                   dateTime: item.dateTime || item.created_at,
                   issueSummary: item.issueSummary || item.summary,
+                  attachmentUrl: item.attachmentUrl || null,
                   status: mapStatusForDisplay(item.status),
                   assignedAdmin: item.assignedAdmin ? {
                     id: item.assignedAdmin.id || 'unassigned',
