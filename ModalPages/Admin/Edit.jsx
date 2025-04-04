@@ -9,8 +9,6 @@ import { UserPen, Settings2 } from "lucide-react";
 import { useToastContext } from "@/contexts/toast";
 
 function EditAdmin({ userData, onSave, onCancel }) {
-
-
   const [isUserDataLoading, setIsUserDataLoading] = useState(!userData);
   // Initialize state with the passed user data
   const [firstname, setFirstname] = useState(userData?.firstName || "");
@@ -19,6 +17,7 @@ function EditAdmin({ userData, onSave, onCancel }) {
   const [username, setUsername] = useState(userData?.username || "");
   const [role, setRole] = useState(userData?.role?.id || "");
   const [roles, setRoles] = useState([]);
+  const [selectedRolePermissions, setSelectedRolePermissions] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
   const [isLoading, setIsLoading] = useState(false);
@@ -34,6 +33,60 @@ function EditAdmin({ userData, onSave, onCancel }) {
   
   // Add state for the "enable all" checkbox
   const [enableAll, setEnableAll] = useState(false);
+
+  // Function to map backend permissions to UI permissions structure
+  const mapBackendPermissionsToUI = (backendPermissions) => {
+    // Create a fresh permissions object
+    const newPermissions = {
+      dashboard: { view: false, manage: false, export: false },
+      userManagement: { view: false, manage: false, export: false },
+      contentManagement: { view: false, manage: false, export: false },
+      auditLogs: { view: false, manage: false, export: false }
+    };
+    
+    // Map from backend permission strings to UI permission structure
+    if (backendPermissions && backendPermissions.length > 0) {
+      backendPermissions.forEach(permission => {
+        // Assuming permission is a string like "VIEW_DASHBOARD"
+        const permName = permission.name ? permission.name : permission;
+        
+        if (permName.includes("view_dashboard")) {
+          newPermissions.dashboard.view = true;
+        } else if (permName.includes("manage_dashboard")) {
+          newPermissions.dashboard.manage = true;
+        } else if (permName.includes("export_dashboad")) {
+          newPermissions.dashboard.export = true;
+        } else if (permName.includes("view_user")) {
+          newPermissions.userManagement.view = true;
+        } else if (permName.includes("manage_user")) {
+          newPermissions.userManagement.manage = true;
+        } else if (permName.includes("export_user")) {
+          newPermissions.userManagement.export = true;
+        } else if (permName.includes("view_content")) {
+          newPermissions.contentManagement.view = true;
+        } else if (permName.includes("manage_content")) {
+          newPermissions.contentManagement.manage = true;
+        } else if (permName.includes("export_content")) {
+          newPermissions.contentManagement.export = true;
+        } else if (permName.includes("view_audit")) {
+          newPermissions.auditLogs.view = true;
+        } else if (permName.includes("manage_audit")) {
+          newPermissions.auditLogs.manage = true;
+        } else if (permName.includes("export_audit")) {
+          newPermissions.auditLogs.export = true;
+        }
+      });
+    }
+    
+    return newPermissions;
+  };
+
+  // Check if all permissions are enabled
+  const checkIfAllEnabled = (perms) => {
+    return Object.values(perms)
+      .flatMap(section => Object.values(section))
+      .every(value => value === true);
+  };
 
   // Fetch roles from backend
   useEffect(() => {
@@ -58,21 +111,46 @@ function EditAdmin({ userData, onSave, onCancel }) {
       setUsername(userData.username || "");
       setRole(userData.role?.id || "");
       
+      console.log("User data:", userData);
       // Initialize permissions if userData has them
-      if (userData.permissions) {
-        setPermissions(userData.permissions);
-        
-        // Check if all permissions are enabled
-        const allChecked = Object.values(userData.permissions)
-          .flatMap(section => Object.values(section))
-          .every(value => value);
-          
-        setEnableAll(allChecked);
+      console.log("User permissions:", userData.role.permissions);
+      if (userData.role.permissions) {
+        const mappedPermissions = mapBackendPermissionsToUI(userData.role.permissions);
+        setPermissions(mappedPermissions);
+        setEnableAll(checkIfAllEnabled(mappedPermissions));
       }
       
       setIsUserDataLoading(false);
     }
   }, [userData]);
+
+  // When role changes, fetch its permissions
+  useEffect(() => {
+    const fetchRolePermissions = async () => {
+      if (role) {
+        try {
+          // Find the selected role in the available roles
+          const selectedRole = roles.find(r => r.id === role);
+          
+          if (selectedRole && selectedRole.permissions) {
+            setSelectedRolePermissions(selectedRole.permissions);
+            
+            // Map backend permissions to UI structure
+            const mappedPermissions = mapBackendPermissionsToUI(selectedRole.permissions);
+            setPermissions(mappedPermissions);
+            
+            // Check if all permissions are enabled
+            setEnableAll(checkIfAllEnabled(mappedPermissions));
+          }
+        } catch (error) {
+          console.error("Error fetching role permissions:", error);
+          showMessage("Error", "Unable to fetch role permissions", "error");
+        }
+      }
+    };
+
+    fetchRolePermissions();
+  }, [role, roles]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -194,7 +272,6 @@ function EditAdmin({ userData, onSave, onCancel }) {
       });
 
       // Simulate success message
-      // alert("Permissions saved successfully!");
       showMessage("Permissions saved successfully!", "success");
 
       // Update the parent component with new data
@@ -207,7 +284,6 @@ function EditAdmin({ userData, onSave, onCancel }) {
       return true;
     } catch (error) {
       console.error("Error updating permissions:", error);
-      // alert("Failed to update permissions. Please try again.");
       showMessage("Failed to update permissions. Please try again.", "error");
       return false;
     } finally {
