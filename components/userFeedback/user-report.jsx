@@ -15,30 +15,7 @@ function UserReport() {
   const [fetchingUsers, setFetchingUsers] = useState(false);
   const [statuses, setStatuses] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState("");
-
-  // Function to generate dummy data for testing
-  // const generateDummyData = () => {
-  //   const statuses = ["New", "In-progress", "Resolved", "Closed"];
-  //   const dummyData = [];
-    
-  //   for (let i = 1; i <= 30; i++) {
-  //     const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-      
-  //     dummyData.push({
-  //       id: `WV${1234 + i}`,
-  //       userId: `WV${1234 + i}`,
-  //       username: "Hassan Taiwo Adeola",
-  //       dateTime: "2024-12-08 - 08:30 AM",
-  //       created_at: "2024-12-08 - 08:30 AM",
-  //       issueSummary: "App crashes on load and can't register for an account",
-  //       summary: "App crashes on load and can't register for an account",
-  //       status: randomStatus,
-  //       role: { name: i % 3 === 0 ? "admin" : i % 2 === 0 ? "user" : "manager" }
-  //     });
-  //   }
-    
-  //   return dummyData;
-  // };
+  
 
   // Function to map backend status to frontend display status
   const mapStatusForDisplay = (backendStatus) => {
@@ -47,7 +24,6 @@ function UserReport() {
     }
     else if (backendStatus === "In Progress") {
       return "In Progress";
-
     }
     return backendStatus;
   };
@@ -56,10 +32,10 @@ function UserReport() {
     try {
       // For testing, dummy statuses instead of API call
       const dummyStatuses = [
-        // { id: 1, name: "New" },
         { id: 1, name: "In Progress" },
         { id: 2, name: "Resolved" },
-        { id: 3, name: "Closed" }
+        { id: 3, name: "Closed" },
+        { id: 4, name: "Unassigned" } // Add "Unassigned" filter option
       ];
       setStatuses(dummyStatuses);
     } catch (error) {
@@ -70,27 +46,30 @@ function UserReport() {
   useEffect(() => {
     if (!users || selectedStatus === "") return setFilteredlist(users);
     setSearchKey("");
-    const filtered = users.filter((user) => mapStatusForDisplay(user.status) === selectedStatus);
+    const filtered = users.filter((user) => {
+      if (selectedStatus === "Unassigned") {
+        return user.assignedAdmin?.id === null; // Filter for unassigned issues
+      }
+      return mapStatusForDisplay(user.status) === selectedStatus;
+    });
     setFilteredlist(filtered);
   }, [selectedStatus, users]);
 
   const fetchUsers = async () => {
     setFetchingUsers(true);
     try {
-
       const response = await api.get('/help-support/issue-report');
       console.log(response.status);
-      console.log("issue:",response.data.issueReports);
-      console.log("attachmentUrl:",response.data.issueReports.attachmentUrl);
-      
+      console.log("issue:", response.data.issueReports);
+      console.log("attachmentUrl:", response.data.issueReports.attachmentUrl);
       
       if (response.status === 200 && response.data.issueReports) {
-      
         const mappedData = response.data.issueReports.map(issue => ({
           id: issue.id,
           userId: issue.id,
           username: issue.email,
           dateTime: new Date(issue.created_at).toLocaleString(),
+          created_at: issue.created_at, // Store the original date for sorting
           issueSummary: `${issue.description}`,
           attachmentUrl: issue.attachmentUrl, 
           status: issue.status,
@@ -99,9 +78,15 @@ function UserReport() {
             username: issue.assignedAdmin?.username || 'Unassigned'
           },
         }));
-        console.log("map", mappedData)
-        setUsers(mappedData);
-        setFilteredlist(mappedData);
+        
+        // Sort by created_at in descending order (newest first)
+        const sortedData = mappedData.sort((a, b) => {
+          return new Date(b.created_at) - new Date(a.created_at);
+        });
+        
+        console.log("sorted data", sortedData);
+        setUsers(sortedData);
+        setFilteredlist(sortedData);
       } else {
         // showMessage("Error fetching user reported issues", "", "error");
       }

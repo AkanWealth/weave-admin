@@ -105,7 +105,7 @@ function Layout({ children }) {
       <ToastContext>
         <div className="bg-[#F5F6FA]">
           <nav className="w-[280px] fixed left-0 top-0 bottom-0 font-rubikRegular">
-            <div className="border-b-2 border-gray-100 flex p-4 py-4 justify-center item=center">
+            <div className="border-b-2 border-gray-100 flex p-4 py-8 justify-center item=center">
               <Image src={logo} className="w-[150px]" alt="Weave Logo" />
             </div>
             <div className="h-1/2 p-2 flex flex-col py-2 space-y-2 text-base">

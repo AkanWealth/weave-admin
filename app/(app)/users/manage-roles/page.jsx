@@ -11,17 +11,9 @@ function Page() {
   const [selectedRolePermission, setSelectedRolePermission] = useState([]);
   const [enabledPermissions, setEnabledPermissions] = useState([]);
   const [enableAll, setEnableAll] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    let matchRole = availableRoles.find((role) => role.id === selectedRole);
-    if (matchRole) {
-      setSelectedRolePermission(matchRole.permissions);
-      // Reset enabled permissions when changing roles
-      setEnabledPermissions([]);
-      setEnableAll(false);
-    }
-  }, [selectedRole]);
-
+  // Fetch all available roles
   const fetchRoles = async () => {
     try {
       const response = await api.get("/role");
@@ -36,6 +28,34 @@ function Page() {
     fetchRoles();
   }, []);
 
+  // When a role is selected, fetch its permissions
+  useEffect(() => {
+    const fetchRolePermissions = async () => {
+      if (selectedRole) {
+        try {
+          let matchRole = availableRoles.find((role) => role.id === selectedRole);
+          if (matchRole) {
+            setSelectedRolePermission(matchRole.permissions);
+
+            // Enable all permissions that come from the backend
+            const permissionIds = matchRole.permissions.map(permission => permission.id);
+            setEnabledPermissions(permissionIds);
+            setEnableAll(true);
+          }
+        } catch (error) {
+          console.log(error);
+          showMessage("Error", "Unable to fetch role permissions", "error");
+        }
+      } else {
+        setSelectedRolePermission([]);
+        setEnabledPermissions([]);
+        setEnableAll(false);
+      }
+    };
+
+    fetchRolePermissions();
+  }, [selectedRole, availableRoles]);
+
   const [deleting, setDeleting] = useState(false);
   const deleteSelectedRole = async () => {
     setDeleting(true);
@@ -47,6 +67,10 @@ function Page() {
         "Role deleted successfully, refresh to see changes",
         "success"
       );
+      // Reset selection after deletion
+      setSelectedRole("");
+      // Refresh roles list
+      fetchRoles();
     } catch (error) {
       showMessage("Error", "Error deleting role", "error");
       console.log(error);
@@ -103,8 +127,22 @@ function Page() {
 
   // Save permissions
   const handleSave = async () => {
-    // Implement your save logic here
-    showMessage("Success", "Permissions saved successfully", "success");
+    setSaving(true);
+    try {
+      // Update the API endpoint and payload according to your backend requirements
+      const response = await api.put(`/role/${selectedRole}/permissions`, {
+        permissions: enabledPermissions
+      });
+      showMessage("Success", "Permissions saved successfully", "success");
+      
+      // Refresh the roles to get updated data
+      fetchRoles();
+    } catch (error) {
+      console.log(error);
+      showMessage("Error", "Unable to save permissions", "error");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -175,16 +213,17 @@ function Page() {
                 <button 
                   className="bg-weave-primary text-base-white px-4 py-2 mx-4 rounded-md"
                   onClick={handleSave}
-                  disabled={selectedRolePermission.length === 0}
+                  disabled={selectedRolePermission.length === 0 || saving}
                 >
-                  Save
+                  {saving ? "Saving..." : "Save"}
                 </button>
                 {selectedRole !== "" ? (
                   <button
                     className="bg-red-500 text-base-white px-4 py-2 mx-4 rounded-md"
                     onClick={() => deleteSelectedRole()}
+                    disabled={deleting}
                   >
-                    {deleting ? "Deleting" : "Delete"}
+                    {deleting ? "Deleting..." : "Delete"}
                   </button>
                 ) : (
                   <></>

@@ -11,10 +11,6 @@ import EditAdmin from "@/ModalPages/Admin/Edit";
 import {X, Copy, CheckCircle } from "lucide-react";
 
 
-// import { useRouter } from "next/router";
-
-// import users from "@/dummyData/adminUser";
-
 function AdminList() {
   const [users, setUsers] = useState(null);
   const [filteredList, setFilteredlist] = useState([]);
@@ -42,12 +38,12 @@ function AdminList() {
     }
   };
 
-  
-
   useEffect(() => {
     if (selectedRole === "") return setFilteredlist(users);
     setSearchKey("");
-    const filtered = users.filter((user) => user.role.name === selectedRole);
+    const filtered = users
+      .filter((user) => user.role.name === selectedRole)
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     setFilteredlist(filtered);
   }, [selectedRole]);
 
@@ -57,8 +53,13 @@ function AdminList() {
       const response = await api.get("/usage-analytics/admin");
       console.log(response.data);
       if (response.status === 200) {
-        setUsers(response.data);
-        setFilteredlist(response.data);
+        // Sort users by created_at date in descending order (newest first)
+        const sortedUsers = response.data.sort((a, b) => {
+          return new Date(b.created_at) - new Date(a.created_at);
+        });
+        
+        setUsers(sortedUsers);
+        setFilteredlist(sortedUsers);
         return;
       }
       showMessage("Unable to fetch admin users", "", "error");
@@ -95,31 +96,17 @@ function AdminList() {
 
   useEffect(() => {
     if (searchKey === "") return;
-    const matchresult = users.filter((user) =>
-      Object.values(user)
-        .join("  ")
-        .toLowerCase()
-        .includes(searchKey.toLowerCase())
-    );
+    const matchresult = users
+      .filter((user) =>
+        Object.values(user)
+          .join("  ")
+          .toLowerCase()
+          .includes(searchKey.toLowerCase())
+      )
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     setFilteredlist(matchresult);
   }, [searchKey]);
-
-   // New function to handle editing a user
-  //  const handleEditUser = (user) => {
-  //   setSelectedUser(user);
-  //   setShowEditModal(true);
-  // };
-  // const handleEditUser = (user) => {
-  //   // Make sure we have the complete role object with id and name
-  //   const userWithCompleteRole = {
-  //     ...user,
-  //     role: roles.find(r => r.id === user.role.id) || user.role
-  //   };
-  //   console.log("Initial role value:", user?.role?.id);
-  //   setSelectedUser(userWithCompleteRole);
-  //   setShowEditModal(true);
-  // };
 
   const handleEditUser = async (user) => {
     try {
@@ -152,94 +139,19 @@ function AdminList() {
     }
   };
 
-
   // Function to close the modal
   const closeEditModal = () => {
     setShowEditModal(false);
     setSelectedUser(null);
   };
 
- 
-  // const handleUserUpdate = async (updatedUser) => {
-  //   try {
-  //     // Find the complete role object based on the ID
-  //     const selectedRole = roles.find(r => r.id === updatedUser.role) || 
-  //                         {id: updatedUser.role, name: "Unknown"};
-      
-  //     // Make API call to update user
-  //     const response = await api.put(`/super-admin/profile/${updatedUser.id}`, {
-  //       firstName: updatedUser.firstName,
-  //       lastName: updatedUser.lastName,
-  //       email: updatedUser.email,
-  //       username: updatedUser.username
-  //       // role: selectedRole.id 
-  //     });
-  //     console.log("status : ", response.status)
-      
-  //     if (response.status === 200) {
-  //       // For local state update, include the complete role object
-  //       // const updatedUserWithRole = {
-  //       //   ...updatedUser,
-  //       //   role: selectedRole // Use complete role object for local state
-  //       // };
-        
-  //       // // Update local state
-  //       // if (users) {
-  //       //   const updatedUsers = users.map(user => 
-  //       //     user.id === updatedUser.id ? updatedUserWithRole : user
-  //       //   );
-  //       //   setUsers(updatedUsers);
-  //       //   setFilteredlist(updatedUsers);
-  //       // }
-        
-  //       showMessage("User updated successfully", "", "success");
-  //     } else {
-  //       throw new Error("Failed to update user");
-  //     }
-      
-  //     closeEditModal();
-  //   } catch (error) {
-  //     console.error("Error updating user:", error);
-  //     showMessage(
-  //       error.response?.data?.message || "Error updating user",
-  //       "",
-  //       "error"
-  //     );
-  //   }
-  // };
-
-
-
-  // const handleUserUpdate = async (updatedUser) => {
-  //   try {
-  //     // Update local state
-  //     if (users) {
-  //       const updatedUsers = users.map(user => 
-  //         user.id === updatedUser.id ? updatedUser : user
-  //       );
-  //       setUsers(updatedUsers);
-  //       setFilteredlist(updatedUsers);
-  //     }
-      
-  //     showMessage("User updated successfully", "", "success");
-  //     closeEditModal();
-  //   } catch (error) {
-  //     console.error("Error updating user:", error);
-  //     showMessage(
-  //       "Error updating user",
-  //       "",
-  //       "error"
-  //     );
-  //   }
-  // };
   const handleUserUpdate = async (updatedUser) => {
     try {
-      console.log("iutre",users);
       if (users) {
-        const updatedUsers = users.map(user => 
-          user.id === updatedUser.id ? updatedUser : user
-        );
-        console.log("user piyrtej",updatedUsers);
+        const updatedUsers = users
+          .map(user => user.id === updatedUser.id ? updatedUser : user)
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        
         setUsers(updatedUsers);
         setFilteredlist(updatedUsers);
       }
@@ -247,7 +159,7 @@ function AdminList() {
       showMessage("User updated successfully", "", "success");
       closeEditModal();
       
-      await fetchUsers();
+      await fetchUsers(); // This will re-fetch and re-sort
     } catch (error) {
       console.error("Error updating user:", error);
       showMessage(
@@ -258,75 +170,8 @@ function AdminList() {
     }
   };
 
-
-
-
-
   return (
     <>
-      {/* <div className="flex my-4">
-        <div className="w-3/5">
-          <div className="bg-white border px-8 py-2 rounded-md">
-            <input
-              type="text"
-              className="bg-[#f5f6fa] rounded-md w-full px-4 py-2"
-              placeholder="Search here"
-              value={searchKey}
-              onChange={(e) => setSearchKey(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="w-2/5 text-right">
-          <button
-            className="bg-weave-primary text-base-white p-2 px-4 mr-3 rounded-md font-rubikMedium"
-            onClick={() =>
-              exportData(
-                filteredList.map((user) => ({
-                  ...user,
-                  status: user.isActive ? "Active" : "Inactive",
-                  role: user.role.name,
-                })),
-                ["username", "email", "created_at", "status", "role"],
-                "usersList"
-              )
-            }
-          >
-            Export
-            <i className="fa fa-window-maximize ml-2"></i>
-          </button>
-          <button className="relative dropdown border p-2 rounded-md font-rubikMedium">
-            <span className="px-2">
-              Filter
-              <i className="fa fa-list ml-2"></i>
-            </span>
-            <div className="absolute right-0 rounded-md p-1 shadow bg-white text-xs w-[200px]  dropdown-menu">
-              <div className="flex flex-col text-left">
-                <a
-                  className={`p-2 capitalize rounded-md mb-1`}
-                  onClick={() => setSelectedRole("")}
-                >
-                  Reset Filter
-                </a>
-                {roles.map((role) => (
-                  <a
-                    className={`p-2 capitalize rounded-md mb-1 ${
-                      selectedRole === role.name ? "bg-gray-200" : ""
-                    }`}
-                    onClick={() => setSelectedRole(role.name)}
-                    key={role.id}
-                  >
-                    {role.name.replace(/_/, " ")}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </button>
-          {/* <button className="border p-2 px-4 rounded-md font-rubikMedium">
-            Filter
-            <i className="fa fa-list ml-2"></i>
-          </button>
-        </div>
-      </div> */}
       <div className="flex flex-col lg:flex-row mb-4 items-start gap-4">
         <div className="w-full lg:w-3/4 h-1/2">
           <div className="relative border rounded-md px-8 py-2 bg-white">
@@ -427,7 +272,6 @@ function AdminList() {
                 <th className="text-left">Role</th>
                 <th className="text-left">Date</th>
                 <th className="text-left">Status</th>
-
                 <th className="text-left"></th>
               </tr>
             )}
@@ -436,26 +280,26 @@ function AdminList() {
       ) : (
         <EmptyList />
       )}
-{showEditModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white p-6 rounded-lg w-3/4 max-w-4xl max-h-[90vh] overflow-y-auto">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Edit User</h2>
-        <button 
-          onClick={closeEditModal}
-          className="text-gray-500 hover:text-gray-700"
-        >
-          <X className="w-5 h-5"/>
-        </button>
-      </div>
-      <EditAdmin 
-        userData={selectedUser} 
-        onSave={handleUserUpdate}
-        onCancel={closeEditModal}
-      />
-    </div>
-  </div>
-)}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-3/4 max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Edit User</h2>
+              <button 
+                onClick={closeEditModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-5 h-5"/>
+              </button>
+            </div>
+            <EditAdmin 
+              userData={selectedUser} 
+              onSave={handleUserUpdate}
+              onCancel={closeEditModal}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -16,20 +16,30 @@ function ResourcesRender() {
   const [resourceFilter, setResourceFilter] = useState("");
 
   useEffect(() => {
-    if (resourceFilter === "") return setFilteredResources(resources);
+    if (resourceFilter === "") {
+      // Sort resources by created_at date in descending order (newest first)
+      const sortedResources = [...resources].sort((a, b) => 
+        new Date(b.created_at) - new Date(a.created_at)
+      );
+      return setFilteredResources(sortedResources);
+    }
 
     setSearchKey("");
     const matchResources = resources.filter(
       (resource) =>
         resource.resourceType.toLowerCase() === resourceFilter.toLowerCase()
-    );
+    ).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Sort filtered resources
 
     setFilteredResources(matchResources);
-  }, [resourceFilter]);
+  }, [resourceFilter, resources]);
 
   useEffect(() => {
-
-    setFilteredResources(resources);
+    // Sort resources by created_at date in descending order (newest first)
+    const sortedResources = [...resources].sort((a, b) => 
+      new Date(b.created_at) - new Date(a.created_at)
+    );
+    
+    setFilteredResources(sortedResources);
   }, [resources]);
 
   useEffect(() => {
@@ -40,7 +50,7 @@ function ResourcesRender() {
         .join(" ")
         .toLowerCase()
         .includes(searchKey.toLowerCase())
-    );
+    ).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Sort search results
 
     setFilteredResources(matchResources);
   }, [searchKey]);
@@ -57,13 +67,14 @@ function ResourcesRender() {
       ["title", "tags", "resourceType", "date_created", "status"],
       "resources"
     );
-
   };
+  
   const formatDate = (d) => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   };
+  
   const formatTime = (d) => {
-    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${d.getHours() >= 12 ? 'AM' : 'PM'}`;
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${d.getHours() >= 12 ? 'PM' : 'AM'}`; // Fixed AM/PM logic
   };
 
   return (
@@ -153,7 +164,7 @@ function ResourcesRender() {
             </h4>
             <p className="text-md my-2">
               There are no resources in your library yet. Once you add articles,
-              videos, or audio content, they’ll appear here for easy access and
+              videos, or audio content, they'll appear here for easy access and
               management.
             </p>
             <div className="">
@@ -237,50 +248,7 @@ function ResourcesRender() {
             )}
           />
         )}
-
-        {}
       </div>
-
-      {/* pagination activity tab */}
-      {/* <div className="rounded-md bg-white p-4 my-4 md:flex md:justify-end">
-        <div className="md:min-w-1/2 flex space-x-2">
-          <p className="my-auto">Page 1 of 20</p>
-          <button className="rounded-full w-[30px] h-[30px] bg-weave-primary text-base-white flex justify-center">
-            <span className="m-auto">1</span>
-          </button>
-          <button className="rounded-full w-[30px] h-[30px] flex justify-center">
-            <span className="m-auto">2</span>
-          </button>
-          <button className="rounded-full w-[30px] h-[30px] flex justify-center">
-            <span className="m-auto">3</span>
-          </button>
-          <button className="rounded-full w-[30px] h-[30px] flex justify-center">
-            <span className="m-auto">4</span>
-          </button>
-          <button className="rounded-full w-[30px] h-[30px] flex justify-center">
-            <span className="m-auto">5</span>
-          </button>
-          <button className="rounded-full w-[30px] h-[30px] flex justify-center">
-            <span className="m-auto">6</span>
-          </button>
-
-          <button className="rounded-full w-[30px] h-[30px] flex justify-center">
-            <span className="m-auto">...</span>
-          </button>
-
-          <button className="rounded-md h-[30px] px-4 flex justify-center bg-weave-primary text-center text-base-white">
-            <span className="m-auto">
-              <i className="fa fa-plus"></i> Previous
-            </span>
-          </button>
-
-          <button className="rounded-md h-[30px] px-4 flex justify-center border border-weave-black text-center">
-            <span className="m-auto">
-              Next <i className="fa fa-plus"></i>
-            </span>
-          </button>
-        </div>
-      </div> */}
     </>
   );
 }

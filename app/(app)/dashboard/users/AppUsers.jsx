@@ -51,7 +51,13 @@ function AppUsers() {
     try {
       const response = await api.get("/usage-analytics/users");
       if (response.status === 200) {
-        setAppUsers(response.data);
+        // Sort the users by created_at date in descending order (newest first)
+        const sortedUsers = response.data.sort((a, b) => {
+          const dateA = new Date(a.created_at || "2024-12-08T08:30:00");
+          const dateB = new Date(b.created_at || "2024-12-08T08:30:00");
+          return dateB - dateA; // Descending order (newest first)
+        });
+        setAppUsers(sortedUsers);
       }
     } catch (error) {
       console.log(error);
@@ -99,6 +105,13 @@ function AppUsers() {
           .includes(searchKey.toLowerCase())
       );
     }
+    
+    // Sort by created_at date (newest first) - ensure chronological order is maintained even after filtering
+    result = result.sort((a, b) => {
+      const dateA = new Date(a.created_at || "2024-12-08T08:30:00");
+      const dateB = new Date(b.created_at || "2024-12-08T08:30:00");
+      return dateB - dateA;
+    });
     
     setFilteredList(result);
   };
