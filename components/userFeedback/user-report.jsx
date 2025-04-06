@@ -15,6 +15,7 @@ function UserReport() {
   const [fetchingUsers, setFetchingUsers] = useState(false);
   const [statuses, setStatuses] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState("");
+  
 
   // Function to map backend status to frontend display status
   const mapStatusForDisplay = (backendStatus) => {

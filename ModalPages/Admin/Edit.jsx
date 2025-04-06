@@ -259,32 +259,47 @@ function EditAdmin({ userData, onSave, onCancel }) {
     setIsSubmitting(true);
 
     try {
-      // Simulate saving permissions successfully
-      console.log("Permissions data to save:", {
+      // Prepare the permissions array for the payload
+      const permissionsArray = [];
+      Object.entries(permissions).forEach(([section, actions]) => {
+        Object.entries(actions).forEach(([action, isEnabled]) => {
+          if (isEnabled) {
+            permissionsArray.push(`${action}_${section}`);
+          }
+        });
+      });
+
+      // Construct the payload
+      const payload = {
         adminId: userData.id,
-        roleId: role,
-        permissions: {
-          dashboard: permissions.dashboard,
-          userManagement: permissions.userManagement,
-          contentManagement: permissions.contentManagement,
-          auditLogs: permissions.auditLogs,
-        },
-      });
+        role: roles.find((r) => r.id === role)?.name || userData.role?.name,
+        permissions: permissionsArray,
+      };
 
-      // Simulate success message
-      showMessage("Permissions saved successfully!", "success");
+      console.log("Payload being sent:", payload);
 
-      // Update the parent component with new data
-      onSave({
-        ...userData,
-        role: { id: role },
-        permissions: permissions,
-      });
+      // Send the payload to the backend
+      const response = await api.put(`/role/update-role-permissions`, payload);
 
-      return true;
+      if (response.status === 200) {
+        showMessage("Permissions updated successfully!", "","success");
+
+        // Update the parent component with new data
+        onSave({
+          ...userData,
+          role: { id: role },
+          permissions: permissions,
+        });
+
+        return true;
+      } else {
+        console.error("Error response from API:", response.data);
+        showMessage("Failed to update permissions. Please try again.", "","error");
+        return false;
+      }
     } catch (error) {
       console.error("Error updating permissions:", error);
-      showMessage("Failed to update permissions. Please try again.", "error");
+      showMessage("Failed to update permissions. Please try again.", "","error");
       return false;
     } finally {
       setIsSubmitting(false);

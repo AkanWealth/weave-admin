@@ -20,7 +20,7 @@ function PasswordField({ label, placeholder, value, setValue, error }) {
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
-      <button
+      {/* <button
         className="absolute right-5 top-7"
         type="button"
         onClick={() => setIsVisible(!isVisible)}
@@ -30,7 +30,7 @@ function PasswordField({ label, placeholder, value, setValue, error }) {
         ) : (
           <i className="fa fa-eye-slash"></i>
         )}
-      </button>
+      </button> */}
       {error && error !== "" && (
         <p className="text-red-400">
           <i className="fa fa-info-circle mr-2"></i>

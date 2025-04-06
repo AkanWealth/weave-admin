@@ -39,10 +39,10 @@ export default function OtpVerification() {
           }
         }
       } else {
-        const resp = await api.post("/super-admin/verify-passcode", {
+        const resp = await api.post("/super-admin/verify-token", {
           email,
-          token,
-          passcode: otp,
+          token:otp,
+          
         });
 
         console.log(resp);
@@ -56,7 +56,7 @@ export default function OtpVerification() {
     } catch (err) {
       console.log(err);
       if (err.response.status === 400) router.push("/setup/message");
-      showMessage(err.response.data.message || "Error verifying otp", "","error");
+      showMessage("OTP Expired", "Click on resend otp","error");
       setIsError(true);
     } finally {
       setIsLoading(false);
@@ -79,7 +79,7 @@ export default function OtpVerification() {
       showMessage(response?.data.message,"", "success");
     } catch (error) {
       showMessage(
-        error.response.data.message || "Error Resending otp","",
+       "Error Resending otp","",
         "error"
       );
     } finally {
