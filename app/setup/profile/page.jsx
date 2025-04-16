@@ -23,48 +23,67 @@ function ProfileForm() {
   const [fileSelected, setFileSelected] = useState(null);
   const [image, setImage] = useState(null);
   const router = useRouter();
-  const params = useSearchParams();
-  const token = params.get("token");
+
+  // Retrieve the admin object from local storage
+  const [admin, setAdmin] = useState(null);
 
   useEffect(() => {
-    setImageView();
-  }, [fileSelected]);
+    const storedAdmin = localStorage.getItem("admin");
+    if (storedAdmin) {
+      setAdmin(JSON.parse(storedAdmin)); // Parse the stored admin object
+    }
+  }, []);
 
-  const setImageView = () => {
-    console.log("reading");
-    if (!fileSelected) return;
-    const filereader = new FileReader();
-    filereader.readAsDataURL(fileSelected);
-    filereader.onload = (e) => {
-      setImage(e.target.result);
-    };
-  };
+  // Pre-fill the form fields with admin data
+  const [firstName, setFirstName] = useState(admin?.firstName || "");
+  const [lastName, setLastName] = useState(admin?.lastName || "");
+  const [username, setUsername] = useState(admin?.username || "");
+  const [email, setEmail] = useState(admin?.email || "");
 
-  // inputs
-  const [firstName, setFirstName] = useState("");
-
-  const [lastName, setLastName] = useState("");
+  // Update form fields when admin data is loaded
+  useEffect(() => {
+    if (admin) {
+      setFirstName(admin.firstName || "");
+      setLastName(admin.lastName || "");
+      setUsername(admin.username || "");
+      setEmail(admin.email || "");
+    }
+  }, [admin]);
 
   let isDisabled = firstName === "" || lastName === "" || isLoading;
 
   const saveInfo = async () => {
     try {
-      const resp = await api.post(`/super-admin/profile-setup?token=${token}`, {
-        firstName,
-        lastName,
+      // Create a FormData object to handle file uploads
+      const formData = new FormData();
+      formData.append("username", username);
+      formData.append("email", email);
+      formData.append("firstName", firstName);
+      formData.append("lastName", lastName);
+
+      // Append the image file if one is selected
+      if (fileSelected) {
+        formData.append("headshot", fileSelected); // 'headshot' is the key expected by the backend
+      }
+
+      // Send the FormData to the backend
+      const resp = await api.put(`/super-admin/profile/${admin.id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data", // Set the correct content type for file uploads
+        },
       });
 
       console.log(resp);
-      if (resp.status === 201) {
-        showMessage("Profile Setup complete", "success");
+      if (resp.status === 200) {
+        showMessage("Profile updated successfully", "success");
         router.push("/welcome");
         return;
       }
 
-      showMessage("Error setting up, login and complete setup", "error");
+      showMessage("Error updating profile, please try again", "error");
     } catch (err) {
       console.log(err);
-      showMessage("Error setting up, login and complete setup", "error");
+      showMessage("Error updating profile, please try again", "error");
     } finally {
       setIsLoading(false);
     }
@@ -84,7 +103,20 @@ function ProfileForm() {
             type="file"
             className="hidden"
             id="profile_img"
-            onChange={(e) => setFileSelected(e.target.files[0])}
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              setFileSelected(file);
+
+              // Preview the selected image
+              const reader = new FileReader();
+              reader.onload = () => {
+                setImage(reader.result); // Set the preview image
+              };
+              if (file) {
+                reader.readAsDataURL(file);
+              }
+            }}
           />
           <div className="w-[160px] h-[160px] rounded-full overflow-hidden">
             {!image ? (
@@ -100,9 +132,6 @@ function ProfileForm() {
             )}
           </div>
           <div className="flex px-6">
-            {/* <button className="bg-weave-primary text-base-white rounded-xl p-2 px-5 my-auto">
-              Upload
-            </button> */}
             <label
               htmlFor="profile_img"
               className="bg-weave-primary text-base-white rounded-xl p-2 px-5 my-auto"
@@ -126,6 +155,18 @@ function ProfileForm() {
           value={lastName}
           setValue={setLastName}
         />
+        {/* <TextField
+          label={"Username"}
+          placeholder={"Enter your username"}
+          value={username}
+          setValue={setUsername}
+        />
+        <TextField
+          label={"Email"}
+          placeholder={"Enter your email"}
+          value={email}
+          setValue={setEmail} */}
+        {/* /> */}
       </div>
       <div className="my-8">
         <Button

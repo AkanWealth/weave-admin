@@ -152,58 +152,58 @@ function EditAdmin({ userData, onSave, onCancel }) {
     fetchRolePermissions();
   }, [role, roles]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setIsSubmitting(true);
 
-    try {
-      const updatedData = {
-        firstName: firstname,
-        lastName: lastname,
-        email: email,
-        username: username,
-      };
+  //   try {
+  //     const updatedData = {
+  //       firstName: firstname,
+  //       lastName: lastname,
+  //       email: email,
+  //       username: username,
+  //     };
 
-      console.log("Payload being sent:", updatedData);
-      console.log("User ID being sent:", userData.id);
+  //     console.log("Payload being sent:", updatedData);
+  //     console.log("User ID being sent:", userData.id);
 
-      const response = await api.put(`/super-admin/profile/${userData.id}`, updatedData);
-      console.log("API Response:", response);
+  //     const response = await api.put(`/super-admin/profile/${userData.id}`, updatedData);
+  //     console.log("API Response:", response);
 
-      if (response.status === 200) {
-        const updatedUserObject = {
-          ...userData,
-          firstName: firstname,
-          lastName: lastname,
-          email: email,
-          username: username,
-          role: {
-            id: role,
-            name: roles.find((r) => r.id === role)?.name || userData.role?.name,
-          },
-        };
+  //     if (response.status === 200) {
+  //       const updatedUserObject = {
+  //         ...userData,
+  //         firstName: firstname,
+  //         lastName: lastname,
+  //         email: email,
+  //         username: username,
+  //         role: {
+  //           id: role,
+  //           name: roles.find((r) => r.id === role)?.name || userData.role?.name,
+  //         },
+  //       };
 
-        console.log("Updated user object:", updatedUserObject);
-        onSave(updatedUserObject);
-        return true;
-      } else {
-        console.error("Error response from API:", response.data);
-        showMessage("Failed to update user", "error");
-        return false;
-      }
-    } catch (error) {
-      console.error("Error in handleSubmit:", error);
-      if (error.response) {
-        console.error("Backend error:", error.response.data);
-        showMessage(error.response.data.message || "Failed to update user", "error");
-      } else {
-        showMessage("An unexpected error occurred", "error");
-      }
-      return false;
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  //       console.log("Updated user object:", updatedUserObject);
+  //       onSave(updatedUserObject);
+  //       return true;
+  //     } else {
+  //       console.error("Error response from API:", response.data);
+  //       showMessage("Failed to update user", "error");
+  //       return false;
+  //     }
+  //   } catch (error) {
+  //     console.error("Error in handleSubmit:", error);
+  //     if (error.response) {
+  //       console.error("Backend error:", error.response.data);
+  //       showMessage(error.response.data.message || "Failed to update user", "error");
+  //     } else {
+  //       showMessage("An unexpected error occurred", "error");
+  //     }
+  //     return false;
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
   
   const handleEnableAllChange = (e) => {
     const isChecked = e.target.checked;
@@ -282,7 +282,7 @@ function EditAdmin({ userData, onSave, onCancel }) {
       const response = await api.put(`/role/update-role-permissions`, payload);
 
       if (response.status === 200) {
-        showMessage("Permissions updated successfully!", "","success");
+        // showMessage("Permissions updated successfully!", "","success");
 
         // Update the parent component with new data
         onSave({
@@ -300,6 +300,64 @@ function EditAdmin({ userData, onSave, onCancel }) {
     } catch (error) {
       console.error("Error updating permissions:", error);
       showMessage("Failed to update permissions. Please try again.", "","error");
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSaveAll = async () => {
+    setIsSubmitting(true);
+
+    try {
+      // Prepare the permissions set for the payload
+      const permissionsSet = new Set();
+      Object.entries(permissions).forEach(([section, actions]) => {
+        Object.entries(actions).forEach(([action, isEnabled]) => {
+          if (isEnabled) {
+            permissionsSet.add(`${action}_${section}`); // Add only the enabled permissions
+          }
+        });
+      });
+
+      // Construct the payload
+      const payload = {
+        firstName: firstname,
+        lastName: lastname,
+        email: email,
+        username: username,
+        roleId: role, // Use roleId instead of role
+        permissions: permissionsSet, // Send permissions as a set of strings
+      };
+
+      console.log("Payload being sent:", payload);
+
+      // Send the payload to the backend
+      const response = await api.put(`/super-admin/profile/${userData.id}`, payload);
+
+      if (response.status === 200) {
+        // showMessage("Profile and permissions updated successfully!", "", "success");
+
+        // Update the parent component with new data
+        onSave({
+          ...userData,
+          firstName: firstname,
+          lastName: lastname,
+          email: email,
+          username: username,
+          role: { id: role },
+          permissions: Array.from(permissionsSet), // Convert set to array for local state
+        });
+
+        return true;
+      } else {
+        console.error("Error response from API:", response.data);
+        showMessage("Failed to update profile and permissions. Please try again.", "", "error");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error updating profile and permissions:", error);
+      showMessage("Failed to update profile and permissions. Please try again.", "", "error");
       return false;
     } finally {
       setIsSubmitting(false);
@@ -361,7 +419,7 @@ function EditAdmin({ userData, onSave, onCancel }) {
         </button>
       </div>
       {activeTab === "profile" ? (
-        <form onSubmit={handleSubmit}>
+        <form>
           <div className="flex flex-col space-y-4">
             <InputField
               value={firstname}
@@ -421,19 +479,19 @@ function EditAdmin({ userData, onSave, onCancel }) {
               </button>
             </div>
             <div className="flex-1 px-2">
-            <button 
-                      className="bg-weave-primary text-base-white px-4 py-2 w-full rounded-md"
-                      onClick={handleSubmit}
-                      type="submit"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? "Saving..." : "Save"}
-                    </button>
+              <button
+                type="button"
+                className="bg-weave-primary text-base-white px-4 py-2 w-full rounded-md"
+                onClick={() => setActiveTab("role")} // Switch to Permission Management tab
+              >
+                Continue
+              </button>
             </div>
           </div>
         </form>
       ) : (
         <>
+          {/* Permission Management Tab */}
           <div className="bg-gray-300 p-4">
             <div className="flex flex-col md:flex-row">
               <div className="flex-1 mb-4 md:mb-0">
@@ -613,11 +671,13 @@ function EditAdmin({ userData, onSave, onCancel }) {
               </button>
             </div>
             <div className="flex-1 px-2">
-              <Button
-                title={isSubmitting ? "Saving..." : "Save Changes"}
+              <button
+                className="bg-weave-primary text-base-white px-4 py-2 w-full rounded-md"
+                onClick={handleSaveAll} // Save everything
                 disabled={isSubmitting}
-                onClick={() => handleSavePermissions()}
-              />
+              >
+                {isSubmitting ? "Saving..." : "Save All"}
+              </button>
             </div>
           </div>
         </>
