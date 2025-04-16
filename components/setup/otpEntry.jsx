@@ -39,17 +39,17 @@ export default function OtpVerification() {
           }
         }
       } else {
-        const resp = await api.post("/super-admin/verify-token", {
+        const resp = await api.post("/auth/validate-otp", {
           email,
-          token:otp,
+          otp,
           
         });
 
         console.log(resp);
-        if (resp.status === 201) {
+        if (resp.status === 200) {
           showMessage(resp.data.message, "","success");
           router.push(
-            `/setup/password?token=${resp.data.setupToken}&email=${email}`
+            `/setup/password?&email=${email}`
           );
         }
       }

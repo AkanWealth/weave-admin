@@ -23,15 +23,15 @@ function PasswordForm() {
 
   const [temporaryPassword, setTemporaryPassword] = useState("");
   const [temporaryPasswordError, setTemporaryPasswordError] = useState("");
-  const [password, setPassword] = useState("");
+  const [newPassword, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [confirmPasswordError, setconfirmPasswordError] = useState("");
   let [passwordStrong, setPasswordStrong] = useState(false);
   const btnDisabled =
-    !passwordStrong || isLoading || password !== confirmPassword;
+    !passwordStrong || isLoading || newPassword !== confirmPassword;
 
-  const token = params.get("token");
+  const email = params.get("email"); // Extract email from the URL
   const router = useRouter();
 
   const savePassword = async () => {
@@ -39,23 +39,28 @@ function PasswordForm() {
       if (!temporaryPassword) {
         return setTemporaryPasswordError("Temporary password is required");
       }
-      if (password.length < 8) {
+      if (newPassword.length < 8) {
         return setPasswordError("Password must be at least 8 characters");
       }
-      if (password !== confirmPassword) {
+      if (newPassword !== confirmPassword) {
         return setconfirmPasswordError("Password does not match Confirm Password");
       }
 
       const resp = await api.post("/super-admin/password-setup", {
-        token,
-        temporaryPassword, // Include the temporary password
-        password,
+        email,
+        temporaryPassword,
+        newPassword,
       });
 
       console.log(resp);
-      if (resp.status === 201) {
+      if (resp.status === 200) {
         showMessage(resp.data.message, "success");
-        router.push(`/setup/profile?token=${resp.data.profileToken}`);
+
+        // Store the admin object in local storage
+        localStorage.setItem("admin", JSON.stringify(resp.data.admin));
+
+        // Navigate to the profile page
+        router.push(`/setup/profile?email=${email}`);
         return;
       }
       showMessage(resp.data.message, "error");
@@ -83,7 +88,7 @@ function PasswordForm() {
         <PasswordField
           label={"Password"}
           placeholder={"Password"}
-          value={password}
+          value={newPassword}
           setValue={setPassword}
           error={passwordError}
         />
@@ -93,14 +98,14 @@ function PasswordForm() {
           value={confirmPassword}
           setValue={setConfirmPassword}
           error={
-            password !== confirmPassword
+            newPassword !== confirmPassword
               ? "Password does not match"
               : confirmPasswordError
           }
         />
       </div>
       <PasswordStrengthMeter
-        password={password}
+        password={newPassword}
         passwordStrong={passwordStrong}
         setPasswordStrong={setPasswordStrong}
       />

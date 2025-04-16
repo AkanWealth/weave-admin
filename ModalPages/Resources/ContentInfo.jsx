@@ -16,7 +16,7 @@ function ContentInfo() {
   const contentType = searchParams.get("contentType");
   const [activeTab, setActiveTab] = useState("info");
 
-  const [transcript, setTranscript] = useState("");
+  const [transcript, setTranscript] = useState(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [thumbnail, setThumbnail] = useState("");
@@ -171,10 +171,17 @@ function ContentInfo() {
         formdata.append("thumbnailUrl", thumbnailUrl);
         formdata.append("author", author);
         formdata.append("description", description);
+        formdata.append("duration", duration);
         formdata.append("tags", tags);
         formdata.append("resourceType", contentType);
         formdata.append("status", status);
-        formdata.append("transcript", transcript); 
+        // formdata.append("transcript", transcript); 
+
+
+        if (transcript) {
+          formdata.append("transcriptFile", transcript); // This will now be a file, not a string
+        }
+        
 
         const response = await fetch(`${baseUrl}/resource-library`, {
           method: "POST",
@@ -475,14 +482,14 @@ function ContentInfo() {
             </div>
 
 
-            <InputField
+            {/* <InputField
               label={"Duration"}
               placeholder={"e.g 3min 4sec"}
               value={duration}
               setValue={setDuration}
               className="mb-3"
               required={true}
-            />
+            /> */}
           </>
         ) : (
           <>
@@ -523,18 +530,71 @@ function ContentInfo() {
             </label>
 
             {contentType !== "article" && (
-      <InputField
-        label={"Transcript"}
-        placeholder={"Enter transcript"}
-        value={transcript}
-        setValue={setTranscript}
-        className="mb-3"
-        required={false}
-      />
-    )}
+  <div className="mb-4">
+    <label className="font-rubikMedium">
+      Transcript <span className="text-gray-500">(Optional)</span>
+    </label>
+    <div className="mt-2">
+    <input
+  type="file"
+  id="transcript-file"
+  className="hidden"
+  accept=".txt,.doc,.docx,.pdf,.srt"
+  onChange={(e) => {
+    setTranscript(e.target.files[0]); 
+  }}
+/>
+      <label
+        htmlFor="transcript-file"
+        className="rounded-xl flex flex-col text-center cursor-pointer"
+        style={{
+          padding: "1.5rem",
+          border: "2px dashed #777",
+          margin: "8px 0",
+        }}
+      >
+        {transcript?.name ? (
+          <div className="flex items-center justify-center">
+            <span className="text-weave-primary">
+              {transcript.name}
+            </span>
+            <button
+              type="button"
+              className="ml-2 text-red-500"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setTranscript(null);
+              }}
+            >
+              <span className="fa fa-times"></span>
+            </button>
+          </div>
+        ) : (
+          <>
+            <span>Upload transcript file</span>
+            <span className="text-gray-500">TXT, DOC, DOCX, PDF</span>
+            <span className="mt-2">
+              <span className="inline-block px-4 py-2 text-sm text-base-white bg-weave-primary rounded-xl">
+                Select File
+              </span>
+            </span>
           </>
         )}
-        
+      </label>
+    </div>
+  </div>
+)}
+          </>
+        )}
+         <InputField
+              label={"Duration"}
+              placeholder={"e.g 3min 4sec"}
+              value={duration}
+              setValue={setDuration}
+              className="mb-3"
+              required={true}
+            />
 
         <InputField
           label={"Author"}
