@@ -17,9 +17,19 @@ export default function ResourceLibraryProvider({ children }) {
       if (response.status === 200) {
         setResources(response.data.resources);
       }
+      if (response.status === 403) {
+        showMessage(
+          "Error",
+          "You do not have permission to view resource library",
+          "error"
+        );
+      }
+      if (response.status === 404) {
+        showMessage("Error", "Resource library not found", "error");
+      }
     } catch (err) {
-      console.log(err);
-      showMessage("Unable to fetch resources", "", "error");
+      // console.log(err);
+      // showMessage("Unable to fetch resources", "", "error");
     } finally {
       setIsLoading(false);
     }

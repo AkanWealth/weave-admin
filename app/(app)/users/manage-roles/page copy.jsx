@@ -22,7 +22,7 @@ function Page() {
       setAvailableRoles(response.data);
     } catch (error) {
       console.log(error);
-      showMessage("Unable to fetch available roles", "error");
+      // showMessage("Unable to fetch available roles", "error");
     }
   };
 
