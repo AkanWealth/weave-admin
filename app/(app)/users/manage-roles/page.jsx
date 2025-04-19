@@ -18,6 +18,9 @@ function Page() {
     try {
       const response = await api.get("/role");
       setAvailableRoles(response.data);
+      if(response.status === 403){
+        showMessage("Error", "You do not have permission to view roles", "error");
+      }
     } catch (error) {
       console.log(error);
       showMessage("Error", "Unable to fetch available roles", "error");

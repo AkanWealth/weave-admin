@@ -13,6 +13,13 @@ function Analytics() {
 
       if (getAdminAnalytics.status === 200)
         setAnalytics(getAdminAnalytics.data);
+      if (getAdminAnalytics.status === 403) {
+        showMessage(
+          "Error",
+          "You do not have permission to view admin analytics",
+          "error"
+        );
+      }
     } catch (error) {
       showMessage("Error fetching analytics", "", "error");
     }

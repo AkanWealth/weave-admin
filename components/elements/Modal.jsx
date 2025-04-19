@@ -75,6 +75,8 @@ export default function Modal() {
               style={{
                 width: "80%",
                 maxWidth: "400px",
+                maxHeight: "85vh",
+                overflow: "auto",
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -94,6 +96,8 @@ export default function Modal() {
                   usage.startsWith("delete") || usage.startsWith("suspend")
                     ? "500px"
                     : "750px",
+                maxHeight: "85vh", // Add max height
+                overflow: "auto",
               }}
               onClick={(e) => e.stopPropagation()}
             >

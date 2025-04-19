@@ -32,9 +32,14 @@ function AdminList() {
         setRoles(response.data);
         return;
       }
-      showMessage("Unable to fetch roles", "", "error");
+      if (response.status === 403) {
+        showMessage("You are not authorized to view this page", "", "error"); 
+        return;
+      }
+
     } catch (error) {
       console.log(error);
+      showMessage("Unable to fetch roles", "", "error");
     }
   };
 
@@ -62,7 +67,11 @@ function AdminList() {
         setFilteredlist(sortedUsers);
         return;
       }
-      showMessage("Unable to fetch admin users", "", "error");
+      if (response.status === 403) {
+        showMessage("You are not authorized to view this page", "", "error");
+        return;
+      }
+      // showMessage("Unable to fetch admin users", "", "error");
     } catch (err) {
       console.log(err);
       showMessage("Error fetching admin users", "", "error");
@@ -128,7 +137,7 @@ function AdminList() {
         showMessage("Failed to fetch user details", "", "error");
       }
     } catch (error) {
-      console.error("Error fetching user details:", error);
+      // console.error("Error fetching user details:", error);
       showMessage(
         error.response?.data?.message || "Error fetching user details",
         "",
@@ -161,7 +170,7 @@ function AdminList() {
       
       await fetchUsers(); // This will re-fetch and re-sort
     } catch (error) {
-      console.error("Error updating user:", error);
+      // console.error("Error updating user:", error);
       showMessage(
         "Error updating user",
         "",

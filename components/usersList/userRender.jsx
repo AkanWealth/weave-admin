@@ -47,6 +47,9 @@ function UserRender({ info, date, resendInvite, onEditClick }) {
       try {
         const response = await api.get(`/users/profile/${info.id}`); // Replace with your actual endpoint
         setHeadshot(response.data.headshot); // Assuming the API returns a `headshotUrl`
+        if (response.status === 403) {  
+          console.error("Error: You do not have permission to view this user's headshot");
+        } 
       } catch (error) {
         console.error("Error fetching headshot:", error);
       }
