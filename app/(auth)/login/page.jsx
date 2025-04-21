@@ -4,10 +4,9 @@ import TextField from "@/components/elements/TextField";
 import PasswordField from "@/components/elements/PasswordField";
 import Button from "@/components/elements/Button";
 import Link from "next/link";
-import api from "@/lib/api";
+import api, { setAuthTokens } from "@/lib/api";
 import { ToastContext, useToastContext } from "@/contexts/toast";
-import { redirect, useRouter } from "next/navigation";
-import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   return (
@@ -50,11 +49,12 @@ function Login() {
           return;
         }
 
+        // Store user info
         if (typeof window !== "undefined") {
           localStorage.setItem("userinfo", JSON.stringify(resp.data.user));
-          Cookies.set("session", resp.data.accessToken, {
-            expires: 1 / 24,
-          });
+          
+          // Set both access token and refresh token using the helper function
+          setAuthTokens(resp.data.accessToken, resp.data.refreshToken);
         }
 
         // Show success toast message

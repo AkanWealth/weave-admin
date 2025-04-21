@@ -15,6 +15,8 @@ function UserReport() {
   const [fetchingUsers, setFetchingUsers] = useState(false);
   const [statuses, setStatuses] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [userRole, setUserRole] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
   
 
   // Function to map backend status to frontend display status
@@ -43,17 +45,67 @@ function UserReport() {
     }
   };
 
-  useEffect(() => {
-    if (!users || selectedStatus === "") return setFilteredlist(users);
-    setSearchKey("");
-    const filtered = users.filter((user) => {
-      if (selectedStatus === "Unassigned") {
-        return user.assignedAdmin?.id === null; // Filter for unassigned issues
+  // Function to get current user role and ID
+  const getCurrentUserInfo = async () => {
+    try {
+      // Get current user info from API
+      const response = await api.get('/auth/me');
+      
+      if (response.status === 200 && response.data && response.data.user) {
+        // Extract role name from the user object based on the provided API response structure
+        const roleName = response.data.user.role?.name || null;
+        setUserRole(roleName);
+        setCurrentUserId(response.data.user.id);
+        console.log("Current user role:", roleName);
+        console.log("Current user ID:", response.data.user.id);
       }
-      return mapStatusForDisplay(user.status) === selectedStatus;
-    });
+    } catch (error) {
+      console.log("Error fetching user info:", error);
+      // Fallback to localStorage if API fails
+      try {
+        const storedUser = localStorage.getItem('userInfo');
+        if (storedUser) {
+          const userInfo = JSON.parse(storedUser);
+          const roleName = userInfo.role?.name || null;
+          setUserRole(roleName);
+          setCurrentUserId(userInfo.id);
+          console.log("Using stored user role:", roleName);
+        }
+      } catch (e) {
+        console.log("Error parsing stored user info:", e);
+      }
+    }
+  };
+
+  useEffect(() => {
+    getCurrentUserInfo();
+  }, []);
+
+  useEffect(() => {
+    if (!users) return;
+    
+    // Apply status filter if selected
+    let filtered = users;
+    
+    if (selectedStatus !== "") {
+      filtered = users.filter((user) => {
+        if (selectedStatus === "Unassigned") {
+          return user.assignedAdmin?.id === null;
+        }
+        return mapStatusForDisplay(user.status) === selectedStatus;
+      });
+    }
+    
+    // Apply role-based filtering
+    if (userRole && userRole !== "super_admin") {
+      filtered = filtered.filter(issue => 
+        issue.assignedAdmin && issue.assignedAdmin.id === currentUserId
+      );
+    }
+    
     setFilteredlist(filtered);
-  }, [selectedStatus, users]);
+    setSearchKey("");
+  }, [selectedStatus, users, userRole, currentUserId]);
 
   const fetchUsers = async () => {
     setFetchingUsers(true);
@@ -86,7 +138,16 @@ function UserReport() {
         
         console.log("sorted data", sortedData);
         setUsers(sortedData);
-        setFilteredlist(sortedData);
+        
+        // Apply role-based filtering on initial data fetch
+        if (userRole && userRole !== "super_admin" && currentUserId) {
+          const roleFiltered = sortedData.filter(issue => 
+            issue.assignedAdmin && issue.assignedAdmin.id === currentUserId
+          );
+          setFilteredlist(roleFiltered);
+        } else {
+          setFilteredlist(sortedData);
+        }
       } else {
         // showMessage("Error fetching user reported issues", "", "error");
       }
@@ -105,7 +166,17 @@ function UserReport() {
 
   useEffect(() => {
     if (searchKey === "" || !users) return;
-    const matchresult = users.filter((user) =>
+    
+    // Get base list of issues the user is allowed to see
+    let baseList = users;
+    if (userRole && userRole !== "super_admin" && currentUserId) {
+      baseList = users.filter(issue => 
+        issue.assignedAdmin && issue.assignedAdmin.id === currentUserId
+      );
+    }
+    
+    // Apply search filter
+    const matchresult = baseList.filter((user) =>
       Object.values(user)
         .join("  ")
         .toLowerCase()
@@ -113,7 +184,7 @@ function UserReport() {
     );
 
     setFilteredlist(matchresult);
-  }, [searchKey, users]);
+  }, [searchKey, users, userRole, currentUserId]);
 
   return (
     <>
@@ -133,6 +204,11 @@ function UserReport() {
           </div>
         </div>
         <div className="w-full lg:w-2/5 flex justify-end gap-3">
+          {userRole && userRole !== "super_admin" && (
+            <div className="bg-blue-100 text-blue-800 py-2 px-4 rounded-md text-sm">
+              Viewing issues assigned to you
+            </div>
+          )}
           <button className="relative dropdown border py-2 px-4 rounded-md font-medium flex items-center">
             Filter
             <ChevronUp className="w-4 h-4 ml-2 rotate-180" />
