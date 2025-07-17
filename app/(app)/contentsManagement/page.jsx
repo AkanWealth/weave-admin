@@ -2,6 +2,9 @@
 import React, { Suspense, useState, useEffect } from "react";
 import ResourcesRender from "./resoucesRender";
 import FeedbackRender from "./feedBackRender";
+import MusicRender from "./music";
+import QuoteRender from "./quote-tip";
+import SponsorsRender from "./sponsor";
 import Link from "next/link";
 import { ToastContext } from "@/contexts/toast";
 import { NotepadText } from "lucide-react";
@@ -53,13 +56,38 @@ useEffect(() => {
             {/* Buttons on the Right */}
             <div>
               {activeTab === "resources" ? (
+              null
+              ) :  activeTab === "sponsors" ? (
                 <Link
-                  href={"?modal=add-content"}
+                  href={"?modal=add-sponsor"}
                   className="px-4 py-2 text-sm text-base-white bg-weave-primary rounded-md font-rubikMedium"
                 >
-                  Add New Content
+                  Add Sponsor
                 </Link>
-              ) : (
+              ): activeTab === "music" ? (
+                <Link
+                  href={"?modal=add-music"}
+                  className="px-4 py-2 text-sm text-base-white bg-weave-primary rounded-md font-rubikMedium"
+                >
+                  Add Song
+                </Link>
+              ): activeTab === "quote" ? (
+                <div className="flex items-center space-x-2">
+                <Link
+                  href={"?modal=add-tip"}
+                  className="px-4 py-2 text-sm text-weave-primary border border-weave-primary rounded-md font-rubikMedium"
+                >
+                  Add Tip
+                </Link>
+                <Link
+                  href={"?modal=add-quote"}
+                  className="px-4 py-2 text-sm text-base-white bg-weave-primary rounded-md font-rubikMedium"
+                >
+                  Add Quote
+                </Link>
+                </div>
+              ):
+              (
                 <>
                   <Link
                     href={"?modal=notifications"}
@@ -80,8 +108,8 @@ useEffect(() => {
           
           {/* Search Pane */}
           <div className="my-4 flex">
-            <div className="bg-gray-300 p-0 rounded-md font-rubikMedium flex">
-              {["resources", "feedback"].map((tab) => (
+            <div className="bg-gray-200 p-0 rounded-md font-rubikMedium flex">
+              {["resources", "music","feedback","sponsors","quote"].map((tab) => (
                 <button
                   key={tab}
                   className={`p-2 px-4 rounded-md ${
@@ -89,14 +117,19 @@ useEffect(() => {
                   }`}
                   onClick={() => setActiveTab(tab)}
                 >
-                  {tab === "resources" ? "Library" : "Feedback"}
+                  {tab === "resources" ? "Library" : tab === "feedback" ? "Feedback" : tab === "sponsors" ? "Sponsorship" : tab === "music" ? "Music": "Quotes & Tips"}
                 </button>
               ))}
             </div>
           </div>
           
           {/* Tab Content */}
-          {activeTab === "resources" ? <ResourcesRender key={key} /> : <FeedbackRender key={key} />}
+          {activeTab === "resources" ? <ResourcesRender key={key} /> :
+          activeTab === "music" ? <MusicRender key={key} /> : 
+           activeTab === "feedback" ? <FeedbackRender key={key} /> :           
+            activeTab === "sponsors" ? <SponsorsRender key={key} />:
+            activeTab === "quote" ? <QuoteRender key={key} /> 
+           : null}
         </div>
       </ToastContext>
     </Suspense>

@@ -8,7 +8,7 @@ import Modal from "@/components/elements/Modal";
 import LogoutBtn from "./LogoutBtn";
 import { FaSearch } from "react-icons/fa";
 import Usaflag from "@/assets/images/UsaFlag.png";
-import { ChevronDown, User, NotepadText, OctagonAlert } from "lucide-react";
+import { ChevronDown, User, NotepadText, OctagonAlert,CircleDollarSign } from "lucide-react";
 import Pentagonwithclock from "@/components/elements/Pentagonwithclock";
 import { ToastContext } from "@/contexts/toast";
 import UserInfo from "./userInfo";
@@ -144,6 +144,20 @@ function Layout({ children }) {
                 <NotepadText className="w-5 h-5 mr-4 flex-shrink-0" />
                 <span>Content Management</span>
               </Link>
+<Link
+                href={"/subscription"}
+                className={
+                  (pathname.startsWith("/subscription")
+                    ? "bg-weave-primary text-base-white "
+                    : "text-gray-600 ") +
+                  "rounded-md p-3 px-5 flex items-center"
+                }
+              >
+                <CircleDollarSign className="w-5 h-5 mr-4 flex-shrink-0" />
+                <span>Subscriptions</span>
+              </Link>
+
+
               <Link
                 href={"/auditLog"}
                 className={

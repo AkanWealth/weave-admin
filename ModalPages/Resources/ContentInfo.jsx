@@ -34,30 +34,30 @@ function ContentInfo() {
 
   // Validate info tab inputs whenever they change
   useEffect(() => {
-    const isInfoTabValid = 
-      title.trim() !== "" && 
-      description.trim() !== "" && 
-      category !== "" && 
+    const isInfoTabValid =
+      title.trim() !== "" &&
+      description.trim() !== "" &&
+      category !== "" &&
       thumbnail !== "";
-    
+
     setInfoTabValid(isInfoTabValid);
   }, [title, description, category, thumbnail]);
 
   // Validate details tab inputs whenever they change
   useEffect(() => {
     let isDetailsTabValid = false;
-    
+
     if (contentType === "article") {
-      isDetailsTabValid = 
-        articleBody.trim() !== "" && 
-        duration.trim() !== "" && 
+      isDetailsTabValid =
+        articleBody.trim() !== "" &&
+        duration.trim() !== "" &&
         author.trim() !== "";
     } else {
-      isDetailsTabValid = 
-        fileUploadContent !== null && 
+      isDetailsTabValid =
+        fileUploadContent !== null &&
         author.trim() !== "";
     }
-    
+
     setDetailsTabValid(isDetailsTabValid);
   }, [contentType, articleBody, duration, author, fileUploadContent]);
 
@@ -159,7 +159,7 @@ function ContentInfo() {
         });
 
         showMessage(resp.data.message, "", "success");
-  
+
         setTimeout(() => {
           router.push("/contentsManagement?refresh=" + Date.now());
         }, 100);
@@ -181,7 +181,7 @@ function ContentInfo() {
         if (transcript) {
           formdata.append("transcriptFile", transcript); // This will now be a file, not a string
         }
-        
+
 
         const response = await fetch(`${baseUrl}/resource-library`, {
           method: "POST",
@@ -196,22 +196,22 @@ function ContentInfo() {
         console.log({ respstatus });
         console.log(respbody);
 
-        
+
         if (response.ok) {
-          showMessage(respbody.message || "Content uploaded successfully", "","success");
-          
+          showMessage(respbody.message || "Content uploaded successfully", "", "success");
+
           setTimeout(() => {
             router.push("/contentsManagement?refresh=" + Date.now());
           }, 100);
         } else {
-          showMessage(respbody.message || "Error uploading content", "","error");
+          showMessage(respbody.message || "Error uploading content", "", "error");
         }
-      
+
 
       }
     } catch (err) {
       console.log(err);
-      showMessage("Error uploading content", "","error");
+      showMessage("Error uploading content", "", "error");
     } finally {
       setIsSubmitting(false);
 
@@ -228,12 +228,12 @@ function ContentInfo() {
     try {
       console.log(thumbnailToDelete);
       const response = await api.delete(`/thumbnails/${thumbnailToDelete}`);
-      showMessage(response.data.message, "","success");
+      showMessage(response.data.message, "", "success");
       getThumbnails();
     } catch (error) {
       console.log(error);
       showMessage(
-        error.response.data.message || "Error deleting thumbnail","",
+        error.response.data.message || "Error deleting thumbnail", "",
         "error"
       );
     } finally {
@@ -456,9 +456,8 @@ function ContentInfo() {
           </div>
           <div className="flex-1">
             <button
-              className={`bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md ${
-                !infoTabValid ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md ${!infoTabValid ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               onClick={() => {
                 setActiveTab("file");
               }}
@@ -530,71 +529,64 @@ function ContentInfo() {
             </label>
 
             {contentType !== "article" && (
-  <div className="mb-4">
-    <label className="font-rubikMedium">
-      Transcript <span className="text-gray-500">(Optional)</span>
-    </label>
-    <div className="mt-2">
-    <input
-  type="file"
-  id="transcript-file"
-  className="hidden"
-  accept=".txt,.doc,.docx,.pdf,.srt"
-  onChange={(e) => {
-    setTranscript(e.target.files[0]); 
-  }}
-/>
-      <label
-        htmlFor="transcript-file"
-        className="rounded-xl flex flex-col text-center cursor-pointer"
-        style={{
-          padding: "1.5rem",
-          border: "2px dashed #777",
-          margin: "8px 0",
-        }}
-      >
-        {transcript?.name ? (
-          <div className="flex items-center justify-center">
-            <span className="text-weave-primary">
-              {transcript.name}
-            </span>
-            <button
-              type="button"
-              className="ml-2 text-red-500"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setTranscript(null);
-              }}
-            >
-              <span className="fa fa-times"></span>
-            </button>
-          </div>
-        ) : (
-          <>
-            <span>Upload transcript file</span>
-            <span className="text-gray-500">TXT, DOC, DOCX, PDF</span>
-            <span className="mt-2">
-              <span className="inline-block px-4 py-2 text-sm text-base-white bg-weave-primary rounded-xl">
-                Select File
-              </span>
-            </span>
+              <div className="mb-4">
+                <label className="font-rubikMedium">
+                  Transcript <span className="text-gray-500">(Optional)</span>
+                </label>
+                <div className="mt-2">
+                  <input
+                    type="file"
+                    id="transcript-file"
+                    className="hidden"
+                    accept=".txt,.doc,.docx,.pdf,.srt"
+                    onChange={(e) => {
+                      setTranscript(e.target.files[0]);
+                    }}
+                  />
+                  <label
+                    htmlFor="transcript-file"
+                    className="rounded-xl flex flex-col text-center cursor-pointer"
+                    style={{
+                      padding: "1.5rem",
+                      border: "2px dashed #777",
+                      margin: "8px 0",
+                    }}
+                  >
+                    {transcript?.name ? (
+                      <div className="flex items-center justify-center">
+                        <span className="text-weave-primary">
+                          {transcript.name}
+                        </span>
+                        <button
+                          type="button"
+                          className="ml-2 text-red-500"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setTranscript(null);
+                          }}
+                        >
+                          <span className="fa fa-times"></span>
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <span>Upload transcript file</span>
+                        <span className="text-gray-500">TXT, DOC, DOCX, PDF</span>
+                        <span className="mt-2">
+                          <span className="inline-block px-4 py-2 text-sm text-base-white bg-weave-primary rounded-xl">
+                            Select File
+                          </span>
+                        </span>
+                      </>
+                    )}
+                  </label>
+                </div>
+              </div>
+            )}
           </>
         )}
-      </label>
-    </div>
-  </div>
-)}
-          </>
-        )}
-         <InputField
-              label={"Duration"}
-              placeholder={"e.g 3min 4sec"}
-              value={duration}
-              setValue={setDuration}
-              className="mb-3"
-              required={true}
-            />
+
 
         <InputField
           label={"Author"}
@@ -665,9 +657,8 @@ function ContentInfo() {
           <div className="flex-1">
             <button
               type="button"
-              className={`bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md ${
-                !detailsTabValid ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md ${!detailsTabValid ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               onClick={(e) => {
                 e.preventDefault();
                 submitForm("Published");

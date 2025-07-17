@@ -153,7 +153,7 @@ export const setAuthTokens = (accessToken, refreshToken) => {
     expires: 1 / 24, // 1 hour
   });
   
-  api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+  api.defaults.headers.common['Authorization'] = `Bearer ${refreshToken}`;
 };
 
 // Function to clear tokens on logout
