@@ -100,8 +100,8 @@ function Login() {
         login();
       }}
     >
-      <h1 className="text-5xl font-rubikBold text-gray-900">
-        Login as the Weave Admin
+      <h1 className="text-3xl font-rubikBold text-gray-900">
+        Login as the FounderThrive Admin
       </h1>
       <p className="text-md my-4 mb-8">
         Enter your account correct login details below
