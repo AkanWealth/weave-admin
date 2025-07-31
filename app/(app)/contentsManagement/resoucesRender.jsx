@@ -973,13 +973,14 @@ const ContentPillarsPage = () => {
   const fetchPillars = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/api/pillars");
+      const response = await api.get("/pillars");
 
       const transformedPillars = response.data.map((pillar, index) => ({
         id: pillar.id || `pillar-${index}`,
         title: pillar.name,
         description: pillar.description,
-        icon: getIconEmoji(pillar.icon),
+        icon: pillar.icon, // Use the actual image URL from API
+        coverImage: pillar.coverImage,
         color: getColorClass(index),
         iconBg: getIconBgClass(index),
         contentItems: pillar.contentItems || 0,
@@ -1000,20 +1001,31 @@ const ContentPillarsPage = () => {
     }
   };
 
-  const getIconEmoji = (iconName) => {
-    const iconMap = {
-      heart: "❤️",
-      leaf: "🍃",
-      apple: "🍎",
-      brain: "🧠",
-      sun: "☀️",
-      star: "⭐",
-      sleep: "😴",
-      nutrition: "🍟",
-      movement: "🏃‍♂️",
-      "mind-body-wellness": "💜",
-    };
-    return iconMap[iconName] || "🔹";
+  // Function to get default emoji based on pillar name
+  const getDefaultEmoji = (pillarName) => {
+    const name = pillarName.toLowerCase();
+    if (name.includes('heart') || name.includes('cardio') || name.includes('fitness')) return '❤️';
+    if (name.includes('leaf') || name.includes('nature') || name.includes('environment')) return '🍃';
+    if (name.includes('apple') || name.includes('nutrition') || name.includes('food')) return '🍎';
+    if (name.includes('brain') || name.includes('mental') || name.includes('mind')) return '🧠';
+    if (name.includes('sun') || name.includes('energy') || name.includes('vitamin')) return '☀️';
+    if (name.includes('star') || name.includes('goal') || name.includes('achievement')) return '⭐';
+    if (name.includes('sleep') || name.includes('rest')) return '😴';
+    if (name.includes('leadership') || name.includes('leader')) return '👑';
+    if (name.includes('wellness') || name.includes('health')) return '💚';
+    if (name.includes('strength') || name.includes('muscle')) return '💪';
+    return '🔹'; // Default fallback emoji
+  };
+
+  // Function to check if URL is valid
+  const isValidUrl = (url) => {
+    if (!url || typeof url !== 'string') return false;
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const getColorClass = (index) => {
@@ -1063,7 +1075,7 @@ const ContentPillarsPage = () => {
     e.stopPropagation();
     if (window.confirm(`Are you sure you want to delete the "${pillar.title}" pillar?`)) {
       try {
-        await api.delete(`/api/pillars/${pillar.id}`);
+        await api.delete(`/pillars/${pillar.id}`);
         fetchPillars();
         showMessage({
           type: "success",
@@ -1175,10 +1187,32 @@ const ContentPillarsPage = () => {
               onClick={() => handlePillarClick(pillar)}
             >
               <div className="flex items-center justify-between mb-3">
-                <div className={`w-12 h-12 ${pillar.iconBg} rounded-full flex items-center justify-center text-3xl`}>
-                  {pillar.icon}
+                <div className={`w-12 h-12 ${pillar.iconBg} rounded-full flex items-center justify-center p-2`}>
+                  {pillar.icon && isValidUrl(pillar.icon) ? (
+                    <Image
+                      src={pillar.icon}
+                      alt={pillar.title}
+                      width={32}
+                      height={32}
+                      className="object-contain rounded-full"
+                      onError={(e) => {
+                        // Hide image and show emoji fallback on error
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  {/* Emoji fallback - shows if no valid image URL or on image error */}
+                  <span 
+                    className="text-2xl flex items-center justify-center" 
+                    style={{ 
+                      display: (pillar.icon && isValidUrl(pillar.icon)) ? 'none' : 'flex' 
+                    }}
+                  >
+                    {getDefaultEmoji(pillar.title)}
+                  </span>
                 </div>
-                <div className={`text-gray-500 flex items-center rounded-full p-2  hover:bg-gray-200 transition-colors cursor-pointer ${pillar.locked ? "text-gray-500 bg-gray-100" : "hidden"}`}>
+                <div className={`text-gray-500 flex items-center rounded-full p-2 hover:bg-gray-200 transition-colors cursor-pointer ${pillar.locked ? "text-gray-500 bg-gray-100" : "hidden"}`}>
                   <LockKeyholeIcon className={`w-5 h-5 ${pillar.locked ? "text-gray-500" : "hidden"}`} />
                 </div>
               </div>
@@ -1223,13 +1257,14 @@ const ContentPillarsPage = () => {
                           <Edit className="w-4 h-4 mr-3" />
                           Edit Pillar
                         </Link>
-                        <button
-                          onClick={(e) => handleDeletePillar(pillar, e)}
+                        <Link
+                          href={`?modal=delete-pillars&id=${pillar.id}`}
                           className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                          onClick={handleLinkClick}
                         >
                           <Trash2 className="w-4 h-4 mr-3" />
                           Delete Pillar
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   )}

@@ -126,76 +126,74 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import api from "@/lib/api"; // Assuming API client is configured
+import api from "@/lib/api"; 
+import { useToastContext } from "@/contexts/toast";
 
 function AddTip() {
-    const [sponsorName, setSponsorName] = useState('');
-    const [logoFile, setLogoFile] = useState('');
-    const [status, setStatus] = useState('');
-    const [duration, setDuration] = useState('');
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
     const [quoteText, setQuoteText] = useState('');
     const [displayDate, setDisplayDate] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const router = useRouter();
-
-    const statusOptions = [
-        { value: 'active', label: 'Active' },
-        { value: 'draft', label: 'Draft' }
-    ];
-
-    const durations = [
-        { value: '1-month', label: '1 Month' },
-        { value: '3-months', label: '3 Months' },
-        { value: '6-months', label: '6 Months' },
-        { value: '1-year', label: '1 Year' }
-    ];
+    const { showMessage } = useToastContext();
 
     const isFormValid = () => {
-        return quoteText && displayDate;
+        return quoteText.trim() && displayDate;
     };
 
     const handleSubmit = async () => {
         if (isFormValid()) {
             try {
+                setLoading(true);
+                setError('');
+                
                 const payload = {
-                    title: quoteText,
-                    created_at: displayDate,
-                    status: status || 'draft',
-                    type: 'tip',
-                    sponsorName,
-                    logoFile,
-                    duration,
-                    startDate,
-                    endDate
+                    text: quoteText,
+                    displayDate: displayDate
                 };
+                
                 await api.post("/api/tips", payload);
-                router.push("/success");
+                showMessage("Success", "Tip created successfully", "success");
+                 setTimeout(() => {
+            router.push("/contentsManagement?refresh=" + Date.now());
+          }, 100);
             } catch (error) {
                 console.error("Error creating tip:", error);
-                // Handle error (e.g., show error message to user)
+                showMessage("Error", "Failed to create tip. Please try again.", "error");
+                setError("Failed to create tip. Please try again.");
+            } finally {
+                setLoading(false);
             }
         }
     };
 
     const handleSaveAsDraft = async () => {
+        if (!quoteText.trim()) {
+            setError("Please enter tip text before saving as draft.");
+            return;
+        }
+
         try {
+            setLoading(true);
+            setError('');
+            
             const payload = {
-                title: quoteText,
-                created_at: displayDate,
-                status: 'draft',
-                type: 'tip',
-                sponsorName,
-                logoFile,
-                duration,
-                startDate,
-                endDate
+                text: quoteText,
+                displayDate: displayDate || new Date().toISOString().split('T')[0], // Use current date if no date selected
+                status: 'draft' // If your API supports status field
             };
+            
             await api.post("/api/tips", payload);
-            // Handle success (e.g., show success message or redirect)
+            showMessage("Draft Saved", "Tip saved as draft successfully", "success");
+            setTimeout(() => {
+            router.push("/contentsManagement?refresh=" + Date.now());
+          }, 100);
         } catch (error) {
             console.error("Error saving tip as draft:", error);
-            // Handle error (e.g., show error message to user)
+            showMessage("Error", "Failed to save tip as draft. Please try again.", "error");
+            setError("Failed to save tip as draft. Please try again.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -205,16 +203,23 @@ function AddTip() {
                 <h5 className="text-xl font-rubikBold">Add New Tip</h5>
             </div>
 
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                    {error}
+                </div>
+            )}
+
             <div className="flex flex-col space-y-4">
                 {/* Tip Text */}
                 <div>
-                    <label className="block font-rubikMedium mb-2">Text Tip</label>
+                    <label className="block font-rubikMedium mb-2">Tip Text</label>
                     <textarea
                         className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-weave-primary focus:border-transparent"
                         placeholder="Enter your daily tip..."
                         value={quoteText}
                         onChange={(e) => setQuoteText(e.target.value)}
                         rows={4}
+                        disabled={loading}
                     />
                 </div>
 
@@ -226,63 +231,50 @@ function AddTip() {
                         className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-weave-primary focus:border-transparent"
                         value={displayDate}
                         onChange={(e) => setDisplayDate(e.target.value)}
+                        disabled={loading}
                     />
                     <span className="text-gray-500 text-sm mt-1 block">
                         The date when this content will be displayed to users
                     </span>
                 </div>
 
-                {/* Status */}
-                <div>
-                    <label className="block font-rubikMedium mb-2">Status</label>
-                    <select
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-weave-primary focus:border-transparent"
-                        value={status}
-                        onChange={(e) => setStatus(e.target.value)}
-                    >
-                        <option value="">Select status</option>
-                        {statusOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* Duration */}
-                <div>
-                    <label className="block font-rubikMedium mb-2">Duration</label>
-                    <select
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-weave-primary focus:border-transparent"
-                        value={duration}
-                        onChange={(e) => setDuration(e.target.value)}
-                    >
-                        <option value="">Select duration</option>
-                        {durations.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
+                {/* Preview Section */}
+                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <label className="block font-rubikMedium mb-2">Preview</label>
+                    <div className="bg-white rounded-lg p-4 border">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#28A745] text-white">
+                                Published
+                            </span>
+                            <span className="text-sm text-gray-500">
+                                Display: {displayDate ? new Date(displayDate).toLocaleDateString() : 'No date selected'}
+                            </span>
+                        </div>
+                        <p className="text-gray-900 text-base leading-relaxed mb-4">
+                            {quoteText || 'Your daily tip will appear here...'}
+                        </p>
+                    </div>
                 </div>
 
                 {/* Action Buttons */}
                 <div className="flex gap-4 mt-8">
                     <button
-                        className="flex-1 py-3 px-4 border border-gray-300 text-gray-700 font-rubikMedium rounded-lg hover:bg-gray-50 transition-colors"
+                        className="flex-1 py-3 px-4 border border-gray-300 text-gray-700 font-rubikMedium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
                         onClick={handleSaveAsDraft}
+                        disabled={loading || !quoteText.trim()}
                     >
-                        Save as Draft
+                        {loading ? 'Saving...' : 'Save as Draft'}
                     </button>
                     <button
-                        className={`flex-1 py-3 px-4 font-rubikMedium rounded-lg transition-colors ${isFormValid()
-                            ? "bg-weave-primary text-white hover:bg-weave-primary/90"
-                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        className={`flex-1 py-3 px-4 font-rubikMedium rounded-lg transition-colors ${
+                            isFormValid() && !loading
+                                ? "bg-weave-primary text-white hover:bg-weave-primary/90"
+                                : "bg-gray-300 text-gray-500 cursor-not-allowed"
                         }`}
                         onClick={handleSubmit}
-                        disabled={!isFormValid()}
+                        disabled={!isFormValid() || loading}
                     >
-                        Save Tip
+                        {loading ? 'Saving...' : 'Save Tip'}
                     </button>
                 </div>
             </div>

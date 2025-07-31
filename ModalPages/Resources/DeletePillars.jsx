@@ -25,14 +25,11 @@ function DeletePillar() {
     const fetchPillarData = async () => {
         try {
             setFetchingData(true);
-            const response = await api.get(`/api/pillars/${pillarId}`);
+            const response = await api.get(`/pillars/${pillarId}`);
             setPillarData(response.data);
         } catch (error) {
             console.error('Error fetching pillar data:', error);
-            showMessage({
-                type: 'error',
-                text: 'Failed to load pillar data'
-            });
+            showMessage("Failed to load pillar data","", "error" );
         } finally {
             setFetchingData(false);
         }
@@ -40,22 +37,16 @@ function DeletePillar() {
 
     const invokeDelete = async () => {
         if (!pillarId) {
-            showMessage({
-                type: 'error',
-                text: 'No pillar selected for deletion'
-            });
+            showMessage("No pillar selected for deletion", "","error");
             return;
         }
 
         setLoading(true);
         try {
-            const response = await api.delete(`/api/pillars/${pillarId}`);
+            const response = await api.delete(`/pillars/${pillarId}`);
 
             if (response.status === 200 || response.status === 204) {
-                showMessage({
-                    type: 'success',
-                    text: 'Pillar deleted successfully'
-                });
+                showMessage("Pillar Deleted", "The pillar has been deleted successfully.", "success");
                 
                 setTimeout(() => {
                     router.push("/contentsManagement?refresh=" + Date.now());
@@ -63,10 +54,7 @@ function DeletePillar() {
                 return;
             }
             
-            showMessage({
-                type: 'error',
-                text: 'Error deleting pillar. Please try again later'
-            });
+            showMessage("Error deleting pillar", "Please try again later", "error");
         } catch (error) {
             console.error('Error deleting pillar:', error);
             
@@ -81,10 +69,7 @@ function DeletePillar() {
                 errorMessage = 'Cannot delete pillar as it contains content items';
             }
 
-            showMessage({
-                type: 'error',
-                text: errorMessage
-            });
+            showMessage("Error deleting pillar", errorMessage, "error");
         } finally {
             setLoading(false);
         }

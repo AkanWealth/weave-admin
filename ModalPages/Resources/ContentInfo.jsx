@@ -1,3 +1,5 @@
+
+
 // "use client";
 // import InputField from "@/components/elements/TextField";
 // import { useRouter, useSearchParams } from "next/navigation";
@@ -14,6 +16,7 @@
 //   const router = useRouter();
 //   const searchParams = useSearchParams();
 //   const contentType = searchParams.get("contentType");
+//   const pillarId = searchParams.get("pillarId"); // Get pillarId from URL if available
 //   const [activeTab, setActiveTab] = useState("info");
 
 //   const [transcript, setTranscript] = useState(null);
@@ -27,21 +30,60 @@
 //   const [tagname, setTagName] = useState("");
 //   const [fileUploadContent, setFileUploadContent] = useState(null);
 //   const [category, setCategory] = useState("");
+  
+//   // Add selectedPillarId state to track the actual pillar ID
+//   const [selectedPillarId, setSelectedPillarId] = useState("");
+
+//   // New states for pillars
+//   const [pillars, setPillars] = useState([]);
+//   const [loadingPillars, setLoadingPillars] = useState(true);
+//   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
 //   // Form validation states
 //   const [infoTabValid, setInfoTabValid] = useState(false);
 //   const [detailsTabValid, setDetailsTabValid] = useState(false);
+
+//   // Fetch pillars from API
+//   useEffect(() => {
+//     fetchPillars();
+//   }, []);
+
+//   const fetchPillars = async () => {
+//     try {
+//       setLoadingPillars(true);
+//       const response = await api.get("/api/pillars");
+      
+//       if (response.status === 200) {
+//         setPillars(response.data);
+        
+//         // If pillarId is provided in URL, auto-select that pillar
+//         if (pillarId) {
+//           const selectedPillar = response.data.find(pillar => pillar.id === pillarId);
+//           if (selectedPillar) {
+//             setCategory(selectedPillar.name);
+//             setSelectedPillarId(selectedPillar.id); // Set the pillar ID
+//           }
+//         }
+//       }
+//     } catch (error) {
+//       console.error('Error fetching pillars:', error);
+//       showMessage("Failed to load categories", "error");
+//     } finally {
+//       setLoadingPillars(false);
+//     }
+//   };
 
 //   // Validate info tab inputs whenever they change
 //   useEffect(() => {
 //     const isInfoTabValid =
 //       title.trim() !== "" &&
 //       description.trim() !== "" &&
-//       category !== "" &&
+//       selectedPillarId !== "" && // Check pillarId is selected
+//       category !== "" && // Also check category name is set
 //       thumbnail !== "";
 
 //     setInfoTabValid(isInfoTabValid);
-//   }, [title, description, category, thumbnail]);
+//   }, [title, description, selectedPillarId, category, thumbnail]); // Updated dependencies
 
 //   // Validate details tab inputs whenever they change
 //   useEffect(() => {
@@ -85,6 +127,7 @@
 
 //   const [thumbNailSelected, setThumbnailSelected] = useState(null);
 //   const [isUploadingThumbnail, setIsuploadingThumbnail] = useState(false);
+  
 //   useEffect(() => {
 //     readAndUploadThumbnail();
 //   }, [thumbNailSelected]);
@@ -107,6 +150,7 @@
 
 //       const respBody = await resp.json();
 //       showMessage(respBody.message, "success");
+//       getThumbnails(); // Refresh thumbnails after upload
 //     } catch (e) {
 //       showMessage(e.message, "error");
 //     } finally {
@@ -148,7 +192,8 @@
 //       if (contentType === "article") {
 //         const resp = await api.post("/resource-library/article", {
 //           title,
-//           category,
+//           pillarId: selectedPillarId, // Send pillarId
+//           category: category, // Also send category name
 //           thumbnailUrl,
 //           author,
 //           content: articleBody,
@@ -167,7 +212,8 @@
 //         let formdata = new FormData();
 //         formdata.append("file", fileUploadContent);
 //         formdata.append("title", title);
-//         formdata.append("category", category);
+//         formdata.append("pillarId", selectedPillarId); // Send pillarId
+//         formdata.append("category", category); // Also send category name
 //         formdata.append("thumbnailUrl", thumbnailUrl);
 //         formdata.append("author", author);
 //         formdata.append("description", description);
@@ -175,13 +221,10 @@
 //         formdata.append("tags", tags);
 //         formdata.append("resourceType", contentType);
 //         formdata.append("status", status);
-//         // formdata.append("transcript", transcript); 
-
 
 //         if (transcript) {
-//           formdata.append("transcriptFile", transcript); // This will now be a file, not a string
+//           formdata.append("transcriptFile", transcript);
 //         }
-
 
 //         const response = await fetch(`${baseUrl}/resource-library`, {
 //           method: "POST",
@@ -196,7 +239,6 @@
 //         console.log({ respstatus });
 //         console.log(respbody);
 
-
 //         if (response.ok) {
 //           showMessage(respbody.message || "Content uploaded successfully", "", "success");
 
@@ -206,8 +248,6 @@
 //         } else {
 //           showMessage(respbody.message || "Error uploading content", "", "error");
 //         }
-
-
 //       }
 //     } catch (err) {
 //       console.log(err);
@@ -241,10 +281,26 @@
 //     }
 //   };
 
-//   // Handle category selection
-//   const handleCategoryChange = (e) => {
-//     setCategory(e.target.value);
+//   // Updated handle category selection to store both name and ID
+//   const handleCategorySelect = (pillar) => {
+//     setCategory(pillar.name);
+//     setSelectedPillarId(pillar.id); // Store the pillar ID
+//     setIsDropdownOpen(false);
 //   };
+
+//   // Close dropdown when clicking outside
+//   useEffect(() => {
+//     const handleClickOutside = (event) => {
+//       if (!event.target.closest('.category-dropdown')) {
+//         setIsDropdownOpen(false);
+//       }
+//     };
+
+//     document.addEventListener('mousedown', handleClickOutside);
+//     return () => {
+//       document.removeEventListener('mousedown', handleClickOutside);
+//     };
+//   }, []);
 
 //   return (
 //     <form name="content-form" onSubmit={(e) => e.preventDefault()}>
@@ -294,57 +350,46 @@
 //             Category <span className="text-red-500">*</span>
 //           </label>
 //           <br />
-//           <div className="inline-block">
-//             <label>
-//               <input
-//                 type="radio"
-//                 name="category"
-//                 value="Sleep"
-//                 className="mx-2"
-//                 checked={category === "Sleep"}
-//                 onChange={handleCategoryChange}
-//               />{" "}
-//               Sleep
-//             </label>
-//           </div>
-//           <div className="inline-block">
-//             <label>
-//               <input
-//                 type="radio"
-//                 name="category"
-//                 value="Happiness"
-//                 className="mx-2"
-//                 checked={category === "Happiness"}
-//                 onChange={handleCategoryChange}
-//               />{" "}
-//               Happiness
-//             </label>
-//           </div>
-//           <div className="inline-block">
-//             <label>
-//               <input
-//                 type="radio"
-//                 name="category"
-//                 value="Meditation"
-//                 className="mx-2"
-//                 checked={category === "Meditation"}
-//                 onChange={handleCategoryChange}
-//               />
-//               Meditation
-//             </label>
-//           </div>
-//           <div className="inline-block">
-//             <label>
-//               <input
-//                 type="radio"
-//                 name="category"
-//                 value="Sophrology"
-//                 className="mx-2"
-//                 checked={category === "Sophrology"}
-//                 onChange={handleCategoryChange}
-//               />
-//               Sophrology
-//             </label>
+//           <div className="category-dropdown relative mt-2">
+//             <button
+//               type="button"
+//               className={`w-full text-left px-4 py-2 border rounded-md bg-white flex items-center justify-between ${
+//                 category ? 'border-weave-primary' : 'border-gray-300'
+//               }`}
+//               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+//               disabled={loadingPillars}
+//             >
+//               <span className={category ? 'text-black' : 'text-gray-500'}>
+//                 {loadingPillars 
+//                   ? 'Loading categories...' 
+//                   : category || 'Select a category'
+//                 }
+//               </span>
+//               <i className={`fa fa-chevron-${isDropdownOpen ? 'up' : 'down'} text-gray-400`}></i>
+//             </button>
+            
+//             {isDropdownOpen && !loadingPillars && (
+//               <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+//                 {pillars.length > 0 ? (
+//                   pillars.map((pillar) => (
+//                     <button
+//                       key={pillar.id}
+//                       type="button"
+//                       className={`w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors ${
+//                         selectedPillarId === pillar.id ? 'bg-blue-50 text-weave-primary' : 'text-gray-700'
+//                       }`}
+//                       onClick={() => handleCategorySelect(pillar)} // Pass the entire pillar object
+//                     >
+//                       {pillar.name}
+//                     </button>
+//                   ))
+//                 ) : (
+//                   <div className="px-4 py-2 text-gray-500">
+//                     No categories available
+//                   </div>
+//                 )}
+//               </div>
+//             )}
 //           </div>
 //         </div>
 
@@ -433,7 +478,7 @@
 //             />
 //             <label
 //               htmlFor="thumbnail-input"
-//               className="border border-2 border-black rounded-xl mx-auto p-2 px-4 w-[300px] text-md font-rubikMedium"
+//               className="border border-2 border-black rounded-xl mx-auto p-2 px-4 w-[300px] text-md font-rubikMedium cursor-pointer hover:bg-gray-50 transition-colors"
 //             >
 //               {isUploadingThumbnail
 //                 ? "Uploading thumbnail..."
@@ -480,22 +525,28 @@
 //               <RichTextEditor setValue={setArticleBody} />
 //             </div>
 
-
-//             {/* <InputField
+//             <InputField
 //               label={"Duration"}
 //               placeholder={"e.g 3min 4sec"}
 //               value={duration}
 //               setValue={setDuration}
 //               className="mb-3"
 //               required={true}
-//             /> */}
+//             />
 //           </>
 //         ) : (
 //           <>
 //             <h6 className="text-xl font-rubikBold my-2 capitalize">
 //               {contentType} File Upload <span className="text-red-500">*</span>
 //             </h6>
-
+//               <InputField
+//                 label={"Duration"}
+//                 placeholder={"e.g 3min 4sec"}
+//                 value={duration}
+//                 setValue={setDuration}
+//                 className="mb-3"
+//                 required={true}
+//               />
 //             <input
 //               type="file"
 //               name="file"
@@ -507,7 +558,7 @@
 //             />
 //             <label
 //               htmlFor="file"
-//               className="rounded-xl flex flex-col text-center"
+//               className="rounded-xl flex flex-col text-center cursor-pointer hover:bg-gray-50 transition-colors"
 //               style={{
 //                 padding: "2rem",
 //                 border: "2px dashed #777",
@@ -545,7 +596,7 @@
 //                   />
 //                   <label
 //                     htmlFor="transcript-file"
-//                     className="rounded-xl flex flex-col text-center cursor-pointer"
+//                     className="rounded-xl flex flex-col text-center cursor-pointer hover:bg-gray-50 transition-colors"
 //                     style={{
 //                       padding: "1.5rem",
 //                       border: "2px dashed #777",
@@ -586,7 +637,6 @@
 //             )}
 //           </>
 //         )}
-
 
 //         <InputField
 //           label={"Author"}
@@ -679,8 +729,6 @@
 
 
 
-
-
 "use client";
 import InputField from "@/components/elements/TextField";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -689,6 +737,7 @@ import React, { useEffect, useState } from "react";
 import RichTextEditor from "@/components/elements/RichTextEditor";
 import { useModalContext } from "@/components/elements/Modal";
 import { useToastContext } from "@/contexts/toast";
+import { CloudUpload, X } from "lucide-react";
 import api from "@/lib/api";
 import Cookies from "js-cookie";
 import { baseUrl } from "@/lib/envfile";
@@ -699,7 +748,7 @@ function ContentInfo() {
   const contentType = searchParams.get("contentType");
   const pillarId = searchParams.get("pillarId"); // Get pillarId from URL if available
   const [activeTab, setActiveTab] = useState("info");
-
+const [loading, setLoading] = useState(false);
   const [transcript, setTranscript] = useState(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -711,6 +760,13 @@ function ContentInfo() {
   const [tagname, setTagName] = useState("");
   const [fileUploadContent, setFileUploadContent] = useState(null);
   const [category, setCategory] = useState("");
+   const [coverImage, setCoverImage] = useState(null);
+   const [sessionTime, setSessionTime] = useState("");
+   const [isPillarLocked, setIsPillarLocked] = useState(false);
+
+  
+  // Add selectedPillarId state to track the actual pillar ID
+  const [selectedPillarId, setSelectedPillarId] = useState("");
 
   // New states for pillars
   const [pillars, setPillars] = useState([]);
@@ -726,58 +782,89 @@ function ContentInfo() {
     fetchPillars();
   }, []);
 
-  const fetchPillars = async () => {
-    try {
-      setLoadingPillars(true);
-      const response = await api.get("/api/pillars");
+  // const fetchPillars = async () => {
+  //   try {
+  //     setLoadingPillars(true);
+  //     const response = await api.get("/pillars");
       
-      if (response.status === 200) {
-        setPillars(response.data);
+  //     if (response.status === 200) {
+  //       setPillars(response.data);
         
-        // If pillarId is provided in URL, auto-select that pillar
-        if (pillarId) {
-          const selectedPillar = response.data.find(pillar => pillar.id === pillarId);
-          if (selectedPillar) {
-            setCategory(selectedPillar.name);
-          }
+  //       // If pillarId is provided in URL, auto-select that pillar
+  //       if (pillarId) {
+  //         const selectedPillar = response.data.find(pillar => pillar.id === pillarId);
+  //         if (selectedPillar) {
+  //           setCategory(selectedPillar.name);
+  //           setSelectedPillarId(selectedPillar.id); // Set the pillar ID
+  //         }
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching pillars:', error);
+  //     showMessage("Failed to load categories", "error");
+  //   } finally {
+  //     setLoadingPillars(false);
+  //   }
+  // };
+
+
+const fetchPillars = async () => {
+  try {
+    setLoadingPillars(true);
+    const response = await api.get("/pillars");
+    
+    if (response.status === 200) {
+      setPillars(response.data);
+      
+      // If pillarId is provided in URL, auto-select that pillar and lock it
+      if (pillarId) {
+        const selectedPillar = response.data.find(pillar => pillar.id === pillarId);
+        if (selectedPillar) {
+          setCategory(selectedPillar.name);
+          setSelectedPillarId(selectedPillar.id);
+          setIsPillarLocked(true); // Lock the pillar selection
         }
       }
-    } catch (error) {
-      console.error('Error fetching pillars:', error);
-      showMessage("Failed to load categories", "error");
-    } finally {
-      setLoadingPillars(false);
     }
-  };
+  } catch (error) {
+    console.error('Error fetching pillars:', error);
+    showMessage("Failed to load categories", "error");
+  } finally {
+    setLoadingPillars(false);
+  }
+};
 
   // Validate info tab inputs whenever they change
   useEffect(() => {
     const isInfoTabValid =
       title.trim() !== "" &&
-      description.trim() !== "" &&
-      category !== "" &&
-      thumbnail !== "";
+      // description.trim() !== "" &&
+      selectedPillarId !== "" && // Check pillarId is selected
+      category !== "" 
+      // thumbnail !== "";
 
     setInfoTabValid(isInfoTabValid);
-  }, [title, description, category, thumbnail]);
+  }, [title, selectedPillarId, category]); // Updated dependencies
 
   // Validate details tab inputs whenever they change
   useEffect(() => {
-    let isDetailsTabValid = false;
+  let isDetailsTabValid = false;
 
-    if (contentType === "article") {
-      isDetailsTabValid =
-        articleBody.trim() !== "" &&
-        duration.trim() !== "" &&
-        author.trim() !== "";
-    } else {
-      isDetailsTabValid =
-        fileUploadContent !== null &&
-        author.trim() !== "";
-    }
+  if (contentType === "article") {
+    isDetailsTabValid =
+      articleBody.trim() !== "" &&
+      duration.trim() !== "" &&
+      sessionTime.trim() !== ""; // Add sessionTime validation
+  } else {
+    isDetailsTabValid =
+      fileUploadContent !== null &&
+      duration.trim() !== "" &&
+      sessionTime.trim() !== ""; // Add sessionTime validation
+  }
 
-    setDetailsTabValid(isDetailsTabValid);
-  }, [contentType, articleBody, duration, author, fileUploadContent]);
+  setDetailsTabValid(isDetailsTabValid);
+}, [contentType, articleBody, duration, fileUploadContent, sessionTime]);
+
 
   const addToTag = (tag) => {
     if (tag == "") return;
@@ -854,85 +941,167 @@ function ContentInfo() {
     getThumbnails();
   }, []);
 
-  const submitForm = async (status) => {
-    setIsSubmitting(true);
-    // Get category value from state instead of form
-    const thumbnailUrl = thumbnail;
+  // const submitForm = async (status) => {
+  //   setIsSubmitting(true);
+  //   // Get category value from state instead of form
+  //   const thumbnailUrl = thumbnail;
 
-    let btn = document.getElementById(`${status.toLowerCase()}-btn`);
-    let btnTitle = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = "Please wait...";
+  //   let btn = document.getElementById(`${status.toLowerCase()}-btn`);
+  //   let btnTitle = btn.textContent;
+  //   btn.disabled = true;
+  //   btn.textContent = "Please wait...";
 
-    try {
-      if (contentType === "article") {
-        const resp = await api.post("/resource-library/article", {
-          title,
-          category, // This will now be the pillar name as string
-          thumbnailUrl,
-          author,
-          content: articleBody,
-          description,
-          duration,
-          tags,
-          status,
-        });
+  //   try {
+  //     if (contentType === "article") {
+  //       const resp = await api.post("/resource-library/article", {
+  //         title,
+  //         pillarId: selectedPillarId, 
+  //         category: category, 
+  //         thumbnailUrl,
+  //         author,
+  //         content: articleBody,
+  //         description,
+  //         duration,
+  //         tags,
+  //         status,
+  //       });
 
-        showMessage(resp.data.message, "", "success");
+  //       showMessage(resp.data.message, "", "success");
+
+  //       setTimeout(() => {
+  //         router.push("/contentsManagement?refresh=" + Date.now());
+  //       }, 100);
+  //     } else {
+  //       let formdata = new FormData();
+  //       formdata.append("file", fileUploadContent);
+  //       formdata.append("title", title);
+  //       formdata.append("pillarId", selectedPillarId); // Send pillarId
+  //       formdata.append("category", category); // Also send category name
+  //       formdata.append("thumbnailUrl", thumbnailUrl);
+  //       formdata.append("author", author);
+  //       formdata.append("description", description);
+  //       formdata.append("duration", duration);
+  //       formdata.append("tags", tags);
+  //       formdata.append("resourceType", contentType);
+  //       formdata.append("status", status);
+
+  //       if (transcript) {
+  //         formdata.append("transcriptFile", transcript);
+  //       }
+
+  //       const response = await fetch(`${baseUrl}/resource-library`, {
+  //         method: "POST",
+  //         body: formdata,
+  //         headers: {
+  //           contentType: "multipart/formdata",
+  //           Authorization: `Bearer ${accessToken}`,
+  //         },
+  //       });
+  //       const respbody = await response.json();
+  //       const respstatus = response.status;
+  //       console.log({ respstatus });
+  //       console.log(respbody);
+
+  //       if (response.ok) {
+  //         showMessage(respbody.message || "Content uploaded successfully", "", "success");
+
+  //         setTimeout(() => {
+  //           router.push("/contentsManagement?refresh=" + Date.now());
+  //         }, 100);
+  //       } else {
+  //         showMessage(respbody.message || "Error uploading content", "", "error");
+  //       }
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //     showMessage("Error uploading content", "", "error");
+  //   } finally {
+  //     setIsSubmitting(false);
+
+  //     btn.disabled = false;
+  //     btn.textContent = btnTitle;
+  //   }
+  // };
+
+
+
+
+const submitForm = async (status) => {
+  setIsSubmitting(true);
+
+  let btn = document.getElementById(`${status.toLowerCase()}-btn`);
+  let btnTitle = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Please wait...";
+
+  try {
+    if (contentType === "article") {
+      const resp = await api.post("/resource-library/article", {
+        title,
+        pillarId: selectedPillarId,
+        // Remove coverImage and tags - not expected by API
+        author: "System Admin",
+        content: articleBody, 
+        description,          
+        duration: duration.toString(), 
+        sessionTime: sessionTime, // Add sessionTime field
+        status,
+      });
+
+      showMessage(resp.data.message, "", "success");
+
+      setTimeout(() => {
+        router.push("/contentsManagement?refresh=" + Date.now());
+      }, 100);
+    } else {
+      let formdata = new FormData();
+      formdata.append("file", fileUploadContent);
+      formdata.append("title", title);
+      formdata.append("pillarId", selectedPillarId);
+      formdata.append("coverImage", coverImage);
+      formdata.append("author", "System Admin");
+      formdata.append("description", description); 
+      formdata.append("duration", duration.toString()); 
+      formdata.append("sessionTime", sessionTime); 
+      formdata.append("resourceType", contentType);
+      formdata.append("status", status);
+      // Don't append content field for media files
+
+      if (transcript) {
+        formdata.append("transcriptFile", transcript);
+      }
+
+      const response = await fetch(`${baseUrl}/resource-library`, {
+        method: "POST",
+        body: formdata,
+        headers: {
+          contentType: "multipart/formdata",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const respbody = await response.json();
+      const respstatus = response.status;
+
+      if (response.ok) {
+        showMessage(respbody.message || "Content uploaded successfully", "", "success");
 
         setTimeout(() => {
           router.push("/contentsManagement?refresh=" + Date.now());
         }, 100);
       } else {
-        let formdata = new FormData();
-        formdata.append("file", fileUploadContent);
-        formdata.append("title", title);
-        formdata.append("category", category); // This will now be the pillar name as string
-        formdata.append("thumbnailUrl", thumbnailUrl);
-        formdata.append("author", author);
-        formdata.append("description", description);
-        formdata.append("duration", duration);
-        formdata.append("tags", tags);
-        formdata.append("resourceType", contentType);
-        formdata.append("status", status);
-
-        if (transcript) {
-          formdata.append("transcriptFile", transcript);
-        }
-
-        const response = await fetch(`${baseUrl}/resource-library`, {
-          method: "POST",
-          body: formdata,
-          headers: {
-            contentType: "multipart/formdata",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        const respbody = await response.json();
-        const respstatus = response.status;
-        console.log({ respstatus });
-        console.log(respbody);
-
-        if (response.ok) {
-          showMessage(respbody.message || "Content uploaded successfully", "", "success");
-
-          setTimeout(() => {
-            router.push("/contentsManagement?refresh=" + Date.now());
-          }, 100);
-        } else {
-          showMessage(respbody.message || "Error uploading content", "", "error");
-        }
+        showMessage(respbody.message || "Error uploading content", "", "error");
       }
-    } catch (err) {
-      console.log(err);
-      showMessage("Error uploading content", "", "error");
-    } finally {
-      setIsSubmitting(false);
-
-      btn.disabled = false;
-      btn.textContent = btnTitle;
     }
-  };
+  } catch (err) {
+    console.log(err);
+    showMessage("Error uploading content", "", "error");
+  } finally {
+    setIsSubmitting(false);
+    btn.disabled = false;
+    btn.textContent = btnTitle;
+  }
+};
+
 
   const [thumbnailToDelete, setThumbnailToDelete] = useState("");
   const [isDeletingThumbnail, setIsdeletingThumbnail] = useState(false);
@@ -955,9 +1124,10 @@ function ContentInfo() {
     }
   };
 
-  // Handle category selection from dropdown
-  const handleCategorySelect = (pillarName) => {
-    setCategory(pillarName);
+  // Updated handle category selection to store both name and ID
+  const handleCategorySelect = (pillar) => {
+    setCategory(pillar.name);
+    setSelectedPillarId(pillar.id); // Store the pillar ID
     setIsDropdownOpen(false);
   };
 
@@ -1005,7 +1175,7 @@ function ContentInfo() {
       </div>
       <div className={activeTab === "info" ? "" : "hidden"}>
         <InputField
-          label={"Content Title"}
+          label={"Title"}
           value={title}
           setValue={setTitle}
           className={"mb-3"}
@@ -1019,54 +1189,64 @@ function ContentInfo() {
         />
 
         <div className="my-4">
-          <label htmlFor="" className="font-rubikMedium">
-            Category <span className="text-red-500">*</span>
-          </label>
-          <br />
-          <div className="category-dropdown relative mt-2">
+  <label htmlFor="" className="font-rubikMedium">
+    Category <span className="text-red-500">*</span>
+  </label>
+  <br />
+  <div className="category-dropdown relative mt-2">
+    <button
+      type="button"
+      className={`w-full text-left px-4 py-2 border rounded-md bg-white flex items-center justify-between ${
+        category ? 'border-weave-primary' : 'border-gray-300'
+      } ${isPillarLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+      onClick={() => !isPillarLocked && setIsDropdownOpen(!isDropdownOpen)}
+      disabled={loadingPillars || isPillarLocked}
+    >
+      <span className={`${category ? 'text-black' : 'text-gray-500'} ${isPillarLocked ? 'text-gray-600' : ''}`}>
+        {loadingPillars 
+          ? 'Loading categories...' 
+          : category || 'Select a category'
+        }
+      </span>
+      {isPillarLocked ? (
+        <i className="fa fa-lock text-gray-400"></i>
+      ) : (
+        <i className={`fa fa-chevron-${isDropdownOpen ? 'up' : 'down'} text-gray-400`}></i>
+      )}
+    </button>
+    
+    {isPillarLocked && (
+      <p className="text-xs text-gray-500 mt-1">
+        Category is pre-selected and cannot be changed
+      </p>
+    )}
+    
+    {isDropdownOpen && !loadingPillars && !isPillarLocked && (
+      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+        {pillars.length > 0 ? (
+          pillars.map((pillar) => (
             <button
+              key={pillar.id}
               type="button"
-              className={`w-full text-left px-4 py-2 border rounded-md bg-white flex items-center justify-between ${
-                category ? 'border-weave-primary' : 'border-gray-300'
+              className={`w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors ${
+                selectedPillarId === pillar.id ? 'bg-blue-50 text-weave-primary' : 'text-gray-700'
               }`}
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              disabled={loadingPillars}
+              onClick={() => handleCategorySelect(pillar)}
             >
-              <span className={category ? 'text-black' : 'text-gray-500'}>
-                {loadingPillars 
-                  ? 'Loading categories...' 
-                  : category || 'Select a category'
-                }
-              </span>
-              <i className={`fa fa-chevron-${isDropdownOpen ? 'up' : 'down'} text-gray-400`}></i>
+              {pillar.name}
             </button>
-            
-            {isDropdownOpen && !loadingPillars && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                {pillars.length > 0 ? (
-                  pillars.map((pillar) => (
-                    <button
-                      key={pillar.id}
-                      type="button"
-                      className={`w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors ${
-                        category === pillar.name ? 'bg-blue-50 text-weave-primary' : 'text-gray-700'
-                      }`}
-                      onClick={() => handleCategorySelect(pillar.name)}
-                    >
-                      {pillar.name}
-                    </button>
-                  ))
-                ) : (
-                  <div className="px-4 py-2 text-gray-500">
-                    No categories available
-                  </div>
-                )}
-              </div>
-            )}
+          ))
+        ) : (
+          <div className="px-4 py-2 text-gray-500">
+            No categories available
           </div>
-        </div>
+        )}
+      </div>
+    )}
+  </div>
+</div>
 
-        <div className="">
+        {/* <div className="">
           Thumbnail/Illustration <span className="text-red-500">*</span>
         </div>
         <div className="border border-gray-500 p-4 my-4 rounded-xl">
@@ -1158,7 +1338,65 @@ function ContentInfo() {
                 : "Add New Thumbnail"}
             </label>
           </div>
-        </div>
+        </div> */}
+
+
+
+        <div className="mb-1">
+                    <label className="font-rubikMedium">
+                      Cover Image <span className="text-red-500">*</span>
+                    </label>
+                    <div className="mt-2">
+                      <input
+                        type="file"
+                        id="coverImage-file"
+                        className="hidden"
+                        accept="image/png, image/jpeg"
+                        onChange={(e) => setCoverImage(e.target.files[0])}
+                        disabled={loading}
+                      />
+                      <label
+                        htmlFor="coverImage-file"
+                        className="rounded-xl flex flex-col text-center cursor-pointer"
+                        style={{
+                          padding: "1.5rem",
+                          border: "2px dashed #777",
+                          margin: "8px 0",
+                        }}
+                      >
+                        {coverImage?.name ? (
+                          <div className="flex items-center justify-center">
+                            <span className="text-weave-primary">{coverImage.name}</span>
+                            <button
+                              type="button"
+                              className="ml-2 text-red-500"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setCoverImage(null);
+                              }}
+                              disabled={loading}
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex items-center justify-center rounded-full bg-gray-200 w-26 h-26 mx-auto mb-2 p-2">
+                              <CloudUpload className="text-gray-600 w-8 h-8" />
+                            </div>
+                            <span className="font-bold">Drag and drop your cover image</span>
+                            <span className="text-gray-500 text-sm">PNG, JPEG</span>
+                            <span className="mt-2">
+                              <span className="inline-block px-4 py-2 text-sm text-base-white bg-weave-primary rounded-xl">
+                                Select Image
+                              </span>
+                            </span>
+                          </>
+                        )}
+                      </label>
+                    </div>
+                  </div>
         <div className="flex" style={{ gap: 20 }}>
           <div className="flex-2"></div>
           <div className="flex-1">
@@ -1190,6 +1428,34 @@ function ContentInfo() {
       <div className={activeTab === "info" ? "hidden" : ""}>
         {contentType === "article" ? (
           <>
+            
+
+            <InputField
+              label={contentType === "article" ? "Read Time(mins)" : "Duration(mins)"}
+              placeholder={"e.g 3min 4sec"}
+              value={duration}
+              setValue={setDuration}
+              className="mb-3"
+              required={true}
+            />
+           <div className="my-4">
+  <label htmlFor="" className="font-rubikMedium">
+    Session Time <span className="text-red-500">*</span>
+  </label>
+  <br />
+  <select
+    className="w-full text-left px-4 py-2 border rounded-md bg-white mt-2"
+    value={sessionTime}
+    onChange={e => setSessionTime(e.target.value)}
+    required
+  >
+    <option value="">Select session time</option>
+    <option value="All Day">All Day</option>
+    <option value="Morning">Morning</option>
+    <option value="Afternoon">Afternoon</option>
+    <option value="Evening">Evening</option>
+  </select>
+</div>
             <h6 className="text-xl font-rubikBold my-2 capitalize">
               Content Body <span className="text-red-500">*</span>
             </h6>
@@ -1197,36 +1463,48 @@ function ContentInfo() {
             <div className="mb-4">
               <RichTextEditor setValue={setArticleBody} />
             </div>
+          </>
+        ) : (
+          <>
+           { /* <h6 className="text-xl font-rubikBold my-2 capitalize">
+                    {contentType} File Upload <span className="text-red-500">*</span>
+                  </h6> */}
 
             <InputField
-              label={"Duration"}
+              label={"Duration(mins)"}
               placeholder={"e.g 3min 4sec"}
               value={duration}
               setValue={setDuration}
               className="mb-3"
               required={true}
             />
-          </>
-        ) : (
-          <>
-            <h6 className="text-xl font-rubikBold my-2 capitalize">
+           <div className="my-4">
+  <label htmlFor="" className="font-rubikMedium">
+    Session Time <span className="text-red-500">*</span>
+  </label>
+  <br />
+  <select
+    className="w-full text-left px-4 py-2 border rounded-md bg-white mt-2"
+    value={sessionTime}
+    onChange={e => setSessionTime(e.target.value)}
+    required
+  >
+    <option value="">Select session time</option>
+    <option value="All Day">All Day</option>
+    <option value="Morning">Morning</option>
+    <option value="Afternoon">Afternoon</option>
+    <option value="Evening">Evening</option>
+  </select>
+</div>
+            <label className="font-rubikMedium">
               {contentType} File Upload <span className="text-red-500">*</span>
-            </h6>
-              <InputField
-                label={"Duration"}
-                placeholder={"e.g 3min 4sec"}
-                value={duration}
-                setValue={setDuration}
-                className="mb-3"
-                required={true}
-              />
+            </label>
             <input
               type="file"
               name="file"
               id="file"
               className="hidden"
-              onChange={(e) => {
-                setFileUploadContent(e.target.files[0]);
+              onChange={(e) => {    setFileUploadContent(e.target.files[0]);
               }}
             />
             <label
@@ -1311,16 +1589,16 @@ function ContentInfo() {
           </>
         )}
 
-        <InputField
+        {/* <InputField
           label={"Author"}
           placeholder={"Enter Author name"}
           value={author}
           setValue={setAuthor}
           className="mb-2"
           required={true}
-        />
+        /> */}
 
-        <label className="capitalize font-rubikMedium">Tags </label>
+        {/* <label className="capitalize font-rubikMedium">Tags </label>
         <div className="border border-weave-primary rounded-md p-2 flex flex-row flex-wrap my-2">
           {tags.length > 0 ? (
             tags.map((tag) => (
@@ -1349,7 +1627,7 @@ function ContentInfo() {
             onChange={(e) => setTagName(e.target.value)}
             onBlur={(e) => addToTag(e.target.value)}
           />
-        </div>
+        </div> */}
 
         <div className="flex" style={{ gap: 20, marginTop: 20 }}>
           <div className="flex-1"> </div>

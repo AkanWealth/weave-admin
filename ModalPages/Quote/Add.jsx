@@ -118,18 +118,15 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import api from "@/lib/api"; // Assuming API client is configured
+import api from "@/lib/api"; 
+import { useToastContext } from "@/contexts/toast";
+
 
 function AddQuote() {
-    const [sponsorName, setSponsorName] = useState('');
-    const [logoFile, setLogoFile] = useState('');
-    const [status, setStatus] = useState('');
-    const [duration, setDuration] = useState('');
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
     const [quoteText, setQuoteText] = useState('');
     const [displayDate, setDisplayDate] = useState('');
     const router = useRouter();
+    const { showMessage } = useToastContext();
 
     const isFormValid = () => {
         return quoteText && displayDate;
@@ -139,21 +136,18 @@ function AddQuote() {
         if (isFormValid()) {
             try {
                 const payload = {
-                    title: quoteText,
-                    created_at: displayDate,
-                    status: status || 'draft',
-                    type: 'quote',
-                    sponsorName,
-                    logoFile,
-                    duration,
-                    startDate,
-                    endDate
+                    text: quoteText,
+                    displayDate: displayDate,
+                    
                 };
                 await api.post("/api/quotes", payload);
-                router.push("/success");
+                showMessage("Success", "Quote created successfully", "success");
+                setTimeout(() => {
+            router.push("/contentsManagement?refresh=" + Date.now());
+          }, 100);
             } catch (error) {
                 console.error("Error creating quote:", error);
-                // Handle error (e.g., show error message to user)
+                showMessage("Error", "Failed to create quote. Please try again.", "error");
             }
         }
     };
@@ -161,21 +155,17 @@ function AddQuote() {
     const handleSaveAsDraft = async () => {
         try {
             const payload = {
-                title: quoteText,
-                created_at: displayDate,
-                status: 'draft',
-                type: 'quote',
-                sponsorName,
-                logoFile,
-                duration,
-                startDate,
-                endDate
+                text: quoteText,
+                displayDate: displayDate,
             };
             await api.post("/api/quotes", payload);
-            // Handle success (e.g., show success message or redirect)
+            showMessage("Draft Saved", "Quote saved as draft successfully", "success");
+          setTimeout(() => {
+            router.push("/contentsManagement?refresh=" + Date.now());
+          }, 100);
         } catch (error) {
             console.error("Error saving quote as draft:", error);
-            // Handle error (e.g., show error message to user)
+            showMessage("Error", "Failed to save quote as draft. Please try again.", "error");
         }
     };
 

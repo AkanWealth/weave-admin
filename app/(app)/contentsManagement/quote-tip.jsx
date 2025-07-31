@@ -320,10 +320,34 @@ function QuoteRender() {
         const quotesResponse = await api.get("/api/quotes");
         const tipsResponse = await api.get("/api/tips");
         
-        // Combine quotes and tips, assuming API returns data in the same format as dummyData
+        // Helper function to determine status based on display date
+        const getStatusByDate = (displayDate) => {
+          const today = new Date();
+          const itemDate = new Date(displayDate);
+          
+          // Reset time to compare only dates
+          today.setHours(0, 0, 0, 0);
+          itemDate.setHours(0, 0, 0, 0);
+          
+          return itemDate <= today ? "published" : "scheduled";
+        };
+
+        // Map API response to match your component structure
         const combinedResources = [
-          ...quotesResponse.data.map(quote => ({ ...quote, type: "quote" })),
-          ...tipsResponse.data.map(tip => ({ ...tip, type: "tip" }))
+          ...quotesResponse.data.map(quote => ({ 
+            id: quote.id,
+            title: quote.text, // Map 'text' to 'title' for consistency
+            created_at: quote.displayDate, // Map 'displayDate' to 'created_at'
+            status: getStatusByDate(quote.displayDate), // Dynamic status based on date
+            type: "quote" 
+          })),
+          ...tipsResponse.data.map(tip => ({ 
+            id: tip.id,
+            title: tip.text, // Map 'text' to 'title' for consistency
+            created_at: tip.displayDate, // Map 'displayDate' to 'created_at'
+            status: getStatusByDate(tip.displayDate), // Dynamic status based on date
+            type: "tip" 
+          }))
         ];
         
         setResources(combinedResources);
@@ -416,16 +440,12 @@ function QuoteRender() {
             alt="Frame"
           />
           <h4 className="text-xl font-rubikMedium my-2">
-            Your Resource Library is Empty
+            Your {activeTab === "quotes" ? "quotes" : "tips"} Library is Empty
           </h4>
           <p className="text-md my-2">
             There are no {activeTab === "quotes" ? "quotes" : "tips"} in your library yet. Once you add content, it'll appear here for easy access and management.
           </p>
-          <div className="">
-            <button className="bg-weave-primary py-2 px-6 text-white rounded-md">
-              Add New Content
-            </button>
-          </div>
+         
         </div>
       );
     }
@@ -436,11 +456,13 @@ function QuoteRender() {
           <div key={resource.id} className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <div className="flex items- justify-between  gap-3 mb-3">
-                  <span className={`inline-flex items-center  px-3 py-1 rounded-full text-xs font-medium ${
-                    resource.status.toLowerCase() === "published"
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                    resource?.status?.toLowerCase() === "published"
                       ? "bg-[#28A745] text-white"
-                      : "bg-[#FFA500] text-white"
+                      : resource?.status?.toLowerCase() === "scheduled"
+                      ? "bg-[#FFA500] text-white"
+                      : "bg-[#6C757D] text-white"
                   }`}>
                     {resource.status}
                   </span>
@@ -450,7 +472,7 @@ function QuoteRender() {
                 </div>
                 
                 <p className="text-gray-900 text-base leading-relaxed mb-4">
-                  "{resource.title}"
+                  {resource.title}
                 </p>
                 <div className="flex justify-end">
                 <div className="flex items-center gap-6">
@@ -462,7 +484,7 @@ function QuoteRender() {
                     Edit
                   </Link>
                   <Link
-                    href={`?modal=delete-quote&resource_id=${resource.id}`}
+                    href={`?modal=delete-quote&resource_id=${resource.id}&contentType=${resource.type}`}
                     className="text-red-500 hover:text-red-700 text-sm flex items-center gap-2"
                   >
                     <i className="fa fa-trash"></i>

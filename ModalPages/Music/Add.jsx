@@ -558,7 +558,7 @@ function AddMusic() {
   useEffect(() => {
     const fetchPillars = async () => {
       try {
-        const response = await api.get("/api/pillars");
+        const response = await api.get("/pillars");
         setPillars(response.data); // Assuming response.data is an array of { id: UUID, name: string }
       } catch (error) {
         console.error("Error fetching pillars:", error);
@@ -735,151 +735,190 @@ function AddMusic() {
   };
 
   // Handle bulk upload
-  const handleBulkUpload = async () => {
-    if (bulkFiles.length === 0) {
-      showMessage("No Files", "Please select files to upload", "error");
-      return;
-    }
+ // Fixed handleBulkUpload function
+const handleBulkUpload = async () => {
+  if (bulkFiles.length === 0) {
+    showMessage("No Files", "Please select files to upload", "error");
+    return;
+  }
 
-    // Validate all forms
-    const isValid = Object.values(bulkFormsData).every(
-      (data) =>
-        data.title &&
-        data.artiste &&
-        data.pillarId &&
-        isValidUUID(data.pillarId) &&
-        (useSharedCover ? sharedCoverImage : data.coverImage)
-    );
+  // Validate all forms
+  const isValid = Object.values(bulkFormsData).every(
+    (data) =>
+      data.title &&
+      data.artiste &&
+      data.pillarId &&
+      isValidUUID(data.pillarId) &&
+      (useSharedCover ? sharedCoverImage : data.coverImage)
+  );
 
-    if (!isValid) {
-      showMessage("Missing Fields", "Please fill in all required fields and valid pillar IDs for all songs", "error");
-      return;
-    }
+  if (!isValid) {
+    showMessage("Missing Fields", "Please fill in all required fields and valid pillar IDs for all songs", "error");
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      const uploadPromises = bulkFiles.map(async (file, index) => {
+  try {
+    // Create the songs array as expected by the API
+    const songsData = bulkFiles.map((file, index) => {
+      const songData = bulkFormsData[index];
+      return {
+        title: songData.title,
+        artiste: songData.artiste,
+        pillarId: songData.pillarId, // Changed from category to pillarId to match your form
+        status: songData.status
+      };
+    });
+
+    // Create FormData for the bulk upload
+    const formData = new FormData();
+    
+    // Add the songs parameter as JSON string - this is the key fix
+    formData.append("songs", JSON.stringify(songsData));
+    
+    // Add song files with consistent naming
+    bulkFiles.forEach((file, index) => {
+      formData.append(`songFile`, file); // Keep consistent with API expectation
+    });
+    
+    // Add cover images
+    if (useSharedCover && sharedCoverImage) {
+      // If using shared cover, add it for each song
+      bulkFiles.forEach((file, index) => {
+        formData.append(`coverImage`, sharedCoverImage);
+      });
+    } else {
+      // Add individual cover images
+      bulkFiles.forEach((file, index) => {
         const songData = bulkFormsData[index];
-        const formData = new FormData();
+        if (songData.coverImage) {
+          formData.append(`coverImage`, songData.coverImage);
+        }
+      });
+    }
 
-        formData.append("title", songData.title);
-        formData.append("artiste", songData.artiste);
-        formData.append("pillarId", songData.pillarId);
-        formData.append("status", songData.status);
-        formData.append("songFile", file);
+    // Debug FormData contents
+    console.log("Bulk Upload FormData:");
+    console.log("Songs JSON:", JSON.stringify(songsData));
+    for (let pair of formData.entries()) {
+      console.log(`${pair[0]}: ${pair[1] instanceof File ? `File: ${pair[1].name}` : pair[1]}`);
+    }
 
+    const response = await api.post("/songs/bulk", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    if (response.status === 200 || response.status === 201) {
+      showMessage("Success", "All songs uploaded successfully!", "success");
+      setTimeout(() => {
+        router.push("/contentsManagement?refresh=" + Date.now());
+      }, 1000);
+    } else {
+      showMessage("Upload Failed", "Failed to upload songs", "error");
+    }
+  } catch (error) {
+    console.error("Bulk upload error:", error);
+    showMessage("Upload Error", error.response?.data?.message || "An error occurred during bulk upload", "error");
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Fixed handleBulkSaveAsDraft function
+const handleBulkSaveAsDraft = async () => {
+  if (bulkFiles.length === 0) {
+    showMessage("No Files", "Please select files to save", "error");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    // Create the songs array for draft saving
+    const songsData = bulkFiles.map((file, index) => {
+      const songData = bulkFormsData[index] || {};
+      return {
+        title: songData.title || "",
+        artiste: songData.artiste || "",
+        pillarId: songData.pillarId || "", // Changed from category to pillarId
+        status: "draft"
+      };
+    }).filter(song => song.title || song.artiste); // Only include songs with at least title or artist
+
+    if (songsData.length === 0) {
+      showMessage("No Data", "Please fill in at least title or artist for songs to save as draft", "error");
+      setLoading(false);
+      return;
+    }
+
+    // Create FormData for the bulk draft save
+    const formData = new FormData();
+    
+    // Add the songs parameter as JSON string
+    formData.append("songs", JSON.stringify(songsData));
+    
+    // Add song files (only for songs that have data)
+    songsData.forEach((songData, songIndex) => {
+      const originalIndex = bulkFiles.findIndex((file, fileIndex) => {
+        const formDataForFile = bulkFormsData[fileIndex] || {};
+        return formDataForFile.title === songData.title && formDataForFile.artiste === songData.artiste;
+      });
+      
+      if (originalIndex !== -1) {
+        formData.append("songFile", bulkFiles[originalIndex]);
+      }
+    });
+    
+    // Add cover images for drafts
+    songsData.forEach((songData, songIndex) => {
+      const originalIndex = bulkFiles.findIndex((file, fileIndex) => {
+        const formDataForFile = bulkFormsData[fileIndex] || {};
+        return formDataForFile.title === songData.title && formDataForFile.artiste === songData.artiste;
+      });
+      
+      if (originalIndex !== -1) {
         if (useSharedCover && sharedCoverImage) {
           formData.append("coverImage", sharedCoverImage);
-        } else if (songData.coverImage) {
-          formData.append("coverImage", songData.coverImage);
+        } else {
+          const songFormData = bulkFormsData[originalIndex];
+          if (songFormData && songFormData.coverImage) {
+            formData.append("coverImage", songFormData.coverImage);
+          }
         }
-
-        // Debug FormData contents
-        for (let pair of formData.entries()) {
-          console.log(`File ${index + 1} - ${pair[0]}: ${pair[1]}`);
-        }
-
-        try {
-          const response = await api.post("/songs/bulk", formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          });
-          return { index, status: "success", response };
-        } catch (error) {
-          return { index, status: "error", error: error.response?.data?.message || `Upload failed for file ${index + 1}` };
-        }
-      });
-
-      const results = await Promise.all(uploadPromises);
-      const errors = results.filter((result) => result.status === "error");
-
-      if (errors.length > 0) {
-        errors.forEach((err) => {
-          showMessage(`Upload Error (File ${err.index + 1})`, err.error, "error");
-        });
-      } else {
-        showMessage("Success", "All songs uploaded successfully!", "success");
-        setTimeout(() => {
-          router.push("/contentsManagement?refresh=" + Date.now());
-        }, 1000);
       }
-    } catch (error) {
-      console.error("Bulk upload error:", error);
-      showMessage("Upload Error", error.response?.data?.message || "An error occurred during bulk upload", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+    });
 
-  // Handle bulk save as draft
-  const handleBulkSaveAsDraft = async () => {
-    if (bulkFiles.length === 0) {
-      showMessage("No Files", "Please select files to save", "error");
-      return;
+    // Debug FormData contents
+    console.log("Bulk Draft Save FormData:");
+    console.log("Songs JSON:", JSON.stringify(songsData));
+    for (let pair of formData.entries()) {
+      console.log(`${pair[0]}: ${pair[1] instanceof File ? `File: ${pair[1].name}` : pair[1]}`);
     }
 
-    setLoading(true);
+    const response = await api.post("/songs/bulk", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
-    try {
-      const uploadPromises = bulkFiles.map(async (file, index) => {
-        const songData = bulkFormsData[index] || {};
-
-        if (songData.title || songData.artiste) {
-          const formData = new FormData();
-
-          formData.append("title", songData.title || "");
-          formData.append("artiste", songData.artiste || "");
-          formData.append("pillarId", songData.pillarId || "");
-          formData.append("status", "draft");
-          formData.append("songFile", file);
-
-          if (useSharedCover && sharedCoverImage) {
-            formData.append("coverImage", sharedCoverImage);
-          } else if (songData.coverImage) {
-            formData.append("coverImage", songData.coverImage);
-          }
-
-          // Debug FormData contents
-          for (let pair of formData.entries()) {
-            console.log(`File ${index + 1} - ${pair[0]}: ${pair[1]}`);
-          }
-
-          try {
-            const response = await api.post("/songs/bulk", formData, {
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
-            });
-            return { index, status: "success", response };
-          } catch (error) {
-            return { index, status: "error", error: error.response?.data?.message || `Save failed for file ${index + 1}` };
-          }
-        }
-        return Promise.resolve({ index, status: "skipped" });
-      });
-
-      const results = await Promise.all(uploadPromises);
-      const errors = results.filter((result) => result.status === "error");
-
-      if (errors.length > 0) {
-        errors.forEach((err) => {
-          showMessage(`Save Error (File ${err.index + 1})`, err.error, "error");
-        });
-      } else {
-        showMessage("Drafts Saved", "Songs saved as drafts successfully!", "success");
-        setTimeout(() => {
-          router.push("/contentsManagement?refresh=" + Date.now());
-        }, 1000);
-      }
-    } catch (error) {
-      console.error("Save drafts error:", error);
-      showMessage("Save Error", error.response?.data?.message || "An error occurred while saving drafts", "error");
-    } finally {
-      setLoading(false);
+    if (response.status === 200 || response.status === 201) {
+      showMessage("Drafts Saved", "Songs saved as drafts successfully!", "success");
+      setTimeout(() => {
+        router.push("/contentsManagement?refresh=" + Date.now());
+      }, 1000);
+    } else {
+      showMessage("Save Failed", "Failed to save songs as drafts", "error");
     }
-  };
+  } catch (error) {
+    console.error("Save drafts error:", error);
+    showMessage("Save Error", error.response?.data?.message || "An error occurred while saving drafts", "error");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div>

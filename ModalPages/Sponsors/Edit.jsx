@@ -1,9 +1,8 @@
 "use client";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import InputField from "@/components/elements/TextField";
-import { CloudUpload, X } from "lucide-react";
+import { CloudUpload, X, ChevronDown } from "lucide-react";
 
 function EditSponsor() {
     const [sponsorName, setSponsorName] = useState('');
@@ -12,19 +11,45 @@ function EditSponsor() {
     const [duration, setDuration] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    
+    // Dropdown states
+    const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+    const [isDurationDropdownOpen, setIsDurationDropdownOpen] = useState(false);
+    
+    const statusDropdownRef = useRef(null);
+    const durationDropdownRef = useRef(null);
+    
     const router = useRouter();
 
     const statusOptions = [
-        { value: 'active', label: 'Active' },
-        { value: 'draft', label: 'Draft' }
+        { value: 'Bronze Tier', label: '£200 - Bronze Tier' },
+        { value: 'Silver Tier', label: '£800 - Silver Tier' },
+        { value: 'Gold Tier', label: '£1,500 - Gold Tier' }
     ];
 
     const durations = [
         { value: '1-month', label: '1 Month' },
         { value: '3-months', label: '3 Months' },
         { value: '6-months', label: '6 Months' },
-        { value: '1-year', label: '1 Year' }
+        { value: '12-months', label: '12 Months' }
     ];
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target)) {
+                setIsStatusDropdownOpen(false);
+            }
+            if (durationDropdownRef.current && !durationDropdownRef.current.contains(event.target)) {
+                setIsDurationDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const isFormValid = () => {
         return sponsorName && logoFile && status && duration && startDate && endDate;
@@ -40,7 +65,6 @@ function EditSponsor() {
                 startDate,
                 endDate
             });
-            // Handle form submission logic here
             router.push("/success");
         }
     };
@@ -54,13 +78,73 @@ function EditSponsor() {
             startDate,
             endDate
         });
-        // Handle save as draft logic here
+    };
+
+    // Custom Dropdown Component
+    const CustomDropdown = ({ 
+        label, 
+        value, 
+        options, 
+        onSelect, 
+        placeholder, 
+        isOpen, 
+        setIsOpen, 
+        dropdownRef 
+    }) => {
+        const selectedOption = options.find(option => option.value === value);
+        
+        return (
+            <div className="w-full" ref={dropdownRef}>
+                <label className="block font-rubikMedium mb-2">
+                    {label}
+                </label>
+                <div className="relative">
+                    <button
+                        type="button"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-weave-primary focus:border-transparent bg-white text-left flex items-center justify-between"
+                        onClick={() => setIsOpen(!isOpen)}
+                    >
+                        <span className={selectedOption ? "text-gray-900" : "text-gray-500"}>
+                            {selectedOption ? selectedOption.label : placeholder}
+                        </span>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    {isOpen && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            <div className="p-2">
+                                {options.map((option) => (
+                                    <label
+                                        key={option.value}
+                                        className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer"
+                                        onClick={() => {
+                                            onSelect(option.value);
+                                            setIsOpen(false);
+                                        }}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name={label}
+                                            value={option.value}
+                                            checked={value === option.value}
+                                            onChange={() => {}}
+                                            className="mr-3 text-weave-primary focus:ring-weave-primary"
+                                        />
+                                        <span className="text-gray-900">{option.label}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
     };
 
     return (
-        <div className="max-w-md mx-auto">
+        <div className="mx-auto">
             <div className="flex items-center justify-between mb-6">
-                <h5 className="text-xl font-rubikBold">Edit Sponsor</h5>
+                <h5 className="text-xl font-rubikBold">Add New Sponsor</h5>
             </div>
 
             <div className="flex flex-col space-y-4">
@@ -129,61 +213,53 @@ function EditSponsor() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="font-rubikMedium">
-                            Status
-                        </label>
-                        <select
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-weave-primary focus:border-transparent"
-                        >
-                            <option value="">Select status</option>
-                            {statusOptions.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="font-rubikMedium">
-                            Duration 
-                        </label>
-                        <select
-                            value={duration}
-                            onChange={(e) => setDuration(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-weave-primary focus:border-transparent"
-                        >
-                            <option value="">Select duration</option>
-                            {durations.map((dur) => (
-                                <option key={dur.value} value={dur.value}>
-                                    {dur.label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="font-rubikMedium">
+                {/* Two Column Layout for Status and Duration */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <CustomDropdown
+                        label="Sponsorship Tier"
+                        value={status}
+                        options={statusOptions}
+                        onSelect={setStatus}
+                        placeholder="Select status"
+                        isOpen={isStatusDropdownOpen}
+                        setIsOpen={setIsStatusDropdownOpen}
+                        dropdownRef={statusDropdownRef}
+                    />
+                    
+                    <CustomDropdown
+                        label="Duration"
+                        value={duration}
+                        options={durations}
+                        onSelect={setDuration}
+                        placeholder="Select duration"
+                        isOpen={isDurationDropdownOpen}
+                        setIsOpen={setIsDurationDropdownOpen}
+                        dropdownRef={durationDropdownRef}
+                    />
+                </div>
+
+                {/* Two Column Layout for Start Date and End Date */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="w-full">
+                        <label className="block font-rubikMedium mb-2">
                             Start Date 
                         </label>
                         <input
                             type="date"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-weave-primary focus:border-transparent"
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-weave-primary focus:border-transparent"
                         />
                     </div>
-                    <div>
-                        <label className="font-rubikMedium">
+                    <div className="w-full">
+                        <label className="block font-rubikMedium mb-2">
                             End Date 
                         </label>
                         <input
                             type="date"
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-weave-primary focus:border-transparent"
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-weave-primary focus:border-transparent"
                         />
                     </div>
                 </div>

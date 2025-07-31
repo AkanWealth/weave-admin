@@ -33,6 +33,9 @@ import DeletePillar from "@/ModalPages/Resources/DeletePillars";
 import EditContentPillars from "@/ModalPages/Resources/EditPillars";
 import ViewContentPillars from "@/ModalPages/Resources/ViewPillars";
 import DeleteNotificationModal from "@/ModalPages/Notification/DeleteNotificationModal";
+import ActivateSponsor from "@/ModalPages/Sponsors/Activate";
+import DeactivateSponsor from "@/ModalPages/Sponsors/Deactivate";
+import ViewDetail from "@/ModalPages/Sponsors/Preview";
 
 const ModalContext = createContext();
 
@@ -203,6 +206,9 @@ const ModalContent = ({ usage, params }) => {
   if (usage === "delete-pillars") return <DeletePillar />;
   if (usage === "edit-content-pillars") return <EditContentPillars />;
   if (usage === "view-content-pillars") return <ViewContentPillars />;
+  if (usage === "activate-sponsor") return <ActivateSponsor />;
+  if (usage === "deactivate-sponsor") return <DeactivateSponsor />;
+  if (usage === "view-sponsor-details") return <ViewDetail />;
 };
 
 export const useModalContext = () => useContext(ModalContext);

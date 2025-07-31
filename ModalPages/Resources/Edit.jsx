@@ -1,675 +1,559 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import RichTextEditor from "@/components/elements/RichTextEditor";
-import ResourceLibraryProvider, {
-  useResourceLibrary,
-} from "@/contexts/ResourceLibraryContext";
+import ResourceLibraryProvider, { useResourceLibrary } from "@/contexts/ResourceLibraryContext";
 import Cookies from "js-cookie";
 import { ToastContext, useToastContext } from "@/contexts/toast";
 import api from "@/lib/api";
-import { readAndUploadThumbnail } from "@/lib/uploadThumbnail";
 import { baseUrl } from "@/lib/envfile";
-
-
+import InputField from "@/components/elements/TextField";
+import { CloudUpload, X } from "lucide-react";
 
 function EditResource() {
   const searchParams = useSearchParams();
   const resource_id = searchParams.get("resource_id");
   const contentType = searchParams.get("contentType");
-  const [activeTab, setActiveTab] = useState("info");
-  const [tagName, setTagName] = useState("");
-  const [thumbnail, setThumbnail] = useState("");
-  const [articleBody, setArticleBody] = useState("");
-  const [resourceFile, setResourceFile] = useState(null);
-  const [transcript, setTranscript] = useState("");
   const router = useRouter();
-
   const { showMessage } = useToastContext();
+  const { resources, getSingleProduct, refreshResources } = useResourceLibrary();
 
-  const [resourceInfo, setResourceInfo] = useState(null);
-  const { resources, getSingleProduct,refreshResources } = useResourceLibrary();
+  // Form states
+  const [activeTab, setActiveTab] = useState("info");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [selectedPillarId, setSelectedPillarId] = useState("");
+  const [pillars, setPillars] = useState([]);
+  const [loadingPillars, setLoadingPillars] = useState(true);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isPillarLocked, setIsPillarLocked] = useState(false);
 
-  const addToTag = (tag) => {
-    if (tag == "") return;
-    const tagExist = resourceInfo.tags.find(
-      (item) => item.toLowerCase() === tag.toLowerCase()
-    );
-    if (!tagExist)
-      setResourceInfo({ ...resourceInfo, tags: [...resourceInfo.tags, tag] });
-    setTagName("");
-  };
-
-  const removeFromTag = (tag) => {
-    const otherTags = resourceInfo.tags.filter((item) => item !== tag);
-    setResourceInfo({ ...resourceInfo, tags: otherTags });
-  };
-
-  useEffect(() => {
-    const resource = getSingleProduct(resource_id);
-    if (!resource) return;
-    setResourceInfo(resource);
-    setArticleBody(resource.content);
-    setTranscript(resource.transcript || "");
-  }, [resource_id, resources]);
-
-  useEffect(() => {
-    if (!resourceInfo) return;
-
-    // Use setTimeout to ensure the DOM element has been rendered
-    setTimeout(() => {
-      const resourceFileElement = document.getElementById("resource-file");
-      if (resourceFileElement) {
-        resourceFileElement.src = resourceInfo.resourceUrl;
-      }
-    }, 0);
-  }, [resourceInfo]);
-
-  const [loadingThumbnail, setLoadingThumbnail] = useState(false);
-  const [thumbnails, setThumbnails] = useState([]);
+  const [coverImage, setCoverImage] = useState(null);
+  const [coverImagePreview, setCoverImagePreview] = useState("");
+  const [duration, setDuration] = useState("");
+  const [sessionTime, setSessionTime] = useState("");
+  const [articleBody, setArticleBody] = useState("");
+  const [fileUploadContent, setFileUploadContent] = useState(null);
+  const [fileUploadContentName, setFileUploadContentName] = useState("");
+  const [transcript, setTranscript] = useState(null);
+  const [transcriptName, setTranscriptName] = useState("");
+  const [author, setAuthor] = useState("");
+  const [tags, setTags] = useState([]);
+  const [tagName, setTagName] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [thumbNailSelected, setThumbnailSelected] = useState(null);
-  const [isUploadingThumbnail, setIsuploadingThumbnail] = useState(false);
+  // Load resource info from API/context
+ useEffect(() => {
+  // Fetch the resource from API/context
+  const resource = getSingleProduct(resource_id);
+  if (!resource) return;
 
-  const accessToken = Cookies.get("session");
-  // useEffect(() => {
-  //   if (!thumbNailSelected) return;
-  //   setIsuploadingThumbnail(true);
-  //   const uploadThumbnail = async () =>
-  //     await readAndUploadThumbnail(thumbNailSelected);
+  setTitle(resource.title || "");
+  setDescription(resource.description || "");
+  setDuration(resource.duration || "");
+  setSessionTime(resource.sessionTime || "");
+  setAuthor(resource.author || "");
+  setArticleBody(resource.content || ""); // For articles
+  setFileUploadContentName(resource.resourceUrl ? resource.resourceUrl.split("/").pop() : "");
+  setTranscriptName(resource.transcript ? resource.transcript.split("/").pop() : "");
+  setCoverImagePreview(resource.coverImage || ""); // Use coverImage for preview
 
-  //   if (uploadThumbnail.status === "success") {
-  //     showMessage("Thumbnail uploaded", "", "success");
-  //     // getThumbnails();
-  //   } else {
-  //     showMessage("Error uploading thumbail", "", "error");
-  //   }
-  // }, [thumbNailSelected]);
+  // Pillar/category
+  setSelectedPillarId(resource.pillar?.id || "");
+  setCategory(resource.pillar?.name || "");
+  setIsPillarLocked(!!resource.pillar?.id);
 
+  // Tags (if present)
+  setTags(resource.tags || []);
+}, [resource_id, resources]);
+  // Fetch pillars for dropdown
   useEffect(() => {
-    console.log("upload",thumbNailSelected);
-    if (!thumbNailSelected) return;
-    setIsuploadingThumbnail(true);
-    
-    const uploadThumbnail = async () => {
-      const result = await readAndUploadThumbnail(thumbNailSelected);
-      console.log("result", result);
-      if (result && result.status === "success") {
-        showMessage("Thumbnail uploaded", "","success");
-        // Reload thumbnails after successful upload
-        getThumbnails();
-      } else {
-        showMessage("Error uploading thumbnail", "","error");
+    const fetchPillars = async () => {
+      try {
+        setLoadingPillars(true);
+        const response = await api.get("/pillars");
+        if (response.status === 200) {
+          setPillars(response.data);
+        }
+      } catch (error) {
+        showMessage("Failed to load categories", "error");
+      } finally {
+        setLoadingPillars(false);
       }
-      
-      setIsuploadingThumbnail(false);
-      setThumbnailSelected(null);  // Reset selected file
     };
-    
-    uploadThumbnail();
-  }, [thumbNailSelected]);
-
-  const getThumbnails = async () => {
-    setLoadingThumbnail(true);
-    try {
-      const response = await api.get("/thumbnails");
-
-      if (response.status === 200) {
-        setThumbnails(response?.data.thumbnails);
-      }
-    } catch (error) {
-      showMessage("Unable to fetch thumbnails", "", "error");
-    } finally {
-      setLoadingThumbnail(false);
-      
-    }
-  };
-
-  useEffect(() => {
-    getThumbnails();
+    fetchPillars();
   }, []);
 
-  // useEffect(() => {
-  //   setResourceInfo({ ...resourceInfo, content: articleBody });
-  // }, [articleBody]);
+  // Tag management
+  const addToTag = (tag) => {
+    if (!tag) return;
+    if (!tags.includes(tag)) setTags([...tags, tag]);
+    setTagName("");
+  };
+  const removeFromTag = (tag) => setTags(tags.filter((t) => t !== tag));
 
+  // Handle pillar/category selection
+  const handleCategorySelect = (pillar) => {
+    setCategory(pillar.name);
+    setSelectedPillarId(pillar.id);
+    setIsDropdownOpen(false);
+  };
+
+  // Cover image preview
+  useEffect(() => {
+    if (coverImage) {
+      const url = URL.createObjectURL(coverImage);
+      setCoverImagePreview(url);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [coverImage]);
+
+  // Form validation
+  const infoTabValid = title && description && selectedPillarId && category;
+  const detailsTabValid =
+    contentType === "article"
+      ? articleBody && duration && sessionTime
+      : fileUploadContentName && duration && sessionTime;
+
+  // Submit handler
   const updateResource = async (status) => {
     setIsSubmitting(true);
     let btn = document.getElementById(`${status.toLowerCase()}-btn`);
-    let btnTitle = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = "Please wait...";
-  
+    let btnTitle = btn?.textContent;
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Please wait...";
+    }
     try {
       let formdata = new FormData();
-  
-      if (resourceFile) formdata.append("file", resourceFile);
-  
-      formdata.append("title", resourceInfo.title);
-      formdata.append("category", resourceInfo.category);
-      formdata.append("thumbnailUrl", resourceInfo.thumbnailUrl);
-      formdata.append("author", resourceInfo.author);
-      formdata.append("description", resourceInfo.description);
-      // formdata.append("transcript", transcript); 
-      if (contentType === "Article")
-        formdata.append("content", resourceInfo.content);
-  
-      formdata.append("tags", resourceInfo.tags);
+      formdata.append("title", title);
+      formdata.append("pillarId", selectedPillarId);
+      formdata.append("description", description);
+      formdata.append("sessionTime", sessionTime);
+      formdata.append("duration", duration);
+      // formdata.append("author", author);
+      // formdata.append("tags", JSON.stringify(tags));
       formdata.append("status", status);
 
-      console.log("formdata", formdata);
-  
+      if (coverImage) formdata.append("coverImage", coverImage);
+      if (contentType === "article") {
+        formdata.append("content", articleBody);
+      } else {
+        if (fileUploadContent) formdata.append("file", fileUploadContent);
+        if (transcript) formdata.append("transcriptFile", transcript);
+      }
+
+      const accessToken = Cookies.get("session");
       const response = await fetch(
-        `${baseUrl}/resource-library/${resourceInfo.id}`,
+        `${baseUrl}/resource-library/${resource_id}`,
         {
           method: "PATCH",
           body: formdata,
           headers: {
-            contentType: "multipart/formdata",
             Authorization: `Bearer ${accessToken}`,
           },
         }
       );
       const respbody = await response.json();
-      
-     
-      showMessage("Update Successful", respbody.message, "success");
-    
+
       if (response.ok) {
+        showMessage("Update Successful", respbody.message, "success");
         await refreshResources();
         setTimeout(() => {
           router.push("/contentsManagement?refresh=" + Date.now());
-
         }, 1000);
+      } else {
+        showMessage("Error", respbody.message || "Error updating content", "error");
       }
     } catch (err) {
-      console.log(err);
-      showMessage("Error", "Error uploading content", "error");
+      showMessage("Error", "Error updating content", "error");
     } finally {
       setIsSubmitting(false);
-      btn.disabled = false;
-      btn.textContent = btnTitle;
-    }
-  };
-
-  const [thumbnailToDelete, setThumbnailToDelete] = useState("");
-  const [isDeletingThumbnail, setIsdeletingThumbnail] = useState(false);
-
-  const deleteThumbnail = async () => {
-    setIsdeletingThumbnail(true);
-    try {
-      console.log(thumbnailToDelete);
-
-      const response = await api.delete(`/thumbnails/${thumbnailToDelete}`);
-      showMessage(response.data.message, "", "success");
-      getThumbnails();
-    setThumbnailToDelete("");
-    } catch (error) {
-      showMessage(
-        "Error",
-        error.response.data.message || "Error deleting thumbnail",
-        "error"
-      );
-    } finally {
-      setIsdeletingThumbnail(false);
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = btnTitle;
+      }
     }
   };
 
   return (
-    <Suspense>
-      <div>
-        <h5 className="capitalize font-rubikBold text-xl">{contentType}</h5>
-        <p className="text-sm text-gray-500 my-2">
-          Fill in the details below to add new content to the resource library.
-        </p>
-        <div className="w-2/3 my-6">
-          <button
-            className="text-gray-500 pr-6 "
-            onClick={(e) => {
-              e.preventDefault();
-              setActiveTab("info");
-            }}
-          >
-            <i className="fa fa-file mx-2"></i> Content Information
-          </button>
+    <div>
+      <h5 className="capitalize font-rubikBold text-2xl">{contentType}</h5>
+      <p className="text-sm text-gray-500 my-2">
+        Edit the details below to update this content.
+      </p>
+      <div className="w-2/3 my-6">
+        <button
+          className="text-gray-500 pr-6"
+          onClick={() => setActiveTab("info")}
+        >
+          <i className="fa fa-file mx-2"></i> Content Information
+        </button>
+        <button
+          className="text-gray-500 px-4"
+          onClick={() => setActiveTab("file")}
+        >
+          <i className="fa fa-copy mx-2"></i> Content Details
+        </button>
+      </div>
 
-          <button
-            className="text-gray-500 px-4"
-            onClick={(e) => {
-              e.preventDefault();
-              setActiveTab("file");
-            }}
-          >
-            <i className="fa fa-copy mx-2"></i>
-            Content Details
-          </button>
-        </div>
+      <form onSubmit={e => e.preventDefault()}>
+        <div className={activeTab === "info" ? "" : "hidden"}>
+          <InputField
+            label={"Title"}
+            value={title}
+            setValue={setTitle}
+            className={"mb-3"}
+            required={true}
+          />
+          <InputField
+            label={"Description"}
+            value={description}
+            setValue={setDescription}
+            required={true}
+          />
 
-        {resourceInfo && (
-          <div>
-            <div className={activeTab === "info" ? "" : "hidden"}>
-              <label className="capitalize font-rubikMedium">
-                Content Title
-              </label>
-              <input
-                type="text"
-                className={`w-full p-2 border border-base-black focus:border-weave-primary focus:outline-none rounded-md font-rubikRegular mb-3`}
-                value={resourceInfo.title}
-                onChange={(e) =>
-                  setResourceInfo({ ...resourceInfo, title: e.target.value })
-                }
-              />
-
-              <label className="capitalize font-rubikMedium">Description</label>
-              <input
-                type="text"
-                className={`w-full p-2 border border-base-black focus:border-weave-primary focus:outline-none rounded-md font-rubikRegular mb-3`}
-                value={resourceInfo.description}
-                onChange={(e) =>
-                  setResourceInfo({
-                    ...resourceInfo,
-                    description: e.target.value,
-                  })
-                }
-              />
-
-              <div className="my-4">
-                <label htmlFor="" className="font-rubikMedium">
-                  Category
-                </label>
-                <br />
-                <div className="inline-block">
-                  <label>
-                    <input
-                      type="radio"
-                      name="category"
-                      value={"Sleep"}
-                      className="mx-2"
-                      checked={resourceInfo.category === "Sleep"}
-                      onChange={(e) =>
-                        setResourceInfo({
-                          ...resourceInfo,
-                          category: e.target.value,
-                        })
-                      }
-                    />
-                    Sleep
-                  </label>
-                </div>
-                <div className="inline-block">
-                  <label>
-                    <input
-                      type="radio"
-                      name="category"
-                      value={"Happiness"}
-                      className="mx-2"
-                      checked={resourceInfo.category === "Happiness"}
-                      onChange={(e) =>
-                        setResourceInfo({
-                          ...resourceInfo,
-                          category: e.target.value,
-                        })
-                      }
-                    />
-                    Happiness
-                  </label>
-                </div>
-                <div className="inline-block">
-                  <label>
-                    <input
-                      type="radio"
-                      name="category"
-                      value={"Meditation"}
-                      className="mx-2"
-                      checked={resourceInfo.category === "Meditation"}
-                      onChange={(e) =>
-                        setResourceInfo({
-                          ...resourceInfo,
-                          category: e.target.value,
-                        })
-                      }
-                    />
-                    Meditation
-                  </label>
-                </div>
-                <div className="inline-block">
-                  <label>
-                    <input
-                      type="radio"
-                      name="category"
-                      value={"Sophrology"}
-                      className="mx-2"
-                      checked={resourceInfo.category === "Sophrology"}
-                      onChange={(e) =>
-                        setResourceInfo({
-                          ...resourceInfo,
-                          category: e.target.value,
-                        })
-                      }
-                    />
-                    Sophrology
-                  </label>
-                </div>
-              </div>
-
-              <div className="">Thumbnail/Illustration</div>
-              <div className="border border-gray-500 p-4 my-4 rounded-xl">
-                <div
-                  className="flex flex-row p-2 px-4 text-sm text-red-500 rounded-xl"
-                  style={{
-                    background: "#f2fbf7",
-                    display: thumbnailToDelete === "" ? "none" : "flex",
-                  }}
-                >
-                  <p className="flex-1 my-auto">
-                    Are you sure to delete this thumbnail
-                  </p>
-                  <div className="my-auto">
-                    {isDeletingThumbnail ? (
-                      <div className="p-2">Please wait</div>
-                    ) : (
-                      <>
-                        <button
-                          className="p-2 border-base-secondary rounded-md mr-4"
-                          onClick={() => setThumbnailToDelete("")}
-                        >
-                          <span className="fa fa-remove"></span> No
-                        </button>
-                        <button
-                          className="p-2 text-weave-primary rounded-md"
-                          onClick={() => deleteThumbnail()}
-                        >
-                          <span className="fa fa-check"></span> Yes
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <div className="flex flex-wrap">
-                  {loadingThumbnail ? (
-                    <div className="text-center p-6 font-rubikMedium w-full">
-                      Loading thumbnails...
-                    </div>
-                  ) : thumbnails.length !== 0 ? (
-                    thumbnails.map((item) => (
-                      <div className=" w-1/4 p-1 relative" key={item.id}>
-                        <button
-                          className="absolute right-0 top-0 p-2 text-red-500 rounded-md w-24"
-                          onClick={() => setThumbnailToDelete(item.id)}
-                        >
-                          <span className="fa fa-trash"></span>
-                        </button>
-
-                        <label
-                          className={`border border-${
-                            thumbnail === item.fileUrl
-                              ? "weave-primary"
-                              : "gray-500"
-                          } rounded-md p-6  flex flex-col h-full`}
-                        >
-                          <img
-                            src={`${item.fileUrl}`}
-                            className="w-full my-auto h-3/4"
-                            alt="Icon"
-                          />
-                          <div className=".h-1/4 text-center">
-                            <input
-                              type="radio"
-                              name="thumbnail"
-                              value={item.fileUrl}
-                              className="mr-2"
-                              checked={
-                                resourceInfo.thumbnailUrl === item.fileUrl
-                              }
-                              onChange={(e) =>
-                                setResourceInfo({
-                                  ...resourceInfo,
-                                  thumbnailUrl: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                        </label>
-                      </div>
+          {/* Pillar/Category Dropdown */}
+          <div className="my-4">
+            <label className="font-rubikMedium">
+              Category <span className="text-red-500">*</span>
+            </label>
+            <div className="category-dropdown relative mt-2">
+              <button
+                type="button"
+                className={`w-full text-left px-4 py-2 border rounded-md bg-white flex items-center justify-between ${
+                  category ? "border-weave-primary" : "border-gray-300"
+                } ${isPillarLocked ? "bg-gray-100 cursor-not-allowed" : ""}`}
+                onClick={() => !isPillarLocked && setIsDropdownOpen(!isDropdownOpen)}
+                disabled={loadingPillars || isPillarLocked}
+              >
+                <span className={`${category ? "text-black" : "text-gray-500"} ${isPillarLocked ? "text-gray-600" : ""}`}>
+                  {loadingPillars
+                    ? "Loading categories..."
+                    : category || "Select a category"}
+                </span>
+                {isPillarLocked ? (
+                  <i className="fa fa-lock text-gray-400"></i>
+                ) : (
+                  <i className={`fa fa-chevron-${isDropdownOpen ? "up" : "down"} text-gray-400`}></i>
+                )}
+              </button>
+              {isPillarLocked && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Category is pre-selected and cannot be changed
+                </p>
+              )}
+              {isDropdownOpen && !loadingPillars && !isPillarLocked && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                  {pillars.length > 0 ? (
+                    pillars.map((pillar) => (
+                      <button
+                        key={pillar.id}
+                        type="button"
+                        className={`w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors ${
+                          selectedPillarId === pillar.id
+                            ? "bg-blue-50 text-weave-primary"
+                            : "text-gray-700"
+                        }`}
+                        onClick={() => handleCategorySelect(pillar)}
+                      >
+                        {pillar.name}
+                      </button>
                     ))
                   ) : (
-                    <div className="text-center p-6 font-rubikMedium w-full">
-                      No thumbnail found
+                    <div className="px-4 py-2 text-gray-500">
+                      No categories available
                     </div>
                   )}
                 </div>
-                <div className="mt-4 text-center">
-                  <input
-                    type="file"
-                    className="hidden"
-                    id="thumbnail-input"
-                    onChange={(e) => setThumbnailSelected(e.target.files[0])}
-                  />
-                  <label
-                    htmlFor="thumbnail-input"
-                    className="border border-2 border-black rounded-xl mx-auto p-2 px-4 w-[300px] text-md font-rubikMedium"
-                  >
-                    {isUploadingThumbnail
-                      ? "Uploading thumbnail..."
-                      : "Add New Thumbnail"}
-                  </label>
-                </div>
-              </div>
-              <div className="flex" style={{ gap: 20 }}>
-                <div className="flex-1"> </div>
-                <div className="flex-1">
-                  <button
-                    className="border border-black py-2 w-full font-rubikMedium rounded-md"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      router.back();
-                    }}
-                  >
-                    Back
-                  </button>
-                </div>
-
-                <div className="flex-1">
-                  <button
-                    className="bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setActiveTab("file");
-                    }}
-                  >
-                    Continue
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className={activeTab !== "info" ? "" : "hidden"}>
-              {contentType === "Article" ? (
-                <>
-                  <h6 className="text-xl font-rubikBold my-2 capitalize">
-                    Content Body
-                  </h6>
-
-                  <div className="mb-4">
-                    <RichTextEditor
-                      value={resourceInfo.content}
-                      setValue={(content) =>
-                        setResourceInfo({ ...resourceInfo, content })
-                      }
-                    />
-                  </div>
-
-                  <label className="capitalize font-rubikMedium">
-                    Duration
-                  </label>
-                  <input
-                    type="text"
-                    className={`w-full p-2 border border-base-black focus:border-weave-primary focus:outline-none rounded-md font-rubikRegular mb-3`}
-                    value={resourceInfo.duration}
-                    onChange={(e) =>
-                      setResourceInfo({
-                        ...resourceInfo,
-                        duration: e.target.value,
-                      })
-                    }
-                  />
-                </>
-              ) : (
-                <>
-                  <h6 className="text-xl font-rubikBold my-2 capitalize">
-                    {contentType} File Upload
-                  </h6>
-                  <label htmlFor="" className="capitalize font-rubikMedium">
-                    Current {resourceInfo.resourceType} file
-                  </label>
-                  <audio id="resource-file" controls className="w-full"></audio>
-
-                  <form action="" encType="multipart/formdata">
-                    <input
-                      type="file"
-                      name="file"
-                      id="file"
-                      className="hidden"
-                      onChange={(e) => setResourceFile(e.target.files[0])}
-                    />
-                    <label
-                      htmlFor="file"
-                      className="rounded-xl flex flex-col text-center"
-                      style={{
-                        padding: "2rem",
-                        border: "2px dashed #777",
-                        gap: 4,
-                        margin: "15px auto",
-                      }}
-                    >
-                      {resourceFile?.name || (
-                        <>
-                          <span>Drag or and drop your audio file here</span>
-                          <span className="text-gray-500">MP3, WAV</span>
-                          <span>
-                            <span className="inline-block px-4 py-2 text-md text-base-white bg-weave-primary rounded-xl">
-                              Select File
-                            </span>
-                          </span>
-                        </>
-                      )}
-                    </label>
-                  </form>
-                </>
               )}
-
-              <label className="capitalize font-rubikMedium">Author</label>
-              <input
-                type="text"
-                className={`w-full p-2 border border-base-black focus:border-weave-primary focus:outline-none rounded-md font-rubikRegular mb-3`}
-                value={resourceInfo.author}
-                onChange={(e) =>
-                  setResourceInfo({
-                    ...resourceInfo,
-                    author: e.target.value,
-                  })
-                }
-              />
-
-              <label className="capitalize font-rubikMedium">Tags </label>
-              <div className="border border-weave-primary rounded-md p-2 flex flex-row flex-wrap my-2">
-                {resourceInfo.tags && resourceInfo.tags.length > 0 ? (
-                  resourceInfo.tags.map((tag) => (
-                    <div
-                      key={tag}
-                      className="bg-gray-200 rounded-md text-gray-700 p-1 text-sm mr-2"
-                    >
-                      {tag}
-                      <button
-                        onClick={(e) => {
-                          removeFromTag(tag);
-                        }}
-                        type="button"
-                      >
-                        <span className="fa fa-remove ml-2"></span>
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <></>
-                )}
-                <input
-                  type="text"
-                  className="focus:outline-none flex-1 px-2"
-                  value={tagName}
-                  onChange={(e) => setTagName(e.target.value)}
-                  onBlur={(e) => addToTag(e.target.value)}
-                />
-              </div>
-
-              {/* {contentType !== "Article" && (
-                <>
-                  <label className="capitalize font-rubikMedium">Transcript</label>
-                  <input
-                    type="text"
-                    className={`w-full p-2 border border-base-black focus:border-weave-primary focus:outline-none rounded-md font-rubikRegular mb-3`}
-                    value={transcript}
-                    onChange={(e) => setTranscript(e.target.value)}
-                  />
-                </>
-              )} */}
-
-              <div className="flex" style={{ gap: 20, marginTop: 20 }}>
-                <div className="flex-1"> </div>
-                <div className="flex-1">
-                  <button
-                    className="border border-black py-2 w-full font-rubikMedium rounded-md"
-                    onClick={() => setActiveTab("info")}
-                  >
-                    Back
-                  </button>
-                </div>
-                <div className="flex-1">
-                  <button
-                    className="bg-gray-300 text-black py-2 w-full font-rubikMedium rounded-md"
-                    onClick={() => updateResource("Draft")}
-                    id="draft-btn"
-                  >
-                    Save as Draft
-                    {/* {isSubmitting ? "Please wait..." : "Save as Draft"} */}
-                  </button>
-                </div>
-                <div className="flex-1">
-                  <button
-                    className="bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md"
-                    onClick={(e) => {
-                      updateResource("Published");
-                    }}
-                    id="published-btn"
-                  >
-                    Publish
-                    {/* {isSubmitting ? "Please wait..." : "Publish"} */}
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
-        )}
-      </div>
-    </Suspense>
+
+          {/* Cover Image */}
+          <div className="mb-1">
+            <label className="font-rubikMedium">
+              Cover Image <span className="text-red-500">*</span>
+            </label>
+            <div className="mt-2">
+              <input
+                type="file"
+                id="coverImage-file"
+                className="hidden"
+                accept="image/png, image/jpeg"
+                onChange={(e) => setCoverImage(e.target.files[0])}
+              />
+              <label
+                htmlFor="coverImage-file"
+                className="rounded-xl flex flex-col text-center cursor-pointer"
+                style={{
+                  padding: "1.5rem",
+                  border: "2px dashed #777",
+                  margin: "8px 0",
+                }}
+              >
+                {coverImagePreview ? (
+                  <div className="flex flex-col items-center">
+                    <img src={coverImagePreview} alt="Cover" className="w-24 h-24 object-cover rounded mb-2" />
+                    <span className="text-weave-primary">{coverImage?.name || "Current Image"}</span>
+                    {coverImage && (
+                      <button
+                        type="button"
+                        className="ml-2 text-red-500"
+                        onClick={e => {
+                          e.preventDefault();
+                          setCoverImage(null);
+                          setCoverImagePreview("");
+                        }}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-center rounded-full bg-gray-200 w-26 h-26 mx-auto mb-2 p-2">
+                      <CloudUpload className="text-gray-600 w-8 h-8" />
+                    </div>
+                    <span className="font-bold">Drag and drop your cover image</span>
+                    <span className="text-gray-500 text-sm">PNG, JPEG</span>
+                    <span className="mt-2">
+                      <span className="inline-block px-4 py-2 text-sm text-base-white bg-weave-primary rounded-xl">
+                        Select Image
+                      </span>
+                    </span>
+                  </>
+                )}
+              </label>
+            </div>
+          </div>
+
+          <div className="flex" style={{ gap: 20 }}>
+            <div className="flex-2"></div>
+            <div className="flex-1">
+              <button
+                className="border border-black py-2 w-full font-rubikMedium rounded-md"
+                onClick={() => router.back()}
+                type="button"
+              >
+                Back
+              </button>
+            </div>
+            <div className="flex-1">
+              <button
+                className={`bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md ${!infoTabValid ? "opacity-50 cursor-not-allowed" : ""}`}
+                onClick={() => setActiveTab("file")}
+                type="button"
+                disabled={!infoTabValid}
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Details Tab */}
+        <div className={activeTab === "info" ? "hidden" : ""}>
+          <InputField
+            label={contentType === "article" ? "Read Time(mins)" : "Duration(mins)"}
+            placeholder={"e.g 3min 4sec"}
+            value={duration}
+            setValue={setDuration}
+            className="mb-3"
+            required={true}
+          />
+          <div className="my-4">
+            <label className="font-rubikMedium">
+              Session Time <span className="text-red-500">*</span>
+            </label>
+            <select
+              className="w-full text-left px-4 py-2 border rounded-md bg-white mt-2"
+              value={sessionTime}
+              onChange={e => setSessionTime(e.target.value)}
+              required
+            >
+              <option value="">Select session time</option>
+              <option value="All Day">All Day</option>
+              <option value="Morning">Morning</option>
+              <option value="Afternoon">Afternoon</option>
+              <option value="Evening">Evening</option>
+            </select>
+          </div>
+
+          {contentType === "article" ? (
+            <>
+              <h6 className="text-xl font-rubikBold my-2 capitalize">
+                Content Body <span className="text-red-500">*</span>
+              </h6>
+              <div className="mb-4">
+                <RichTextEditor value={articleBody} setValue={setArticleBody} />
+              </div>
+            </>
+          ) : (
+            <>
+              <label className="font-rubikMedium">
+                {contentType} File Upload <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="file"
+                name="file"
+                id="file"
+                className="hidden"
+                onChange={e => {
+                  setFileUploadContent(e.target.files[0]);
+                  setFileUploadContentName(e.target.files[0]?.name || "");
+                }}
+              />
+              <label
+                htmlFor="file"
+                className="rounded-xl flex flex-col text-center cursor-pointer hover:bg-gray-50 transition-colors"
+                style={{
+                  padding: "2rem",
+                  border: "2px dashed #777",
+                  gap: 4,
+                  margin: "15px auto",
+                }}
+              >
+                {fileUploadContentName || (
+                  <>
+                    <span>Drag or and drop your audio file here</span>
+                    <span className="text-gray-500">MP3, WAV</span>
+                    <span>
+                      <span className="inline-block px-4 py-2 text-md text-base-white bg-weave-primary rounded-xl">
+                        Select File
+                      </span>
+                    </span>
+                  </>
+                )}
+              </label>
+              <div className="mb-4">
+                <label className="font-rubikMedium">
+                  Transcript <span className="text-gray-500">(Optional)</span>
+                </label>
+                <input
+                  type="file"
+                  id="transcript-file"
+                  className="hidden"
+                  accept=".txt,.doc,.docx,.pdf,.srt"
+                  onChange={e => {
+                    setTranscript(e.target.files[0]);
+                    setTranscriptName(e.target.files[0]?.name || "");
+                  }}
+                />
+                <label
+                  htmlFor="transcript-file"
+                  className="rounded-xl flex flex-col text-center cursor-pointer hover:bg-gray-50 transition-colors"
+                  style={{
+                    padding: "1.5rem",
+                    border: "2px dashed #777",
+                    margin: "8px 0",
+                  }}
+                >
+                  {transcriptName ? (
+                    <div className="flex items-center justify-center">
+                      <span className="text-weave-primary">{transcriptName}</span>
+                      <button
+                        type="button"
+                        className="ml-2 text-red-500"
+                        onClick={e => {
+                          e.preventDefault();
+                          setTranscript(null);
+                          setTranscriptName("");
+                        }}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <span>Upload transcript file</span>
+                      <span className="text-gray-500">TXT, DOC, DOCX, PDF</span>
+                      <span className="mt-2">
+                        <span className="inline-block px-4 py-2 text-sm text-base-white bg-weave-primary rounded-xl">
+                          Select File
+                        </span>
+                      </span>
+                    </>
+                  )}
+                </label>
+              </div>
+            </>
+          )}
+
+          {/* <InputField
+            label={"Author"}
+            placeholder={"Enter Author name"}
+            value={author}
+            setValue={setAuthor}
+            className="mb-2"
+            required={true}
+          /> */}
+
+          {/* <label className="capitalize font-rubikMedium">Tags </label>
+          <div className="border border-weave-primary rounded-md p-2 flex flex-row flex-wrap my-2">
+            {tags.length > 0 &&
+              tags.map((tag) => (
+                <div
+                  key={tag}
+                  className="bg-gray-200 rounded-md text-gray-700 p-1 text-sm mr-2"
+                >
+                  {tag}
+                  <button
+                    onClick={() => removeFromTag(tag)}
+                    type="button"
+                  >
+                    <span className="fa fa-remove ml-2"></span>
+                  </button>
+                </div>
+              ))}
+            <input
+              type="text"
+              className="focus:outline-none flex-1 px-2"
+              value={tagName}
+              onChange={e => setTagName(e.target.value)}
+              onBlur={e => addToTag(e.target.value)}
+            />
+          </div> */}
+
+          <div className="flex" style={{ gap: 20, marginTop: 20 }}>
+            <div className="flex-1"></div>
+            <div className="flex-1">
+              <button
+                className="border border-black py-2 w-full font-rubikMedium rounded-md"
+                onClick={() => setActiveTab("info")}
+                type="button"
+              >
+                Back
+              </button>
+            </div>
+            <div className="flex-1">
+              <button
+                className="bg-gray-300 text-black py-2 w-full font-rubikMedium rounded-md"
+                onClick={() => updateResource("Draft")}
+                id="draft-btn"
+                disabled={isSubmitting}
+              >
+                Save as Draft
+              </button>
+            </div>
+            <div className="flex-1">
+              <button
+                className={`bg-weave-primary text-base-white py-2 w-full font-rubikMedium rounded-md ${!detailsTabValid ? "opacity-50 cursor-not-allowed" : ""}`}
+                onClick={() => updateResource("Published")}
+                id="published-btn"
+                disabled={isSubmitting || !detailsTabValid}
+              >
+                Publish
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 }
-
-// const AddResourceInfo = ({}) => {
-//   const [title, setTitle] = useState("");
-//   const [activeTab, setActiveTab] = useState("");
-
-//   const [thumbnail, setThumbnail] = useState("");
-//   const searchParams = useSearchParams();
-//   const contentType = searchParams.get("contentType");
-
-//   // const [title, setTitle] = useState("");
-
-//   return (
-
-//   );
-// };
 
 export default function Edit() {
   return (

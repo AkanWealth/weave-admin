@@ -28,7 +28,7 @@ export default function Dashboard() {
         <span className="inline-flex items-center justify-center mr-4">
           <PentagonWithCircleIcon className="bg-[#e8e8e8] text-weave-primary rounded-full p-3" />
         </span>
-        Dashboard
+        Subscribers
       </h1>
 
       {/* app summary */}

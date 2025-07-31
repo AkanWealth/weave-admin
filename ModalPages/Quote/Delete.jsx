@@ -8,26 +8,43 @@ import { useToastContext } from "@/contexts/toast";
 function DeleteQuote() {
     const [loading, setLoading] = useState(false);
     const params = useSearchParams();
-    const userId = params.get("id");
+    const resourceId = params.get("resource_id");
+    const contentType = params.get("contentType");
 
     const router = useRouter();
     const { showMessage } = useToastContext();
 
     const invokeDelete = async () => {
+        if (!resourceId || !contentType) {
+            showMessage("Error", "Missing resource information", "error");
+            return;
+        }
+
         setLoading(true);
         try {
-            const response = await api.delete(`/usage-analytics/delete/${userId}`);
+            // Determine the correct endpoint based on content type
+            const endpoint = contentType === 'quote' ? `/api/quotes/${resourceId}` : `/api/tips/${resourceId}`;
+            const response = await api.delete(endpoint);
 
             if (response.status === 200) {
-                showMessage("Sponsor Deleted", "The sponsor has been deleted successfully.", "success");
+                showMessage(
+                    `${contentType === 'quote' ? 'Quote' : 'Tip'} Deleted`,
+                    `The ${contentType} has been deleted successfully.`,
+                    "success"
+                );
                 setTimeout(() => {
-                    router.push("/sponsors?refresh=" + Date.now());
+                    router.push("/contentsManagement?refresh=" + Date.now());
                 }, 100);
                 return;
             }
-            showMessage("Error deleting sponsor", "Please try again later", "error");
+            showMessage("Error deleting item", "Please try again later", "error");
         } catch (error) {
-            showMessage("Error deleting the sponsor", error.message || "An unexpected error occurred", "error");
+            console.error(`Error deleting ${contentType}:`, error);
+            showMessage(
+                `Error deleting the ${contentType}`,
+                error.response?.data?.message || error.message || "An unexpected error occurred",
+                "error"
+            );
         } finally {
             setLoading(false);
         }
@@ -44,9 +61,11 @@ function DeleteQuote() {
                     <Trash className="w-6 h-6 text-red-500" />
                 </div>
                 <div>
-                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Delete this Item? </h2>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                        Delete this {contentType === 'quote' ? 'Quote' : 'Tip'}?
+                    </h2>
                     <p className="text-gray-600 text-sm leading-relaxed">
-                        Are you sure you want to delete this? This action cannot be undone.
+                        Are you sure you want to delete this {contentType}? This action cannot be undone.
                     </p>
                 </div>
             </div>
@@ -54,18 +73,18 @@ function DeleteQuote() {
             {/* Action buttons */}
             <div className="flex gap-3">
                 <button
-                    className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                     onClick={() => router.back()}
-                //   disabled={loading}
+                    disabled={loading}
                 >
                     Cancel
                 </button>
                 <button
-                    className="flex-1 bg-red-500 text-white px-4 py-2 text-sm font-medium rounded-md "
-                //   onClick={invokeDelete}
-                //   disabled={loading}
+                    className="flex-1 bg-red-500 text-white px-4 py-2 text-sm font-medium rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                    onClick={invokeDelete}
+                    disabled={loading}
                 >
-                    Confirm
+                    {loading ? 'Deleting...' : 'Confirm'}
                 </button>
             </div>
         </div>

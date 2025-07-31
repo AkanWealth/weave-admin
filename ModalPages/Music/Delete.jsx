@@ -108,7 +108,7 @@ function DeleteMusic() {
       if (response.status === 200 || response.status === 204) {
         showMessage("Song Deleted", "The song has been deleted successfully.", "success");
         setTimeout(() => {
-          router.push("/music?refresh=" + Date.now());
+          router.push("/contentsManagement?refresh=" + Date.now());
         }, 1000);
       } else {
         showMessage("Error deleting song", "Please try again later", "error");

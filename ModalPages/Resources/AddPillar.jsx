@@ -459,12 +459,13 @@ import appleIcon from "@/assets/images/task-list1.png";
 import brainIcon from "@/assets/images/brain4.png";
 import sunIcon from "@/assets/images/bib.png";
 import starIcon from "@/assets/images/energy.png";
-import api from "@/lib/api"; // Assuming you have an API utility
+import api from "@/lib/api"; 
 import { useToastContext } from "@/contexts/toast";
 
 function AddContentPillars() {
     const [pillarName, setPillarName] = useState("");
-    const [selectedIcon, setSelectedIcon] = useState("");
+    const [selectedIcon, setSelectedIcon] = useState(null); // Changed to store file object
+    const [selectedIconName, setSelectedIconName] = useState(""); // For UI display
     const [description, setDescription] = useState("");
     const [unlocked, setUnlocked] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -481,6 +482,35 @@ function AddContentPillars() {
         { name: "sun", src: sunIcon },
         { name: "star", src: starIcon },
     ];
+
+    // Function to convert image import to File object
+    const convertImageToFile = async (imageSrc, filename) => {
+        try {
+            const response = await fetch(imageSrc.src || imageSrc);
+            const blob = await response.blob();
+            return new File([blob], filename, { type: blob.type });
+        } catch (error) {
+            console.error("Error converting image to file:", error);
+            return null;
+        }
+    };
+
+    const handleIconSelect = async (icon) => {
+        if (loading) return;
+        
+        try {
+            const file = await convertImageToFile(icon.src, `${icon.name}-icon.png`);
+            if (file) {
+                setSelectedIcon(file);
+                setSelectedIconName(icon.name);
+            } else {
+                setError("Failed to process selected icon");
+            }
+        } catch (error) {
+            console.error("Error selecting icon:", error);
+            setError("Failed to select icon");
+        }
+    };
 
     const handleCreatePillar = async () => {
         // Validation
@@ -501,21 +531,24 @@ function AddContentPillars() {
         setError("");
 
         try {
-            // Prepare data according to API specification
-            const data = {
-                name: pillarName.trim(),
-                icon: selectedIcon,
-                description: description.trim(),
-                locked: !unlocked // Note: API uses 'locked', UI uses 'unlocked'
-            };
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append("name", pillarName.trim());
+            formData.append("icon", selectedIcon); // Append the file
+            formData.append("description", description.trim());
+            formData.append("locked", !unlocked); // Note: API uses 'locked', UI uses 'unlocked'
 
-            // Make API call
-            const response = await api.post("/api/pillars", data);
+            // Make API call with FormData
+            const response = await api.post("/pillars", formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
             
             console.log("Pillar created successfully:", response.data);
             
             // Show success toast
-            showMessage("Pillar created successfully!", "","success");
+            showMessage("Pillar created successfully!", "", "success");
             
             // Navigate back and trigger reload
             router.push("/contentsManagement?refresh=" + Date.now());
@@ -526,16 +559,16 @@ function AddContentPillars() {
             // Handle different error types
             if (err.response?.data?.message) {
                 setError(err.response.data.message);
-                showMessage(err.response.data.message, "","error");
+                showMessage(err.response.data.message, "", "error");
             } else if (err.response?.status === 400) {
                 setError("Invalid data provided. Please check your inputs.");
-                showMessage("Invalid data provided. Please check your inputs.", "","error");
+                showMessage("Invalid data provided. Please check your inputs.", "", "error");
             } else if (err.response?.status === 409) {
                 setError("A pillar with this name already exists.");
-                showMessage("A pillar with this name already exists.", "","error");
+                showMessage("A pillar with this name already exists.", "", "error");
             } else {
                 setError("Failed to create pillar. Please try again.");
-                showMessage("Failed to create pillar. Please try again.", "","error");
+                showMessage("Failed to create pillar. Please try again.", "", "error");
             }
         } finally {
             setLoading(false);
@@ -547,7 +580,7 @@ function AddContentPillars() {
         if (error) {
             setError("");
         }
-    }, [pillarName, selectedIcon, description, unlocked]);
+    }, [pillarName, selectedIconName, description, unlocked]);
 
     return (
         <div>
@@ -583,13 +616,13 @@ function AddContentPillars() {
                             className={`
                                 relative rounded-full p-3 border-2 transition-all duration-200 
                                 hover:scale-105 hover:shadow-md
-                                ${selectedIcon === icon.name
+                                ${selectedIconName === icon.name
                                     ? "border-weave-primary bg-weave-primary/10 shadow-lg ring-2 ring-weave-primary/20"
                                     : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
                                 }
                                 ${loading ? "opacity-50 cursor-not-allowed" : ""}
                             `}
-                            onClick={() => !loading && setSelectedIcon(icon.name)}
+                            onClick={() => handleIconSelect(icon)}
                             aria-label={`Select ${icon.name} icon`}
                             disabled={loading}
                         >
@@ -601,7 +634,7 @@ function AddContentPillars() {
                                 className="object-contain"
                             />
                             {/* Selection indicator */}
-                            {selectedIcon === icon.name && (
+                            {selectedIconName === icon.name && (
                                 <div className="absolute -top-1 -right-1 w-5 h-5 bg-weave-primary rounded-full flex items-center justify-center">
                                     <svg 
                                         className="w-3 h-3 text-white" 

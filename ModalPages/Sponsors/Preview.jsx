@@ -1,198 +1,187 @@
 "use client";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useState, useEffect } from "react";
-import InputField from "@/components/elements/TextField";
-import { CloudUpload, X } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
 
-function PreviewSponsor() {
-    const [sponsorName, setSponsorName] = useState('');
-    const [logoFile, setLogoFile] = useState('');
-    const [status, setStatus] = useState('');
-    const [duration, setDuration] = useState('');
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const router = useRouter();
+import recreaxLogo from "@/assets/images/recreax.png";
+import Image from "next/image";
+import { Info } from "lucide-react";
+import Link from "next/link";
+import api from "@/lib/api";
 
-    const statusOptions = [
-        { value: 'active', label: 'Active' },
-        { value: 'draft', label: 'Draft' }
-    ];
+function ViewDetail({ onClose, onActivate, onDeactivate }) {
+  const mockSponsorData = {
+    id: 1,
+    name: "ReCreaX",
+    logo: recreaxLogo,
+    user: "Jane Adebayo",
+    email: "jane@gmail.com",
+    package: "Spotlight Package",
+    duration: "3 months",
+    price: "£1,500",
+    applicationDate: "15 January 2024 at 11:30",
+    activatedDate: "20 January 2024 at 09:15",
+    status: "Active" // Change this to "Pending" or "Inactive" to test different states
+  };
 
-    const durations = [
-        { value: '1-month', label: '1 Month' },
-        { value: '3-months', label: '3 Months' },
-        { value: '6-months', label: '6 Months' },
-        { value: '1-year', label: '1 Year' }
-    ];
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Active":
+        return "bg-green-100 text-green-800";
+      case "Pending":
+        return "bg-gray-100 text-gray-800";
+      case "Inactive":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
 
-    const isFormValid = () => {
-        return sponsorName && logoFile && status && duration && startDate && endDate;
-    };
+  const getActionButton = () => {
+    switch (mockSponsorData.status) {
+      case "Active":
+        return (
+          <Link 
+            href={`?modal=deactivate-sponsor&sponsor_id=${mockSponsorData.id}`}
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            style={{background: "red"}}
+          >
+            Deactivate Sponsor
+          </Link>
+        );
+      case "Pending":
+      case "Inactive":
+        return (
+          <Link 
+            href={`?modal=activate-sponsor&sponsor_id=${mockSponsorData.id}`}
+            className="w-full bg-[#4AA0A4] hover:bg-[#3a8a8e] text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            style={{background: "teal"}}
+          >
+            Activate Sponsor
+          </Link>
+        );
+      default:
+        return (
+          <Link 
+            href={`?modal=activate-sponsor&sponsor_id=${mockSponsorData.id}`}
+            className="w-full bg-[#4AA0A4] hover:bg-[#3a8a8e] text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            style={{background: "teal"}}
+          >
+            Activate Sponsor
+          </Link>
+        );
+    }
+  };
 
-    const handleSubmit = () => {
-        if (isFormValid()) {
-            console.log({
-                sponsorName,
-                logoFile,
-                status,
-                duration,
-                startDate,
-                endDate
-            });
-            // Handle form submission logic here
-            router.push("/success");
-        }
-    };
-
-    const handleSaveAsDraft = () => {
-        console.log("Saving as draft:", {
-            sponsorName,
-            logoFile,
-            status,
-            duration,
-            startDate,
-            endDate
-        });
-        // Handle save as draft logic here
-    };
-
-    return (
-        <div className="max-w-md mx-auto">
-            <div className="flex items-center justify-between mb-6">
-                <h5 className="text-xl font-rubikBold">Preview Sponsor</h5>
+  const sponsorData = mockSponsorData;
+  
+  return (
+    <>
+      {/* Header */}
+      <div className="flex items-center justify-between border-b">
+        <div className="flex items-center space-x-3 p-4">
+          <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center">
+            <Image
+              src={sponsorData.logo}
+              alt={sponsorData.name}
+              width={40}
+              height={40}
+              className="rounded-full"
+            />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">{sponsorData.name}</h3>
+            <div className={`inline-flex items-center space-x-2 text-sm rounded-full px-3 py-1 ${getStatusColor(sponsorData.status)}`}>
+              <span className="text-sm font-medium">{sponsorData.status}</span>
             </div>
-
-            <div className="flex flex-col space-y-4">
-                {/* Sponsor Name */}
-                <div>
-                    <InputField
-                        label="Sponsor Name"
-                        placeholder="Enter sponsor name"
-                        value={sponsorName}
-                        setValue={setSponsorName}
-                    />
-                </div>
-
-                {/* Upload Logo */}
-                <div>
-                    <label className="font-rubikMedium">
-                        Upload Logo 
-                    </label>
-                    <div className="mt-2">
-                        <input
-                            type="file"
-                            id="logo-file"
-                            className="hidden"
-                            accept="image/png, image/jpeg, image/jpg"
-                            onChange={(e) => setLogoFile(e.target.files[0])}
-                        />
-                        <label
-                            htmlFor="logo-file"
-                            className="rounded-lg flex flex-col items-center justify-center text-center cursor-pointer border-2 border-dashed border-gray-300 p-8 hover:border-weave-primary transition-colors"
-                            style={{
-                                padding: "1.5rem",
-                                border: "2px dashed #777",
-                                margin: "8px 0",
-                            }}
-                        >
-                            {logoFile?.name ? (
-                                <div className="flex items-center justify-center">
-                                    <span className="text-weave-primary">{logoFile.name}</span>
-                                    <button
-                                        type="button"
-                                        className="ml-2 text-red-500"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            setLogoFile(null);
-                                        }}
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="flex items-center justify-center rounded-full bg-gray-200 w-16 h-16 mb-4">
-                                        <CloudUpload className="text-gray-600 w-8 h-8" />
-                                    </div>
-                                    <span className="font-medium text-gray-700">Drag and drop image</span>
-                                    <span className="text-gray-500 text-sm">PNG, JPEG, JPG</span>
-                                    <span className="mt-3">
-                                        <span className="inline-block px-4 py-2 text-sm text-white bg-weave-primary rounded-lg">
-                                            Select a file
-                                        </span>
-                                    </span>
-                                </>
-                            )}
-                        </label>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="font-rubikMedium">
-                            Status
-                        </label>
-                        <select
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-weave-primary focus:border-transparent"
-                        >
-                            <option value="">Select status</option>
-                            {statusOptions.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="font-rubikMedium">
-                            Duration 
-                        </label>
-                        <select
-                            value={duration}
-                            onChange={(e) => setDuration(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-weave-primary focus:border-transparent"
-                        >
-                            <option value="">Select duration</option>
-                            {durations.map((dur) => (
-                                <option key={dur.value} value={dur.value}>
-                                    {dur.label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="font-rubikMedium">
-                            Start Date 
-                        </label>
-                        <input
-                            type="date"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-weave-primary focus:border-transparent"
-                        />
-                    </div>
-                    <div>
-                        <label className="font-rubikMedium">
-                            End Date 
-                        </label>
-                        <input
-                            type="date"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-weave-primary focus:border-transparent"
-                        />
-                    </div>
-                </div>
-
-                {/* Action Buttons */}
-                
-            </div>
+          </div>
         </div>
-    );
+      </div>
+
+      {/* Content */}
+      <div className="p-4">
+        {/* User Information */}
+        <div className="mb-6">
+          <h4 className="text-lg font-semibold mb-3 text-gray-900">User Information</h4>
+          <div className="flex justify-between items-center py-2 border-b border-gray-100">
+            <span className="text-sm font-medium text-gray-600">User:</span>
+            <span className="text-sm text-gray-900">{sponsorData.user}</span>
+          </div>
+          <div className="flex justify-between items-center py-2 border-b border-gray-100">
+            <span className="text-sm font-medium text-gray-600">Email:</span>
+            <span className="text-sm text-gray-900">{sponsorData.email}</span>
+          </div>
+        </div>
+
+        {/* Sponsorship Package Details */}
+        <div className="mb-6">
+          <h4 className="text-lg font-semibold mb-3 text-gray-900">Sponsorship Package Details</h4>
+          <div className="flex justify-between items-center py-2 border-b border-gray-100">
+            <span className="text-sm font-medium text-gray-600">Package:</span>
+            <span className="text-sm text-gray-900">{sponsorData.package}</span>
+          </div>
+          <div className="flex justify-between items-center py-2 border-b border-gray-100">
+            <span className="text-sm font-medium text-gray-600">Duration:</span>
+            <span className="text-sm text-gray-900">{sponsorData.duration}</span>
+          </div>
+          <div className="flex justify-between items-center py-2 border-b border-gray-100">
+            <span className="text-sm font-medium text-gray-600">Price:</span>
+            <span className="text-sm text-gray-900">{sponsorData.price}</span>
+          </div>
+        </div>
+
+        {/* Timeline */}
+        <div className="mb-6">
+          <h4 className="text-lg font-semibold mb-3 text-gray-900">Timeline</h4>
+          <div className="flex justify-between items-center py-2 border-b border-gray-100">
+            <span className="text-sm font-medium text-gray-600">Application Submitted:</span>
+            <span className="text-sm text-gray-900">{sponsorData.applicationDate}</span>
+          </div>
+          <div className="flex justify-between items-center py-2 border-b border-gray-100">
+            <span className="text-sm font-medium text-gray-600">
+              {sponsorData.status === "Active" ? "Activated:" : "Status:"}
+            </span>
+            <span className="text-sm text-gray-900">
+              {sponsorData.status === "Active" ? sponsorData.activatedDate : sponsorData.status}
+            </span>
+          </div>
+        </div>
+
+        {/* Status-based Information */}
+        {sponsorData.status === "Active" && (
+          <div className="flex items-start space-x-3 p-3 bg-green-50 rounded-lg mb-6">
+            <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Info className="text-green-600 w-4 h-4" />
+            </div>
+            <p className="text-sm text-green-800">
+              This sponsor is currently active. Their ads are live in the mobile app and generating impressions.
+            </p>
+          </div>
+        )}
+
+        {(sponsorData.status === "Pending" || sponsorData.status === "Inactive") && (
+          <div className="flex items-start space-x-3 p-3 bg-amber-50 rounded-lg mb-6">
+            <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Info className="text-amber-600 w-4 h-4" />
+            </div>
+            <p className="text-sm text-amber-800">
+              This sponsor is not currently active. You can activate them to make their ads go live in the mobile app.
+            </p>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="flex items-center w-full pt-4">
+          {/* <button
+            onClick={onClose}
+            className="flex-1 bg-white border border-gray-300 text-gray-700 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Close
+          </button> */}
+          <button className="flex w-full">{getActionButton()}</button>
+        </div>
+      </div>
+    </>
+  );
 }
 
-export default PreviewSponsor;
+export default ViewDetail;

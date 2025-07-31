@@ -527,7 +527,6 @@
 
 
 "use client";
-
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import InputField from "@/components/elements/TextField";
@@ -546,6 +545,11 @@ function EditMusic() {
   });
   const [coverImage, setCoverImage] = useState(null);
   const [songFile, setSongFile] = useState(null);
+  
+  // Add state for existing media URLs and info
+  const [existingCoverImage, setExistingCoverImage] = useState(null);
+  const [existingSongFile, setExistingSongFile] = useState(null);
+  const [songData, setSongData] = useState(null);
 
   const router = useRouter();
   const { showMessage } = useToastContext();
@@ -568,19 +572,31 @@ function EditMusic() {
 
       try {
         // Fetch pillars
-        const pillarsResponse = await api.get("/api/pillars");
+        const pillarsResponse = await api.get("/pillars");
         setPillars(pillarsResponse.data);
 
         // Fetch song details
         const songResponse = await api.get(`/songs/${resourceId}`);
         const song = songResponse.data;
+        
+        console.log("Song data:", song); // Debug log
+        
+        setSongData(song);
         setFormData({
           title: song.title || "",
           artiste: song.artiste || "",
-          pillarId: song.pillarId || "",
+          // Fix: Extract pillar ID from nested pillar object
+          pillarId: song.pillar?.id || song.pillarId || "",
           status: song.status || "uploaded",
         });
-        // Note: File inputs (coverImage, songFile) are not prefetched as they are typically not returned by the API
+        
+        // Set existing media URLs/info
+        setExistingCoverImage(song.coverImage || song.coverImageUrl);
+        setExistingSongFile({
+          url: song.songFile || song.songFileUrl,
+          name: song.originalFileName || song.fileName || song.title || "Current song file"
+        });
+        
       } catch (error) {
         console.error("Error fetching song or pillars:", error);
         showMessage("Error", error.response?.data?.message || "Failed to load song details", "error");
@@ -620,12 +636,13 @@ function EditMusic() {
     if (songFile) formDataToSend.append("songFile", songFile);
 
     // Debug FormData contents
+    console.log("Save as Draft FormData:");
     for (let pair of formDataToSend.entries()) {
       console.log(`${pair[0]}: ${pair[1]}`);
     }
 
     try {
-      const response = await api.put(`/songs/${resourceId}`, formDataToSend, {
+      const response = await api.patch(`/songs/${resourceId}`, formDataToSend, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -634,7 +651,7 @@ function EditMusic() {
       if (response.status === 200 || response.status === 201) {
         showMessage("Draft Saved", "Song saved as draft successfully!", "success");
         setTimeout(() => {
-          router.push("/music");
+          router.push("/contentsManagement?refresh=" + Date.now());
         }, 1000);
       }
     } catch (error) {
@@ -647,7 +664,11 @@ function EditMusic() {
 
   // Handle update song
   const handleUpdateSong = async () => {
-    if (!formData.title || !formData.artiste || !formData.pillarId || !coverImage || !songFile) {
+    // Check if we have either new files or existing files
+    const hasCoverImage = coverImage || existingCoverImage;
+    const hasSongFile = songFile || existingSongFile;
+    
+    if (!formData.title || !formData.artiste || !formData.pillarId || !hasCoverImage || !hasSongFile) {
       showMessage("Missing Fields", "Please fill in all required fields", "error");
       return;
     }
@@ -663,26 +684,35 @@ function EditMusic() {
     formDataToSend.append("title", formData.title);
     formDataToSend.append("artiste", formData.artiste);
     formDataToSend.append("pillarId", formData.pillarId);
-    formDataToSend.append("status", formData.status);
-    formDataToSend.append("coverImage", coverImage);
-    formDataToSend.append("songFile", songFile);
+    formDataToSend.append("status", "uploaded");
+    
+   
+    if (coverImage) formDataToSend.append("coverImage", coverImage);
+    if (songFile) formDataToSend.append("songFile", songFile);
+   
+    console.log("pillarid selected", formData.pillarId);
+    console.log("file sent: ", formDataToSend);
+    
 
     // Debug FormData contents
+    console.log("Update Song FormData:");
     for (let pair of formDataToSend.entries()) {
       console.log(`${pair[0]}: ${pair[1]}`);
     }
+    
 
     try {
-      const response = await api.put(`/songs/${resourceId}`, formDataToSend, {
+      const response = await api.patch(`/songs/${resourceId}`, formDataToSend, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
+      
       if (response.status === 200 || response.status === 201) {
         showMessage("Success", "Song updated successfully!", "success");
         setTimeout(() => {
-          router.push("/music");
+          router.push("/contentsManagement?refresh=" + Date.now());
         }, 1000);
       } else {
         showMessage("Update Failed", "Failed to update song", "error");
@@ -735,7 +765,15 @@ function EditMusic() {
               </option>
             ))}
           </select>
+          {/* Debug info - remove in production */}
+          {/* {formData.pillarId && (
+            <p className="text-xs text-gray-500 mt-1">
+              Selected pillar ID: {formData.pillarId}
+            </p>
+          )} */}
         </div>
+        
+        {/* Cover Image Section */}
         <div className="mb-1">
           <label className="font-rubikMedium">
             Cover Image <span className="text-red-500">*</span>
@@ -749,6 +787,29 @@ function EditMusic() {
               onChange={(e) => setCoverImage(e.target.files[0])}
               disabled={loading}
             />
+            
+            {/* Show existing cover image preview */}
+            {existingCoverImage && !coverImage && (
+              <div className="mb-2">
+                <p className="text-sm text-gray-600 mb-2">Current cover image:</p>
+                <div className="flex items-center justify-between p-3 border rounded-md bg-gray-50">
+                  <div className="flex items-center">
+                    <img 
+                      src={existingCoverImage} 
+                      alt="Current cover" 
+                      className="w-12 h-12 object-cover rounded mr-3"
+                      onError={(e) => {
+                        // Fallback if image fails to load
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                    <span className="text-sm">Current cover image</span>
+                  </div>
+                  <span className="text-xs text-gray-500">Replace by selecting a new image below</span>
+                </div>
+              </div>
+            )}
+            
             <label
               htmlFor="coverImage-file"
               className="rounded-xl flex flex-col text-center cursor-pointer"
@@ -779,7 +840,9 @@ function EditMusic() {
                   <div className="flex items-center justify-center rounded-full bg-gray-200 w-26 h-26 mx-auto mb-2 p-2">
                     <CloudUpload className="text-gray-600 w-8 h-8" />
                   </div>
-                  <span className="font-bold">Drag and drop your cover image</span>
+                  <span className="font-bold">
+                    {existingCoverImage ? "Replace cover image" : "Drag and drop your cover image"}
+                  </span>
                   <span className="text-gray-500 text-sm">PNG, JPEG</span>
                   <span className="mt-2">
                     <span className="inline-block px-4 py-2 text-sm text-base-white bg-weave-primary rounded-xl">
@@ -791,6 +854,8 @@ function EditMusic() {
             </label>
           </div>
         </div>
+        
+        {/* Song File Section */}
         <div className="mb-1">
           <label className="font-rubikMedium">
             Song File <span className="text-red-500">*</span>
@@ -804,6 +869,23 @@ function EditMusic() {
               onChange={(e) => setSongFile(e.target.files[0])}
               disabled={loading}
             />
+            
+            {/* Show existing song file info */}
+            {existingSongFile && !songFile && (
+              <div className="mb-2">
+                <p className="text-sm text-gray-600 mb-2">Current song file:</p>
+                <div className="flex items-center justify-between p-3 border rounded-md bg-gray-50">
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                      <span className="text-blue-600 text-xs font-semibold">♪</span>
+                    </div>
+                    <span className="text-sm">{existingSongFile.name}</span>
+                  </div>
+                  <span className="text-xs text-gray-500">Replace by selecting a new file below</span>
+                </div>
+              </div>
+            )}
+            
             <label
               htmlFor="songFile-file"
               className="rounded-xl flex flex-col text-center cursor-pointer"
@@ -834,7 +916,9 @@ function EditMusic() {
                   <div className="flex items-center justify-center rounded-full bg-gray-200 w-26 h-26 mx-auto mb-2 p-2">
                     <CloudUpload className="text-gray-600 w-8 h-8" />
                   </div>
-                  <span className="font-bold">Drag and drop your audio here</span>
+                  <span className="font-bold">
+                    {existingSongFile ? "Replace audio file" : "Drag and drop your audio here"}
+                  </span>
                   <span className="text-gray-500 text-sm">MP3, WAV</span>
                   <span className="mt-2">
                     <span className="inline-block px-4 py-2 text-sm text-base-white bg-weave-primary rounded-xl">
@@ -846,6 +930,7 @@ function EditMusic() {
             </label>
           </div>
         </div>
+        
         <div className="w-full mx-auto">
           <div className="flex" style={{ gap: 20 }}>
             <div className="flex-1">
@@ -860,12 +945,24 @@ function EditMusic() {
             <div className="flex-1">
               <button
                 className={`${
-                  coverImage && songFile && formData.title && formData.artiste && formData.pillarId && !loading
+                  (coverImage || existingCoverImage) && 
+                  (songFile || existingSongFile) && 
+                  formData.title && 
+                  formData.artiste && 
+                  formData.pillarId && 
+                  !loading
                     ? "bg-weave-primary"
                     : "bg-gray-300"
                 } text-base-white py-2 w-full font-rubikMedium rounded-md`}
                 onClick={handleUpdateSong}
-                disabled={loading || !coverImage || !songFile || !formData.title || !formData.artiste || !formData.pillarId}
+                disabled={
+                  loading || 
+                  (!coverImage && !existingCoverImage) || 
+                  (!songFile && !existingSongFile) || 
+                  !formData.title || 
+                  !formData.artiste || 
+                  !formData.pillarId
+                }
               >
                 {loading ? "Updating..." : "Update Song"}
               </button>
