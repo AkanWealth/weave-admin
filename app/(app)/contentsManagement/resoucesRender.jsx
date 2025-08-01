@@ -970,12 +970,64 @@ const ContentPillarsPage = () => {
     fetchPillars();
   }, []);
 
-  const fetchPillars = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get("/pillars");
+  // const fetchPillars = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await api.get("/pillars");
 
-      const transformedPillars = response.data.map((pillar, index) => ({
+  //     const transformedPillars = response.data.map((pillar, index) => ({
+  //       id: pillar.id || `pillar-${index}`,
+  //       title: pillar.name,
+  //       description: pillar.description,
+  //       icon: pillar.icon, // Use the actual image URL from API
+  //       coverImage: pillar.coverImage,
+  //       color: getColorClass(index),
+  //       iconBg: getIconBgClass(index),
+  //       contentItems: pillar.contentItems || 0,
+  //       locked: pillar.locked,
+  //     }));
+
+  //     setPillars(transformedPillars);
+  //     setError(null);
+  //   } catch (err) {
+  //     console.error("Error fetching pillars:", err);
+  //     setError("Failed to load pillars");
+  //     showMessage({
+  //       type: "error",
+  //       text: "Failed to load pillars",
+  //     });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
+
+  const fetchPillars = async () => {
+  try {
+    setLoading(true);
+
+    // Fetch pillars
+    const pillarsResponse = await api.get("/pillars");
+    const pillarsData = pillarsResponse.data;
+
+    // Fetch all resources
+    const resourcesResponse = await api.get("/resource-library/resources");
+    let resourcesData = [];
+    if (resourcesResponse.data && resourcesResponse.data.resources && Array.isArray(resourcesResponse.data.resources)) {
+      resourcesData = resourcesResponse.data.resources;
+    } else if (Array.isArray(resourcesResponse.data)) {
+      resourcesData = resourcesResponse.data;
+    }
+
+    // Transform pillars and calculate content items
+    const transformedPillars = pillarsData.map((pillar, index) => {
+      // Count resources for this pillar
+      const contentCount = resourcesData.filter(
+        (resource) => resource.pillar && resource.pillar.id === pillar.id
+      ).length;
+
+      return {
         id: pillar.id || `pillar-${index}`,
         title: pillar.name,
         description: pillar.description,
@@ -983,23 +1035,24 @@ const ContentPillarsPage = () => {
         coverImage: pillar.coverImage,
         color: getColorClass(index),
         iconBg: getIconBgClass(index),
-        contentItems: pillar.contentItems || 0,
+        contentItems: contentCount, // Set the calculated count
         locked: pillar.locked,
-      }));
+      };
+    });
 
-      setPillars(transformedPillars);
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching pillars:", err);
-      setError("Failed to load pillars");
-      showMessage({
-        type: "error",
-        text: "Failed to load pillars",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    setPillars(transformedPillars);
+    setError(null);
+  } catch (err) {
+    console.error("Error fetching pillars or resources:", err);
+    setError("Failed to load pillars");
+    showMessage({
+      type: "error",
+      text: "Failed to load pillars",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Function to get default emoji based on pillar name
   const getDefaultEmoji = (pillarName) => {

@@ -445,7 +445,7 @@ function Subscriber() {
   useEffect(() => {
     const fetchSubscribers = async () => {
       try {
-        const response = await api.get("/api/subscriptions");
+        const response = await api.get("/subscriptions");
         setSubscribers(response.data || []);
       } catch (error) {
         console.error("Error fetching subscribers:", error);

@@ -220,15 +220,15 @@ function SubcriptionSummary() {
 
   const getUsersSummary = async () => {
     try {
-      const response = await api.get("/api/subscriptions/summary");
+      const response = await api.get("/subscriptions/summary");
       const data = response.data;
 
-      setAllUsers(data.totalUsers || 0);
-      setAppUsers(data.activeUsers || 0);
+      setAllUsers(data.totalSubscriptions || 0);
+      setAppUsers(data.expiredSubscriptions || 0);
       setAverageCheck(data.totalIncome || 0);
-      setAllUserAverageMonthly(data.totalUsersChange || 0);
+      setAllUserAverageMonthly(data.activeSubscriptions || 0);
       setAllAppUserAverageMonthly(data.activeUsersChange || 0);
-      setAllInternalUserAverageMonthly(data.expiredUsersChange || 0);
+      setAllInternalUserAverageMonthly(data.totalRevenue || 0);
       setAverageCheckChange(data.totalIncomeChange || 0);
     } catch (error) {
       console.error("Error fetching subscription summary:", error);
@@ -278,7 +278,7 @@ function SubcriptionSummary() {
         <div className="flex justify-between items-start mb-4">
           <div className="whitespace-nowrap">
             <h5 className="text-gray-500 mb-2 text-sm">Active Subscriptions</h5>
-            <h6 className="font-rubikMedium text-2xl">{appUsers}</h6>
+            <h6 className="font-rubikMedium text-2xl">{allAppUserAverageMonthly}</h6>
           </div>
           <div className="flex justify-center items-center h-10 w-10 text-[#28A745]">
             <FontAwesomeIcon icon={faUserGroup} className="text-2xl" />
@@ -291,7 +291,7 @@ function SubcriptionSummary() {
         <div className="flex justify-between items-start mb-4">
           <div className="whitespace-nowrap">
             <h5 className="text-gray-500 mb-2 text-sm">Expired Subscriptions</h5>
-            <h6 className="font-rubikMedium text-2xl">{allUsers - appUsers}</h6>
+            <h6 className="font-rubikMedium text-2xl">{appUsers}</h6>
           </div>
           <div className="flex justify-center items-center h-10 w-10 text-[#4AA0A4]">
             <FontAwesomeIcon icon={faUserGroup} className="text-2xl" />
@@ -304,7 +304,7 @@ function SubcriptionSummary() {
         <div className="flex justify-between items-start mb-4">
           <div className="whitespace-nowrap">
             <h5 className="text-gray-500 mb-2 text-sm">Total Income</h5>
-            <h6 className="font-rubikMedium text-2xl">£{averageCheck.toFixed(2)}</h6>
+            <h6 className="font-rubikMedium text-2xl">£{allInternalUserAverageMonthly}</h6>
           </div>
           <div className="flex justify-center items-center h-10 w-10 text-[#9747FF]">
             <FontAwesomeIcon icon={faClockRotateLeft} className="text-2xl" />

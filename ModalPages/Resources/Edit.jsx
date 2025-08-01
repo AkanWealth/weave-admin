@@ -55,7 +55,7 @@ function EditResource() {
   setDuration(resource.duration || "");
   setSessionTime(resource.sessionTime || "");
   setAuthor(resource.author || "");
-  setArticleBody(resource.content || ""); // For articles
+  setArticleBody(resource.content || ""); 
   setFileUploadContentName(resource.resourceUrl ? resource.resourceUrl.split("/").pop() : "");
   setTranscriptName(
   typeof resource.transcript === "string" && resource.transcript
