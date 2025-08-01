@@ -146,6 +146,15 @@ function SponsorsRender() {
     };
     return pricing[sponsor.sponsorshipTier] || "£0.00";
   };
+  
+const formatDuration = (durationStr) => {
+  if (!durationStr) return "";
+  // Example: "6_MONTHS" => "6 month"
+  const [num, unit] = durationStr.split("_");
+  if (!num || !unit) return durationStr;
+  let unitFormatted = unit.toLowerCase().replace("months", "month").replace("month", "month").replace("years", "year").replace("year", "year").replace("days", "day").replace("day", "day");
+  return `${num} ${unitFormatted}`;
+};
 
   return (
     <>
@@ -312,8 +321,8 @@ function SponsorsRender() {
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="text-gray-600">{sponsor.duration}</span>
-                </td>
+  <span className="text-gray-600">{formatDuration(sponsor.duration)}</span>
+</td>
                 <td className="px-4 py-3">
                   <div className="text-sm">
                     <span className="block text-gray-600">
@@ -329,7 +338,7 @@ function SponsorsRender() {
                     className={`${
                       sponsor.isActive
                         ? "bg-[#28A745] text-white"
-                        : "bg-[#B5B5B5] text-white"
+                        : "bg-red-500 text-white"
                     } px-4 rounded-full py-1 text-sm font-rubikMedium`}
                   >
                     {sponsor.isActive ? "Active" : "Inactive"}
@@ -370,13 +379,13 @@ function SponsorsRender() {
                             <i className="fa fa-play mr-2"></i> Activate Sponsor
                           </Link>
                         )}
-
+{/* 
                         <Link
                           href={`?modal=edit-sponsor&sponsor_id=${sponsor.id}`}
                           className="px-3 py-2 hover:bg-gray-100 rounded"
                         >
                           <i className="fa fa-pencil mr-2"></i> Edit
-                        </Link>
+                        </Link> */}
                         <Link
                           href={`?modal=delete-sponsor&sponsor_id=${sponsor.id}`}
                           className="text-red-500 px-3 py-2 hover:bg-gray-100 rounded"

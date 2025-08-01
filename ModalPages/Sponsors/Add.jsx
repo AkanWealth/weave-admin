@@ -450,7 +450,12 @@ function AddSponsor() {
             formData.append('sponsorName', sponsorName);
             formData.append('logo', logoFile);
             formData.append('sponsorshipTier', sponsorshipTier);
-            formData.append('duration', `${selectedTier.duration}-months`);
+            const durationMap = {
+                3: "1_MONTH",
+                6: "6_MONTHS",
+                12: "1_YEAR"
+            };
+            formData.append('duration', durationMap[selectedTier.duration]);
             formData.append('startDate', startDate);
             formData.append('endDate', endDate);
 

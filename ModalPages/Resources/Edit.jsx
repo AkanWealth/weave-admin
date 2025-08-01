@@ -57,7 +57,11 @@ function EditResource() {
   setAuthor(resource.author || "");
   setArticleBody(resource.content || ""); // For articles
   setFileUploadContentName(resource.resourceUrl ? resource.resourceUrl.split("/").pop() : "");
-  setTranscriptName(resource.transcript ? resource.transcript.split("/").pop() : "");
+  setTranscriptName(
+  typeof resource.transcript === "string" && resource.transcript
+    ? resource.transcript.split("/").pop()
+    : ""
+);
   setCoverImagePreview(resource.coverImage || ""); // Use coverImage for preview
 
   // Pillar/category
@@ -113,7 +117,7 @@ function EditResource() {
   // Form validation
   const infoTabValid = title && description && selectedPillarId && category;
   const detailsTabValid =
-    contentType === "article"
+    contentType === "Article"
       ? articleBody && duration && sessionTime
       : fileUploadContentName && duration && sessionTime;
 
@@ -138,7 +142,7 @@ function EditResource() {
       formdata.append("status", status);
 
       if (coverImage) formdata.append("coverImage", coverImage);
-      if (contentType === "article") {
+      if (contentType === "Article") {
         formdata.append("content", articleBody);
       } else {
         if (fileUploadContent) formdata.append("file", fileUploadContent);
@@ -271,6 +275,16 @@ function EditResource() {
               )}
             </div>
           </div>
+                  
+          {isPillarLocked && (
+            <button
+              type="button"
+              className="text-xs text-blue-300 bg-[#2345325] underline mt-1"
+              onClick={() => setIsPillarLocked(false)}
+            >
+              Change Category
+            </button>
+          )}
 
           {/* Cover Image */}
           <div className="mb-1">
@@ -357,7 +371,7 @@ function EditResource() {
         {/* Details Tab */}
         <div className={activeTab === "info" ? "hidden" : ""}>
           <InputField
-            label={contentType === "article" ? "Read Time(mins)" : "Duration(mins)"}
+            label={contentType === "Article" ? "Read Time(mins)" : "Duration(mins)"}
             placeholder={"e.g 3min 4sec"}
             value={duration}
             setValue={setDuration}
@@ -382,7 +396,7 @@ function EditResource() {
             </select>
           </div>
 
-          {contentType === "article" ? (
+          {contentType === "Article" ? (
             <>
               <h6 className="text-xl font-rubikBold my-2 capitalize">
                 Content Body <span className="text-red-500">*</span>
