@@ -271,7 +271,7 @@ function SubcriptionSummary() {
             <FontAwesomeIcon icon={faUserGroup} className="text-2xl" />
           </div>
         </div>
-        {renderPercentageChange(allUserAverageMonthly, "last month")}
+        {/* {renderPercentageChange(allUserAverageMonthly, "last month")} */}
       </div>
 
       <div className="bg-base-white p-6 rounded-2xl">
@@ -284,7 +284,7 @@ function SubcriptionSummary() {
             <FontAwesomeIcon icon={faUserGroup} className="text-2xl" />
           </div>
         </div>
-        {renderPercentageChange(allAppUserAverageMonthly, "last month")}
+        {/* {renderPercentageChange(allAppUserAverageMonthly, "last month")} */}
       </div>
 
       <div className="bg-base-white p-6 rounded-2xl">
@@ -297,7 +297,7 @@ function SubcriptionSummary() {
             <FontAwesomeIcon icon={faUserGroup} className="text-2xl" />
           </div>
         </div>
-        {renderPercentageChange(allInternalUserAverageMonthly, "last month")}
+        {/* {renderPercentageChange(allInternalUserAverageMonthly, "last month")} */}
       </div>
 
       <div className="bg-base-white p-6 rounded-2xl">
@@ -310,7 +310,7 @@ function SubcriptionSummary() {
             <FontAwesomeIcon icon={faClockRotateLeft} className="text-2xl" />
           </div>
         </div>
-        {renderPercentageChange(averageCheckChange, "yesterday")}
+        {/* {renderPercentageChange(averageCheckChange, "yesterday")} */}
       </div>
     </div>
   );
