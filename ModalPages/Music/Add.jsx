@@ -36,7 +36,7 @@ function AddMusic() {
     const fetchPillars = async () => {
       try {
         const response = await api.get("/pillars");
-        setPillars(response.data); // Assuming response.data is an array of { id: UUID, name: string }
+        setPillars(response.data); 
       } catch (error) {
         console.error("Error fetching pillars:", error);
         showMessage("Error", "Failed to fetch pillars", "error");

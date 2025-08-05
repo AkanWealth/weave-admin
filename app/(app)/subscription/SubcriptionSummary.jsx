@@ -227,7 +227,7 @@ function SubcriptionSummary() {
       setAppUsers(data.expiredSubscriptions || 0);
       setAverageCheck(data.totalIncome || 0);
       setAllUserAverageMonthly(data.activeSubscriptions || 0);
-      setAllAppUserAverageMonthly(data.activeUsersChange || 0);
+      setAllAppUserAverageMonthly(data.activeSubscriptions || 0);
       setAllInternalUserAverageMonthly(data.totalRevenue || 0);
       setAverageCheckChange(data.totalIncomeChange || 0);
     } catch (error) {

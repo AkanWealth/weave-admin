@@ -451,7 +451,7 @@ function AddSponsor() {
             formData.append('logo', logoFile);
             formData.append('sponsorshipTier', sponsorshipTier);
             const durationMap = {
-                3: "1_MONTH",
+                3: "3_MONTH",
                 6: "6_MONTHS",
                 12: "1_YEAR"
             };

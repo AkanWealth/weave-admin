@@ -145,7 +145,7 @@ function EditContentPillars() {
                 headers['Content-Type'] = 'application/json';
             }
 
-            const response = await api.put(`/pillars/${pillarId}`, requestData, { headers });
+            const response = await api.patch(`/pillars/${pillarId}`, requestData, { headers });
             
             showMessage("Success", "Pillar updated successfully!", "success");
             router.push("/contentsManagement?refresh=" + Date.now());
