@@ -1115,9 +1115,23 @@ const ContentPillarsPage = () => {
     setOpenDropdown(null);
   };
 
+  // const handlePillarClick = (pillar) => {
+  //   router.push(`/contentsManagement/pillars/${pillar.id}`);
+  // };
+
+
   const handlePillarClick = (pillar) => {
-    router.push(`/contentsManagement/pillars/${pillar.id}`);
-  };
+  // Prevent navigation if pillar is locked
+  if (pillar.locked) {
+    showMessage({
+      type: "warning",
+      text: `The "${pillar.title}" pillar is currently locked`,
+    });
+    return;
+  }
+  
+  router.push(`/contentsManagement/pillars/${pillar.id}`);
+};
 
   const handleDropdownClick = (e, pillarId) => {
     e.stopPropagation();
@@ -1326,6 +1340,114 @@ const ContentPillarsPage = () => {
             </div>
           ))}
         </div>
+//         <div
+//   key={pillar.id}
+//   className={`bg-white rounded-lg p-4 transition-shadow relative ${
+//     pillar.locked 
+//       ? 'opacity-60 cursor-not-allowed' 
+//       : 'cursor-pointer hover:shadow-md'
+//   }`}
+//   onClick={() => handlePillarClick(pillar)}
+// >
+//   <div className="flex items-center justify-between mb-3">
+//     <div className={`w-12 h-12 ${pillar.iconBg} rounded-full flex items-center justify-center p-2 ${
+//       pillar.locked ? 'opacity-70' : ''
+//     }`}>
+//       {pillar.icon && isValidUrl(pillar.icon) ? (
+//         <Image
+//           src={pillar.icon}
+//           alt={pillar.title}
+//           width={32}
+//           height={32}
+//           className="object-contain rounded-full"
+//           onError={(e) => {
+//             e.target.style.display = 'none';
+//             e.target.nextSibling.style.display = 'flex';
+//           }}
+//         />
+//       ) : null}
+//       <span 
+//         className="text-2xl flex items-center justify-center" 
+//         style={{ 
+//           display: (pillar.icon && isValidUrl(pillar.icon)) ? 'none' : 'flex' 
+//         }}
+//       >
+//         {getDefaultEmoji(pillar.title)}
+//       </span>
+//     </div>
+//     <div className={`text-gray-500 flex items-center rounded-full p-2 transition-colors ${
+//       pillar.locked ? "text-gray-500 bg-gray-100" : "hidden"
+//     }`}>
+//       <LockKeyholeIcon className={`w-5 h-5 ${pillar.locked ? "text-gray-500" : "hidden"}`} />
+//     </div>
+//   </div>
+
+//   <h4 className={`font-rubikMedium text-lg mb-2 ${pillar.locked ? 'text-gray-500' : ''}`}>
+//     {pillar.title}
+//     {pillar.locked && <span className="ml-2 text-sm text-gray-400">(Locked)</span>}
+//   </h4>
+//   <p className={`text-sm text-gray-600 mb-3 ${pillar.locked ? 'text-gray-400' : ''}`}>
+//     {pillar.description}
+//   </p>
+
+//   <div className="flex items-center justify-between">
+//     <span className={`text-sm ${pillar.locked ? 'text-gray-400' : 'text-gray-500'}`}>
+//       Content Items: <span className={`font-medium rounded-full p-2 ${
+//         pillar.locked ? 'bg-gray-200 text-gray-500' : 'bg-blue-200'
+//       }`}>{pillar.contentItems}</span>
+//     </span>
+
+//     <div
+//       className="relative"
+//       ref={(el) => (dropdownRefs.current[pillar.id] = el)}
+//     >
+//       <button
+//         className={`p-1 rounded-full transition-colors ${
+//           pillar.locked 
+//             ? 'text-gray-400 cursor-not-allowed' 
+//             : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+//         }`}
+//         onClick={(e) => pillar.locked ? e.stopPropagation() : handleDropdownClick(e, pillar.id)}
+//         disabled={pillar.locked}
+//       >
+//         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+//         </svg>
+//       </button>
+
+//       {openDropdown === pillar.id && !pillar.locked && (
+//         <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-20">
+//           <div className="py-1">
+//             <Link
+//               href={`?modal=view-content-pillars&id=${pillar.id}`}
+//               className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+//               onClick={handleLinkClick}
+//             >
+//               <Eye className="w-4 h-4 mr-3" />
+//               View Pillar
+//             </Link>
+//             <Link
+//               href={`?modal=edit-content-pillars&id=${pillar.id}`}
+//               className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+//               onClick={handleLinkClick}
+//             >
+//               <Edit className="w-4 h-4 mr-3" />
+//               Edit Pillar
+//             </Link>
+//             <Link
+//               href={`?modal=delete-pillars&id=${pillar.id}`}
+//               className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+//               onClick={handleLinkClick}
+//             >
+//               <Trash2 className="w-4 h-4 mr-3" />
+//               Delete Pillar
+//             </Link>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   </div>
+// </div>
       )}
     </div>
   );

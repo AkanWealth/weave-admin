@@ -39,6 +39,7 @@ function EditResource() {
   const [transcript, setTranscript] = useState(null);
   const [transcriptName, setTranscriptName] = useState("");
   const [author, setAuthor] = useState("");
+  const [isContentLoaded, setIsContentLoaded] = useState(false);
   const [tags, setTags] = useState([]);
   const [tagName, setTagName] = useState("");
 
@@ -55,7 +56,9 @@ function EditResource() {
   setDuration(resource.duration || "");
   setSessionTime(resource.sessionTime || "");
   setAuthor(resource.author || "");
-  setArticleBody(resource.content || ""); 
+  const content = resource.content || "";
+  setArticleBody(content);
+  setIsContentLoaded(true);
   setFileUploadContentName(resource.resourceUrl ? resource.resourceUrl.split("/").pop() : "");
   setTranscriptName(
   typeof resource.transcript === "string" && resource.transcript
@@ -63,6 +66,7 @@ function EditResource() {
     : ""
 );
   setCoverImagePreview(resource.coverImage || ""); // Use coverImage for preview
+  console.log("content: ", articleBody);
 
   // Pillar/category
   setSelectedPillarId(resource.pillar?.id || "");
@@ -71,7 +75,10 @@ function EditResource() {
 
   // Tags (if present)
   setTags(resource.tags || []);
+  console.log("content loaded: ", content)
 }, [resource_id, resources]);
+
+
   // Fetch pillars for dropdown
   useEffect(() => {
     const fetchPillars = async () => {
@@ -396,7 +403,7 @@ function EditResource() {
             </select>
           </div>
 
-          {contentType === "Article" ? (
+          {contentType === "Article" && isContentLoaded ? (
             <>
               <h6 className="text-xl font-rubikBold my-2 capitalize">
                 Content Body <span className="text-red-500">*</span>
