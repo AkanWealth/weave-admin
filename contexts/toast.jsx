@@ -97,14 +97,43 @@
 
 "use client";
 import { toast, ToastContainer } from "react-toastify";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useRef } from "react";
 import { AlertCircle, X } from "lucide-react";
 import { FaSquareCheck } from "react-icons/fa6";
 
 const MessageContext = createContext();
 
 export function ToastContext({ children }) {
+  const toastQueue = useRef(new Set()); // Track active toasts
+  const lastToastRef = useRef({ message: '', timestamp: 0 });
+
   const showMessage = (message, description, status = "default") => {
+    // Create a unique identifier for this toast
+    const toastId = `${message}-${description}-${status}`;
+    const currentTime = Date.now();
+    
+    // Prevent duplicate toasts within 1 second
+    if (
+      lastToastRef.current.message === toastId && 
+      currentTime - lastToastRef.current.timestamp < 1000
+    ) {
+      return; // Don't show duplicate toast
+    }
+
+    // Update last toast reference
+    lastToastRef.current = {
+      message: toastId,
+      timestamp: currentTime
+    };
+
+    // Check if this toast is already active
+    if (toastQueue.current.has(toastId)) {
+      return; // Don't show if already active
+    }
+
+    // Add to active toasts
+    toastQueue.current.add(toastId);
+
     const ToastContent = () => (
       <div className="flex items-start relative pl-6">
         <div className="absolute left-0 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -151,14 +180,26 @@ export function ToastContext({ children }) {
     };
 
     let toastOptions = {
+      toastId: toastId, // Use toastId to prevent duplicates
       position: "top-right",
       autoClose: 5000,
       hideProgressBar: true,
       closeOnClick: true,
       pauseOnHover: true,
       draggable: false,
+      onClose: () => {
+        // Remove from active toasts when closed
+        toastQueue.current.delete(toastId);
+      },
       closeButton: ({ closeToast }) => (
-        <button onClick={closeToast} className="p-1">
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            closeToast();
+            toastQueue.current.delete(toastId);
+          }} 
+          className="p-1 hover:bg-gray-100 rounded transition-colors"
+        >
           <X size={16} className="text-gray-500" />
         </button>
       ),
@@ -173,7 +214,6 @@ export function ToastContext({ children }) {
 
   return (
     <MessageContext.Provider value={{ showMessage }}>
-      {/* Add explicit z-index and ensure it's above modals */}
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -185,6 +225,8 @@ export function ToastContext({ children }) {
         draggable={false}
         pauseOnHover
         toastClassName="!z-[99999]"
+        enableMultiContainer={false} // Prevent multiple containers
+        limit={5} // Limit number of toasts
         style={{
           zIndex: 99999,
         }}
