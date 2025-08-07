@@ -279,7 +279,7 @@ function EditAdmin({ userData, onSave, onCancel }) {
       console.log("Payload being sent:", payload);
 
       // Send the payload to the backend
-      const response = await api.put(`/role/update-role-permissions`, payload);
+      const response = await api.patch(`/role/update-role-permissions`, payload);
 
       if (response.status === 200) {
         // showMessage("Permissions updated successfully!", "","success");
@@ -333,7 +333,7 @@ function EditAdmin({ userData, onSave, onCancel }) {
       console.log("Payload being sent:", payload);
 
       // Send the payload to the backend
-      const response = await api.put(`/super-admin/profile/${userData.id}`, payload);
+      const response = await api.patch(`/super-admin/profile/${userData.id}`, payload);
 
       if (response.status === 200) {
         // showMessage("Profile and permissions updated successfully!", "", "success");

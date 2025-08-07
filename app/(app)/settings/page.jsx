@@ -14,6 +14,8 @@ function SettingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isupdatinginfo, setIsupdatinginfo] = useState(false);
   const [isupdatingpassword, setIsupdatingpassword] = useState(false);
+  const [isUploadingHeadshot, setIsUploadingHeadshot] = useState(false);
+  const [isRemovingHeadshot, setIsRemovingHeadshot] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [isFetching, setIsFetching] = useState(true);
   const { showMessage } = useToastContext();
@@ -34,6 +36,7 @@ function SettingPage() {
     (userProfile &&
       (userProfile.firstName === "" || userProfile.lastName === "")) ||
     isLoading;
+
   const getUserProfile = async () => {
     try {
       const response = await api.get("/users/profile");
@@ -60,7 +63,7 @@ function SettingPage() {
         newPassword,
       });
       console.log(response);
-      showMessage(response.data.message, "", "sucess");
+      showMessage(response.data.message, "", "success");
     } catch (error) {
       console.log(error);
       showMessage(
@@ -73,19 +76,71 @@ function SettingPage() {
     }
   };
 
+  const uploadHeadshot = async () => {
+    if (!profileImg) return;
+    
+    setIsUploadingHeadshot(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", profileImg);
+
+      const response = await fetch(`${baseUrl}/users/${userProfile.id}/upload-headshot`, {
+        method: "POST",
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (response.status === 201) {
+        const result = await response.json();
+        // Update user profile with new headshot URL
+        setUserProfile(prev => ({ ...prev, headshot: result.headshot }));
+        setProfileImg(null);
+        showMessage("Headshot uploaded successfully", "", "success");
+      } else {
+        showMessage("Error uploading headshot", "", "error");
+      }
+    } catch (error) {
+      console.log(error);
+      showMessage("Error uploading headshot", "", "error");
+    } finally {
+      setIsUploadingHeadshot(false);
+    }
+  };
+
+  const removeHeadshot = async () => {
+    setIsRemovingHeadshot(true);
+    try {
+      const response = await fetch(`${baseUrl}/users/${userProfile.id}/headshot`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (response.status === 200) {
+        // Update user profile to remove headshot URL
+        setUserProfile(prev => ({ ...prev, headshot: null }));
+        setAttachedImg(null);
+        setProfileImg(null);
+        showMessage("Headshot removed successfully", "", "success");
+      } else {
+        showMessage("Error removing headshot", "", "error");
+      }
+    } catch (error) {
+      console.log(error);
+      showMessage("Error removing headshot", "", "error");
+    } finally {
+      setIsRemovingHeadshot(false);
+    }
+  };
+
   const updateUserProfile = async () => {
     setIsupdatinginfo(true);
 
     try {
       const formData = new FormData();
-
-      // Check if a new image is uploaded, otherwise use the existing one
-      // if (profileImg) {
-      //   formData.append("headshot", profileImg);
-      // } else if (userProfile.headshot) {
-      //   formData.append("headshot", userProfile.headshot);
-      // }
-
       formData.append("firstName", userProfile.firstName);
       formData.append("lastName", userProfile.lastName);
       formData.append("username", userProfile.username);
@@ -95,7 +150,6 @@ function SettingPage() {
         method: "PATCH",
         body: formData,
         headers: {
-          // contentType: "multipart/formdata",
           Authorization: `Bearer ${accessToken}`,
         },
       });
@@ -119,6 +173,17 @@ function SettingPage() {
       };
     }
   }, [profileImg]);
+
+  const handleRemoveImage = () => {
+    if (userProfile.headshot) {
+      // If user has an existing headshot on server, call remove API
+      removeHeadshot();
+    } else {
+      // If it's just a locally selected image, clear it
+      setAttachedImg(null);
+      setProfileImg(null);
+    }
+  };
 
   return (
     <div>
@@ -150,6 +215,7 @@ function SettingPage() {
                     type="file"
                     className="hidden"
                     id="profile_img"
+                    accept="image/*"
                     onChange={(e) => setProfileImg(e.target.files[0])}
                   />
                   <div
@@ -170,25 +236,31 @@ function SettingPage() {
                       className="w-full"
                     />
                   </div>
-                  <div className="flex px-6">
-                    {/* <button className="bg-weave-primary text-base-white rounded-xl p-2 px-5 my-auto">
-              Upload
-            </button> */}
+                  <div className="flex px-6 space-x-3">
                     <button
-                      className="border border-black rounded-xl p-2 px-5 my-auto mr-3"
-                      onClick={() => {
-                        setAttachedImg(null);
-                        setProfileImg(null);
-                      }}
+                      className="border border-black rounded-xl p-2 px-5 my-auto"
+                      onClick={handleRemoveImage}
+                      disabled={isRemovingHeadshot || (!attachedimg && !userProfile.headshot)}
                     >
-                      Remove
+                      {isRemovingHeadshot ? "Removing..." : "Remove"}
                     </button>
-                    <label
-                      htmlFor="profile_img"
-                      className="bg-weave-primary text-base-white rounded-xl p-2 px-5 my-auto"
-                    >
-                      Upload
-                    </label>
+                    
+                    {!profileImg ? (
+                      <label
+                        htmlFor="profile_img"
+                        className="bg-weave-primary text-base-white rounded-xl p-2 px-5 my-auto cursor-pointer"
+                      >
+                        Select Image
+                      </label>
+                    ) : (
+                      <button
+                        className="bg-weave-primary text-base-white rounded-xl p-2 px-5 my-auto"
+                        onClick={uploadHeadshot}
+                        disabled={isUploadingHeadshot}
+                      >
+                        {isUploadingHeadshot ? "Uploading..." : "Upload"}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -237,7 +309,7 @@ function SettingPage() {
                 <div className="w-2/3">
                   <TextField
                     label={"Email Address"}
-                    placeholder={"Enter your first name"}
+                    placeholder={"Enter your email address"}
                     value={userProfile.email}
                     setValue={(e) =>
                       setUserProfile({
@@ -247,18 +319,11 @@ function SettingPage() {
                     }
                   />
                 </div>
-                {/* <div className="flex-1">
-                  <TextField
-                    label={"Role"}
-                    placeholder={"Enter your last name"}
-                    disabled={true}
-                  />
-                </div> */}
               </div>
               <div className="my-8">
                 <div className="">
                   <Button
-                    title={isupdatinginfo ? "Saving..." : "Finish"}
+                    title={isupdatinginfo ? "Saving..." : "Update Profile"}
                     disabled={isDisabled}
                     onClick={() => {
                       updateUserProfile();
@@ -309,7 +374,7 @@ function SettingPage() {
           <div className="my-8">
             <div className="">
               <Button
-                title={isupdatingpassword ? "Saving..." : "Finish"}
+                title={isupdatingpassword ? "Saving..." : "Change Password"}
                 disabled={pswdBtnDisabled}
                 onClick={() => {
                   updateUserPassword();
@@ -325,8 +390,8 @@ function SettingPage() {
 
 export default function Page() {
   return (
-    <ToastContext>
+    // <ToastContext>
       <SettingPage />
-    </ToastContext>
+    // </ToastContext> */}
   );
 }

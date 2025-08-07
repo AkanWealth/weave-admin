@@ -148,13 +148,13 @@ function UserRender({ info, date, resendInvite, onEditClick }) {
               >
                 <i className="fa fa-pencil mr-2"></i> Edit User
               </div>
-              <Link
+              {/* <Link
                 href={`/users?modal=delete-admin&id=${info.id}`}
                 className="text-red-500 px-3 py-1"
               >
                 {" "}
                 <i className="fa fa-trash mr-2"></i> Delete User{" "}
-              </Link>
+              </Link> */}
 
               {info.isActive ? (
                 <Link

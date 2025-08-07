@@ -1041,6 +1041,7 @@ const submitForm = async (status) => {
         pillarId: selectedPillarId,
         // Remove coverImage and tags - not expected by API
         author: "System Admin",
+        // coverImage: coverImage,
         content: articleBody, 
         description,          
         duration: duration.toString(), 
@@ -1082,7 +1083,7 @@ const submitForm = async (status) => {
       const respbody = await response.json();
       const respstatus = response.status;
 
-      if (response.ok) {
+      if (response.ok || response.status === 201  ) {
         showMessage(respbody.message || "Content uploaded successfully", "", "success");
 
         setTimeout(() => {
