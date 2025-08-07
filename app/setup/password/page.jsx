@@ -60,7 +60,7 @@ function PasswordForm() {
         localStorage.setItem("admin", JSON.stringify(resp.data.admin));
 
         // Navigate to the profile page
-        router.push(`/setup/profile?email=${email}`);
+        router.push(`/login`);
         return;
       }
       showMessage(resp.data.message, "error");

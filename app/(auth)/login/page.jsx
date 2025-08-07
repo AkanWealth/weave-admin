@@ -542,7 +542,7 @@ function Login() {
                 router.push("/dashboard");
               } else {
                 debug("Redirecting authenticated user to profile setup");
-                router.push("/setup/profile");
+                router.push(`/setup/profile?email=${email}`);
               }
             }
           } else {
@@ -638,7 +638,7 @@ function Login() {
             data.user.lastName == null
           ) {
             debug("Redirecting to profile setup");
-            router.push("/setup/profile");
+            router.push(`/setup/profile?email=${email}`);
           } else {
             debug("Redirecting to dashboard");
             router.push("/dashboard");

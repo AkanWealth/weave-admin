@@ -80,11 +80,11 @@ function SettingPage() {
       const formData = new FormData();
 
       // Check if a new image is uploaded, otherwise use the existing one
-      if (profileImg) {
-        formData.append("headshot", profileImg);
-      } else if (userProfile.headshot) {
-        formData.append("headshot", userProfile.headshot);
-      }
+      // if (profileImg) {
+      //   formData.append("headshot", profileImg);
+      // } else if (userProfile.headshot) {
+      //   formData.append("headshot", userProfile.headshot);
+      // }
 
       formData.append("firstName", userProfile.firstName);
       formData.append("lastName", userProfile.lastName);
@@ -92,10 +92,10 @@ function SettingPage() {
       formData.append("email", userProfile.email);
 
       const response = await fetch(`${baseUrl}/super-admin/profile`, {
-        method: "PUT",
+        method: "PATCH",
         body: formData,
         headers: {
-          contentType: "multipart/formdata",
+          // contentType: "multipart/formdata",
           Authorization: `Bearer ${accessToken}`,
         },
       });

@@ -136,10 +136,10 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
 
       // Make the API call to respond to the issue
       const result = await api.post(`/help-support/respond-to-issue/${issueData.userId}`, payload, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        // headers: {
+        //   'Authorization': `Bearer ${token}`,
+        //   'Content-Type': 'application/json'
+        // }
       });
 
       console.log("result", result);
