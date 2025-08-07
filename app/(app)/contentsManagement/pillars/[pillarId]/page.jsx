@@ -600,6 +600,13 @@ const PillarDetailPage = () => {
     }
   };
 
+
+  const truncateTitle = (title, maxLength = 20) => {
+  if (!title) return 'Untitled';
+  if (title.length <= maxLength) return title;
+  return title.substring(0, maxLength) + '...';
+};
+
   const fetchPillarContent = async () => {
     try {
       setIsLoading(true);
@@ -1006,11 +1013,11 @@ const PillarDetailPage = () => {
             )}
             renderItems={(resource) => (
               <tr key={resource.id} className="hover:bg-gray-50 border-b border-gray-100">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-xs font-medium text-gray-900">
-                    {resource.title || 'Untitled'}
-                  </div>
-                </td>
+               <td className="px-6 py-4 whitespace-nowrap">
+  <div className="text-xs font-medium text-gray-900" title={resource.title || 'Untitled'}>
+    {truncateTitle(resource.title)}
+  </div>
+</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getTypeBadgeColor(resource.resourceType)}`}>
                     {resource.resourceType || 'Unknown'}
