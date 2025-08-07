@@ -1,5 +1,5 @@
 "use client";
-import Button from "@/components/elements/Button";
+// import Button from "@/components/elements/Button";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState,useEffect } from "react";
@@ -25,7 +25,9 @@ export default function Page() {
     <Suspense>
       <div>
         <h1 className="text-lg font-rubikMedium my-2">
-          <span className="text-gray-500"> Dashboard</span> {" > "} App Users
+          <Link href="/dashboard" className="text-weave-primary hover:underline">
+    Dashboard
+  </Link> {" > "} App Users
         </h1>
 
         <div className="rounded-2xl bg-white p-6 my-4">
