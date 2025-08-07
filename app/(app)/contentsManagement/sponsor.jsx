@@ -140,9 +140,9 @@ function SponsorsRender() {
     
     // Fallback pricing based on tier
     const pricing = {
-      "Boost Package": "£500",
-      "Growth Package": "£1000", 
-      "Spotlight Package": "£2000"
+      "Boost Package": "£200",
+      "Growth Package": "£800", 
+      "Spotlight Package": "£1500"
     };
     return pricing[sponsor.sponsorshipTier] || "£0.00";
   };

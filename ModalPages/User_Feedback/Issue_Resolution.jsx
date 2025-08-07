@@ -6,7 +6,7 @@ import Top from "@/assets/images/ScreenshotTop.png";
 import Bottom from "@/assets/images/SceenShotBottom.png";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-
+import Cookies from "js-cookie"
 import { useToastContext } from "@/contexts/toast";
 
 const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) => {
@@ -132,11 +132,12 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
       };
       console.log("payload", payload);
       console.log("token", localStorage.getItem('token'));
+      const token = Cookies.get("accessToken");
 
       // Make the API call to respond to the issue
       const result = await api.post(`/help-support/respond-to-issue/${issueData.userId}`, payload, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });

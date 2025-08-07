@@ -166,7 +166,7 @@ function UserRender({ info, date, resendInvite, onEditClick }) {
                 </Link>
               ) : (
                 <Link
-                  href={`/users?modal=activate-app-user&id=${info.id}`}
+                  href={`/users?modal=activate-admin&id=${info.id}`}
                   className="px-3 py-1"
                 >
                   {" "}

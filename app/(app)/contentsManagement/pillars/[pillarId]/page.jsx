@@ -1007,7 +1007,7 @@ const PillarDetailPage = () => {
             renderItems={(resource) => (
               <tr key={resource.id} className="hover:bg-gray-50 border-b border-gray-100">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
+                  <div className="text-xs font-medium text-gray-900">
                     {resource.title || 'Untitled'}
                   </div>
                 </td>
@@ -1048,14 +1048,14 @@ const PillarDetailPage = () => {
                         >
                           <i className="fa fa-trash mr-2"></i> Delete
                         </Link>
-                        <button
+                        {/* <button
                           className="px-3 py-2 hover:bg-gray-100 rounded text-left text-gray-700 w-full"
                           onClick={() => {
                             console.log('View details for:', resource.id);
                           }}
                         >
                           <i className="fa fa-eye mr-2"></i> View Details
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                   </div>

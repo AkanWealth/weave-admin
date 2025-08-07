@@ -642,6 +642,522 @@
 // // };
 
 
+// import axios from "axios";
+// import Cookies from "js-cookie";
+// import { baseUrl } from "./envfile";
+
+// // Create axios instance
+// const api = axios.create({
+//   baseURL: baseUrl,
+//   timeout: 20000,
+//   headers: {
+//     'Accept': 'application/json, text/plain, */*',
+//     'Content-Type': 'application/json',
+//   },
+// });
+
+// const DEBUG = true;
+
+// // Debug logging function
+// export const debug = (message, data = null) => {
+//   if (DEBUG) {
+//     const logEntry = {
+//       timestamp: new Date().toISOString(),
+//       message: `[WEAVE AuthService] ${message}`,
+//       data: data || '',
+//     };
+//     console.log(logEntry.message, logEntry.data);
+//   }
+// };
+
+// // Cookie options
+// const accessTokenCookieOptions = {
+//   expires: 1 / 24, // 1 hour
+//   sameSite: 'lax',
+//   secure: process.env.NODE_ENV === 'production'
+// };
+
+// const refreshTokenCookieOptions = {
+//   expires: 7, // 7 days
+//   sameSite: 'lax',
+//   secure: process.env.NODE_ENV === 'production'
+// };
+
+// const sessionCookieOptions = {
+//   expires: 1 / 24, // 1 hour
+//   sameSite: 'lax',
+//   secure: process.env.NODE_ENV === 'production'
+// };
+
+// // JWT decode function
+// const decodeJWT = (token) => {
+//   try {
+//     const tokenParts = token.split('.');
+//     if (tokenParts.length !== 3) {
+//       throw new Error('Invalid token format');
+//     }
+//     const payload = JSON.parse(atob(tokenParts[1]));
+//     return payload;
+//   } catch (error) {
+//     debug("Error decoding JWT:", error);
+//     throw error;
+//   }
+// };
+
+// // Check if token is expired with buffer (default 5 minutes)
+// export const isTokenExpired = (token, bufferSeconds = 300) => {
+//   if (!token) return true;
+  
+//   try {
+//     const decoded = decodeJWT(token);
+//     const expiresAt = decoded.exp;
+//     const currentTime = Date.now() / 1000;
+//     const timeLeft = expiresAt - currentTime;
+
+//     debug('Token expiration check', {
+//       tokenPreview: token.substring(0, 20) + '...',
+//       expiresAt: new Date(expiresAt * 1000).toLocaleString(),
+//       currentTime: new Date(currentTime * 1000).toLocaleString(),
+//       timeLeftSeconds: timeLeft,
+//       isExpired: timeLeft < bufferSeconds
+//     });
+
+//     return timeLeft < bufferSeconds;
+//   } catch (error) {
+//     debug("Error checking token expiration:", error);
+//     return true;
+//   }
+// };
+
+// // Get tokens from cookies and localStorage
+// export const getAccessToken = () => {
+//   return Cookies.get("accessToken") || null;
+// };
+
+// export const getRefreshToken = () => {
+//   const cookieRefreshToken = Cookies.get("refreshToken");
+  
+//   let localStorageRefreshToken = null;
+//   let userInfoRefreshToken = null;
+  
+//   if (typeof window !== "undefined") {
+//     localStorageRefreshToken = localStorage.getItem("refreshToken");
+    
+//     try {
+//       const userInfo = localStorage.getItem("userinfo");
+//       userInfoRefreshToken = userInfo ? JSON.parse(userInfo)?.refreshToken : null;
+//     } catch (e) {
+//       debug("Error parsing userinfo for refresh token:", e);
+//     }
+//   }
+
+//   const token = cookieRefreshToken || localStorageRefreshToken || userInfoRefreshToken;
+//   debug('Getting refresh token', {
+//     fromCookie: !!cookieRefreshToken,
+//     fromLocalStorage: !!localStorageRefreshToken,
+//     fromUserInfo: !!userInfoRefreshToken,
+//     hasToken: !!token,
+//     tokenPreview: token ? token.substring(0, 20) + '...' : 'none'
+//   });
+  
+//   return token;
+// };
+
+// // Update auth cookies and localStorage
+// const updateAuthTokens = (accessToken, refreshToken = null) => {
+//   try {
+//     debug('Updating auth tokens', {
+//       hasAccessToken: !!accessToken,
+//       hasRefreshToken: !!refreshToken,
+//       accessTokenPreview: accessToken ? accessToken.substring(0, 20) + '...' : 'none'
+//     });
+
+//     // Set access token cookie
+//     Cookies.set("accessToken", accessToken, accessTokenCookieOptions);
+//     Cookies.set("session", accessToken, sessionCookieOptions);
+
+//     // Update refresh token if provided
+//     if (refreshToken) {
+//       Cookies.set("refreshToken", refreshToken, refreshTokenCookieOptions);
+      
+//       // Update localStorage
+//       if (typeof window !== "undefined") {
+//         localStorage.setItem("refreshToken", refreshToken);
+        
+//         // Update userinfo with refresh token
+//         const existingUserInfo = localStorage.getItem("userinfo");
+//         if (existingUserInfo) {
+//           try {
+//             const user = JSON.parse(existingUserInfo);
+//             user.refreshToken = refreshToken;
+//             localStorage.setItem("userinfo", JSON.stringify(user));
+//             debug('Updated userinfo with new refresh token');
+//           } catch (e) {
+//             debug("Failed to update userinfo with refresh token:", e);
+//           }
+//         }
+//       }
+//     }
+
+//     // Set authorization header
+//     api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+
+//     // Log token info for debugging
+//     try {
+//       const decoded = decodeJWT(accessToken);
+//       debug('Auth tokens updated successfully', {
+//         tokenExpiry: new Date(decoded.exp * 1000).toLocaleString(),
+//         hasRefreshToken: !!refreshToken,
+//       });
+//     } catch (e) {
+//       debug('Auth tokens updated (could not decode for logging)');
+//     }
+
+//   } catch (error) {
+//     debug('Failed to update auth tokens:', error);
+//     throw error;
+//   }
+// };
+
+// // Direct token swap - replace access token with refresh token
+// export const refreshTokens = async () => {
+//   debug('Starting direct token swap (refresh token -> access token)');
+
+//   try {
+//     const currentAccessToken = getAccessToken();
+//     const refreshToken = getRefreshToken();
+
+//     debug('Current token status', {
+//       hasAccessToken: !!currentAccessToken,
+//       hasRefreshToken: !!refreshToken,
+//       accessTokenExpired: currentAccessToken ? isTokenExpired(currentAccessToken, 0) : 'no token',
+//       refreshTokenExpired: refreshToken ? isTokenExpired(refreshToken, 60) : 'no token'
+//     });
+
+//     if (!refreshToken) {
+//       debug('No refresh token available for swap');
+//       return false;
+//     }
+
+//     // Check if refresh token is expired (with small buffer)
+//     if (isTokenExpired(refreshToken, 60)) { // 1 minute buffer for refresh token
+//       debug('Refresh token is expired, cannot swap');
+//       handleTokenExpiration();
+//       return false;
+//     }
+
+//     debug('Swapping refresh token to become access token');
+
+//     // Use the refresh token as the new access token
+//     // Keep the same refresh token (or you could generate/rotate it)
+//     updateAuthTokens(refreshToken, refreshToken);
+
+//     debug('Token swap completed successfully', {
+//       newAccessTokenPreview: refreshToken.substring(0, 20) + '...'
+//     });
+
+//     return true;
+
+//   } catch (error) {
+//     debug('Token swap failed', {
+//       message: error.message,
+//       stack: error.stack
+//     });
+
+//     return false;
+//   }
+// };
+
+// // Handle token expiration (logout)
+// const handleTokenExpiration = () => {
+//   debug("Handling token expiration - logging out");
+//   clearAuthTokens();
+//   if (typeof window !== "undefined") {
+//     // Add a small delay to ensure cleanup completes
+//     setTimeout(() => {
+//       window.location.href = "/login";
+//     }, 100);
+//   }
+// };
+
+// // Set tokens after login
+// export const setAuthTokens = (accessToken, refreshToken) => {
+//   debug('Setting auth tokens after login', {
+//     hasAccessToken: !!accessToken,
+//     hasRefreshToken: !!refreshToken,
+//     accessTokenPreview: accessToken ? accessToken.substring(0, 20) + '...' : 'none',
+//     refreshTokenPreview: refreshToken ? refreshToken.substring(0, 20) + '...' : 'none'
+//   });
+
+//   if (!accessToken) {
+//     throw new Error('Access token is required');
+//   }
+
+//   if (!refreshToken) {
+//     throw new Error('Refresh token is required');
+//   }
+
+//   updateAuthTokens(accessToken, refreshToken);
+//   debug('Login tokens set successfully');
+// };
+
+// // Clear tokens on logout
+// export const clearAuthTokens = () => {
+//   debug('Clearing all auth tokens');
+  
+//   Cookies.remove("accessToken");
+//   Cookies.remove("refreshToken");
+//   Cookies.remove("session");
+
+//   if (typeof window !== "undefined") {
+//     localStorage.removeItem("refreshToken");
+//     localStorage.removeItem("userinfo");
+//   }
+
+//   delete api.defaults.headers.common["Authorization"];
+  
+//   debug('All auth tokens cleared');
+// };
+
+// // Auth status check
+// export const isAuthenticated = () => {
+//   const accessToken = getAccessToken();
+//   const refreshToken = getRefreshToken();
+  
+//   const hasValidAccess = accessToken && !isTokenExpired(accessToken, 0); // No buffer for authentication check
+//   const hasValidRefresh = refreshToken && !isTokenExpired(refreshToken, 60); // 1 minute buffer for refresh
+  
+//   debug('Authentication status check', {
+//     hasAccessToken: !!accessToken,
+//     hasRefreshToken: !!refreshToken,
+//     hasValidAccess,
+//     hasValidRefresh,
+//     isAuthenticated: hasValidAccess || hasValidRefresh
+//   });
+  
+//   return hasValidAccess || hasValidRefresh;
+// };
+
+// // Get user info
+// export const getCurrentUser = () => {
+//   if (typeof window !== "undefined") {
+//     try {
+//       const user = localStorage.getItem("userinfo");
+//       const parsed = user ? JSON.parse(user) : null;
+//       debug('Getting current user', { hasUser: !!parsed });
+//       return parsed;
+//     } catch (error) {
+//       debug("Error parsing user info:", error);
+//       return null;
+//     }
+//   }
+//   return null;
+// };
+
+// // Get token expiration status
+// export const getTokenExpirationStatus = () => {
+//   const accessToken = getAccessToken();
+//   const refreshToken = getRefreshToken();
+
+//   debug('Checking token expiration status', {
+//     hasAccessToken: !!accessToken,
+//     hasRefreshToken: !!refreshToken
+//   });
+
+//   if (!accessToken && !refreshToken) {
+//     return { status: "no_tokens", message: "No tokens available" };
+//   }
+
+//   if (!refreshToken || isTokenExpired(refreshToken, 60)) {
+//     return { status: "all_expired", message: "All tokens expired" };
+//   }
+
+//   if (!accessToken || isTokenExpired(accessToken, 0)) {
+//     return { status: "access_expired", message: "Access token expired, refresh token available" };
+//   }
+
+//   if (isTokenExpired(accessToken, 300)) { // 5 minutes buffer
+//     return { status: "about_to_expire", message: "Access token expires soon" };
+//   }
+
+//   return { status: "valid", message: "Access token is valid" };
+// };
+
+// // Enhanced auth status check with automatic token swap
+// export const checkAuthStatus = async () => {
+//   const tokenStatus = getTokenExpirationStatus();
+//   debug('Checking auth status', tokenStatus);
+  
+//   if (tokenStatus.status === 'no_tokens' || tokenStatus.status === 'all_expired') {
+//     return false;
+//   }
+  
+//   if (tokenStatus.status === 'access_expired' || tokenStatus.status === 'about_to_expire') {
+//     debug('Attempting token swap due to expiration status');
+//     const swapped = await refreshTokens();
+//     debug('Token swap result:', { success: swapped });
+//     return swapped;
+//   }
+  
+//   return true;
+// };
+
+// // Get fresh access token (ensures we have a valid token via swap if needed)
+// export const getFreshAccessToken = async () => {
+//   debug('Requesting fresh access token');
+  
+//   const accessToken = getAccessToken();
+  
+//   // If we have a valid access token, return it
+//   if (accessToken && !isTokenExpired(accessToken, 60)) { // 1 minute buffer
+//     debug('Current access token is still fresh');
+//     return accessToken;
+//   }
+  
+//   // Try to swap tokens
+//   const swapped = await refreshTokens();
+//   if (swapped) {
+//     const newToken = getAccessToken();
+//     debug('Fresh access token obtained via token swap');
+//     return newToken;
+//   }
+  
+//   debug('Failed to get fresh access token');
+//   return null;
+// };
+
+// // Request Interceptor - with token swap logic
+// api.interceptors.request.use(
+//   async (config) => {
+//     debug('Request interceptor triggered', { 
+//       url: config.url,
+//       method: config.method 
+//     });
+    
+//     // Skip auth for login and other public endpoints
+//     if (config.url?.includes('/auth/login') || 
+//         config.url?.includes('/auth/register') ||
+//         config.url?.includes('/auth/forgot-password')) {
+//       debug('Skipping auth for public endpoint');
+//       return config;
+//     }
+
+//     let token = getAccessToken();
+
+//     // If token is expired or about to expire, swap it with refresh token
+//     if (!token || isTokenExpired(token, 60)) { // 1 minute buffer
+//       debug('Access token missing or expired, attempting token swap');
+//       const swapped = await refreshTokens();
+//       if (swapped) {
+//         token = getAccessToken();
+//         debug('Successfully swapped token for request');
+//       } else {
+//         debug('Failed to swap token for request');
+//         // Let the request proceed - response interceptor will handle 401s
+//       }
+//     }
+
+//     if (token) {
+//       config.headers.Authorization = `Bearer ${token}`;
+//       debug('Added authorization header to request');
+//     } else {
+//       debug('No token available for request');
+//     }
+
+//     return config;
+//   },
+//   (error) => {
+//     debug('Request interceptor error:', error);
+//     return Promise.reject(error);
+//   }
+// );
+
+// // Response Interceptor - with token swap retry logic
+// api.interceptors.response.use(
+//   (response) => {
+//     debug('Response received', { 
+//       status: response.status, 
+//       url: response.config.url 
+//     });
+//     return response;
+//   },
+//   async (error) => {
+//     const originalRequest = error.config;
+    
+//     debug('Response error intercepted', {
+//       status: error.response?.status,
+//       url: originalRequest?.url,
+//       hasRetryFlag: !!originalRequest?._retry
+//     });
+
+//     if (error.response?.status === 401 && !originalRequest._retry) {
+//       originalRequest._retry = true;
+//       debug("401 detected, attempting token swap...");
+
+//       const success = await refreshTokens();
+//       if (success) {
+//         const token = getAccessToken();
+//         if (token) {
+//           originalRequest.headers["Authorization"] = `Bearer ${token}`;
+//           debug("Retrying request with swapped token");
+//           return api(originalRequest);
+//         }
+//       }
+      
+//       debug("Token swap failed or no token available, handling expiration");
+//       handleTokenExpiration();
+//       return Promise.reject(error);
+//     }
+
+//     if (error.response?.status === 401 && originalRequest._retry) {
+//       debug("401 after retry attempt, handling token expiration");
+//       handleTokenExpiration();
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
+
+// // Periodic token check with proactive swapping (runs every 3 minutes)
+// if (typeof window !== "undefined") {
+//   const startPeriodicTokenCheck = () => {
+//     debug('Starting periodic token check with swap strategy');
+    
+//     const checkInterval = setInterval(async () => {
+//       const status = getTokenExpirationStatus();
+//       debug("Periodic token status check:", status);
+
+//       if (status.status === "about_to_expire") {
+//         debug("Proactively swapping token");
+//         await refreshTokens();
+//       } else if (status.status === "access_expired") {
+//         debug("Access token expired, swapping with refresh token");
+//         const swapped = await refreshTokens();
+//         if (!swapped) {
+//           debug("Token swap failed, clearing interval and handling expiration");
+//           clearInterval(checkInterval);
+//           handleTokenExpiration();
+//         }
+//       } else if (status.status === "all_expired" || status.status === "no_tokens") {
+//         debug("All tokens expired, clearing interval and handling expiration");
+//         clearInterval(checkInterval);
+//         handleTokenExpiration();
+//       }
+//     }, 3 * 60 * 1000); // 3 minutes (more frequent since we're doing direct swaps)
+
+//     return checkInterval;
+//   };
+
+//   // Start the periodic check
+//   startPeriodicTokenCheck();
+// }
+
+// export default api;
+
+
+
+
+/////new update
 import axios from "axios";
 import Cookies from "js-cookie";
 import { baseUrl } from "./envfile";
@@ -654,6 +1170,7 @@ const api = axios.create({
     'Accept': 'application/json, text/plain, */*',
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Always include cookies for refresh token
 });
 
 const DEBUG = true;
@@ -670,22 +1187,16 @@ export const debug = (message, data = null) => {
   }
 };
 
-// Cookie options
+// Cookie options for access token (shorter expiry for security)
 const accessTokenCookieOptions = {
-  expires: 1 / 24, // 1 hour
-  sameSite: 'lax',
-  secure: process.env.NODE_ENV === 'production'
-};
-
-const refreshTokenCookieOptions = {
-  expires: 7, // 7 days
+  expires: 1 / 48, // 30 minutes 
   sameSite: 'lax',
   secure: process.env.NODE_ENV === 'production'
 };
 
 const sessionCookieOptions = {
-  expires: 1 / 24, // 1 hour
-  sameSite: 'lax',
+  expires: 1 / 48, // 30 minutes
+  sameSite: 'lax', 
   secure: process.env.NODE_ENV === 'production'
 };
 
@@ -729,75 +1240,22 @@ export const isTokenExpired = (token, bufferSeconds = 300) => {
   }
 };
 
-// Get tokens from cookies and localStorage
+// Get access token from cookies
 export const getAccessToken = () => {
   return Cookies.get("accessToken") || null;
 };
 
-export const getRefreshToken = () => {
-  const cookieRefreshToken = Cookies.get("refreshToken");
-  
-  let localStorageRefreshToken = null;
-  let userInfoRefreshToken = null;
-  
-  if (typeof window !== "undefined") {
-    localStorageRefreshToken = localStorage.getItem("refreshToken");
-    
-    try {
-      const userInfo = localStorage.getItem("userinfo");
-      userInfoRefreshToken = userInfo ? JSON.parse(userInfo)?.refreshToken : null;
-    } catch (e) {
-      debug("Error parsing userinfo for refresh token:", e);
-    }
-  }
-
-  const token = cookieRefreshToken || localStorageRefreshToken || userInfoRefreshToken;
-  debug('Getting refresh token', {
-    fromCookie: !!cookieRefreshToken,
-    fromLocalStorage: !!localStorageRefreshToken,
-    fromUserInfo: !!userInfoRefreshToken,
-    hasToken: !!token,
-    tokenPreview: token ? token.substring(0, 20) + '...' : 'none'
-  });
-  
-  return token;
-};
-
-// Update auth cookies and localStorage
-const updateAuthTokens = (accessToken, refreshToken = null) => {
+// Update auth tokens and headers
+const updateAuthTokens = (accessToken) => {
   try {
     debug('Updating auth tokens', {
       hasAccessToken: !!accessToken,
-      hasRefreshToken: !!refreshToken,
       accessTokenPreview: accessToken ? accessToken.substring(0, 20) + '...' : 'none'
     });
 
     // Set access token cookie
     Cookies.set("accessToken", accessToken, accessTokenCookieOptions);
     Cookies.set("session", accessToken, sessionCookieOptions);
-
-    // Update refresh token if provided
-    if (refreshToken) {
-      Cookies.set("refreshToken", refreshToken, refreshTokenCookieOptions);
-      
-      // Update localStorage
-      if (typeof window !== "undefined") {
-        localStorage.setItem("refreshToken", refreshToken);
-        
-        // Update userinfo with refresh token
-        const existingUserInfo = localStorage.getItem("userinfo");
-        if (existingUserInfo) {
-          try {
-            const user = JSON.parse(existingUserInfo);
-            user.refreshToken = refreshToken;
-            localStorage.setItem("userinfo", JSON.stringify(user));
-            debug('Updated userinfo with new refresh token');
-          } catch (e) {
-            debug("Failed to update userinfo with refresh token:", e);
-          }
-        }
-      }
-    }
 
     // Set authorization header
     api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
@@ -807,7 +1265,6 @@ const updateAuthTokens = (accessToken, refreshToken = null) => {
       const decoded = decodeJWT(accessToken);
       debug('Auth tokens updated successfully', {
         tokenExpiry: new Date(decoded.exp * 1000).toLocaleString(),
-        hasRefreshToken: !!refreshToken,
       });
     } catch (e) {
       debug('Auth tokens updated (could not decode for logging)');
@@ -819,51 +1276,98 @@ const updateAuthTokens = (accessToken, refreshToken = null) => {
   }
 };
 
-// Direct token swap - replace access token with refresh token
+// Flag to prevent multiple simultaneous refresh requests
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+// Add subscriber to refresh queue
+const subscribeTokenRefresh = (callback) => {
+  refreshSubscribers.push(callback);
+};
+
+// Notify all subscribers when refresh is complete
+const onRefreshed = (token) => {
+  refreshSubscribers.map(callback => callback(token));
+  refreshSubscribers = [];
+};
+
+// Refresh tokens by calling the refresh API
 export const refreshTokens = async () => {
-  debug('Starting direct token swap (refresh token -> access token)');
+  // Prevent multiple simultaneous refresh calls
+  if (isRefreshing) {
+    debug('Refresh already in progress, queuing request');
+    return new Promise((resolve) => {
+      subscribeTokenRefresh((token) => {
+        resolve(!!token);
+      });
+    });
+  }
+
+  isRefreshing = true;
+  debug('Starting refresh token API call with HttpOnly cookie');
 
   try {
     const currentAccessToken = getAccessToken();
-    const refreshToken = getRefreshToken();
 
-    debug('Current token status', {
+    debug('Current token status before refresh', {
       hasAccessToken: !!currentAccessToken,
-      hasRefreshToken: !!refreshToken,
-      accessTokenExpired: currentAccessToken ? isTokenExpired(currentAccessToken, 0) : 'no token',
-      refreshTokenExpired: refreshToken ? isTokenExpired(refreshToken, 60) : 'no token'
+      accessTokenExpired: currentAccessToken ? isTokenExpired(currentAccessToken, 0) : 'no token'
     });
 
-    if (!refreshToken) {
-      debug('No refresh token available for swap');
-      return false;
-    }
-
-    // Check if refresh token is expired (with small buffer)
-    if (isTokenExpired(refreshToken, 60)) { // 1 minute buffer for refresh token
-      debug('Refresh token is expired, cannot swap');
-      handleTokenExpiration();
-      return false;
-    }
-
-    debug('Swapping refresh token to become access token');
-
-    // Use the refresh token as the new access token
-    // Keep the same refresh token (or you could generate/rotate it)
-    updateAuthTokens(refreshToken, refreshToken);
-
-    debug('Token swap completed successfully', {
-      newAccessTokenPreview: refreshToken.substring(0, 20) + '...'
+    // Create a separate axios instance for refresh call to avoid interceptor loops
+    const refreshApi = axios.create({
+      baseURL: baseUrl,
+      timeout: 10000,
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/json',
+      },
+      withCredentials: true, 
     });
 
-    return true;
+    // Make the refresh token API call to your specific endpoint
+    const response = await refreshApi.patch('/auth/refresh');
+    setTimeout(() => {
+    console.log(response)
+console.log("response from token: ", response.accessToken)
+, 6000});
+    debug('Refresh token API response received', {
+      status: response.status,
+      hasAccessToken: !!response.data?.accessToken,
+      newAccessTokenPreview: response.data?.accessToken ? response.data.accessToken.substring(0, 20) + '...' : 'none'
+    });
+
+    if (response.data?.accessToken) {
+      // Update tokens with new access token
+      updateAuthTokens(response.data.accessToken);
+      debug('Tokens refreshed successfully via API');
+      
+      // Notify all waiting requests
+      onRefreshed(response.data.accessToken);
+      isRefreshing = false;
+      return true;
+    } else {
+      debug('Invalid response from refresh API - missing access token', response.data);
+      onRefreshed(null);
+      isRefreshing = false;
+      return false;
+    }
 
   } catch (error) {
-    debug('Token swap failed', {
+    debug('Refresh token API call failed', {
+      status: error.response?.status,
       message: error.message,
-      stack: error.stack
+      data: error.response?.data
     });
 
+    // If refresh token is invalid/expired on server side
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      debug('Refresh token rejected by server - handling token expiration');
+      handleTokenExpiration();
+    }
+
+    onRefreshed(null);
+    isRefreshing = false;
     return false;
   }
 };
@@ -872,32 +1376,25 @@ export const refreshTokens = async () => {
 const handleTokenExpiration = () => {
   debug("Handling token expiration - logging out");
   clearAuthTokens();
-  if (typeof window !== "undefined") {
-    // Add a small delay to ensure cleanup completes
-    setTimeout(() => {
-      window.location.href = "/login";
-    }, 100);
-  }
+  // if (typeof window !== "undefined") {
+  //   // setTimeout(() => {
+  //   //   window.location.href = "/login";
+  //   // }, 100);
+  // }
 };
 
 // Set tokens after login
-export const setAuthTokens = (accessToken, refreshToken) => {
+export const setAuthTokens = (accessToken) => {
   debug('Setting auth tokens after login', {
     hasAccessToken: !!accessToken,
-    hasRefreshToken: !!refreshToken,
-    accessTokenPreview: accessToken ? accessToken.substring(0, 20) + '...' : 'none',
-    refreshTokenPreview: refreshToken ? refreshToken.substring(0, 20) + '...' : 'none'
+    accessTokenPreview: accessToken ? accessToken.substring(0, 20) + '...' : 'none'
   });
 
   if (!accessToken) {
     throw new Error('Access token is required');
   }
 
-  if (!refreshToken) {
-    throw new Error('Refresh token is required');
-  }
-
-  updateAuthTokens(accessToken, refreshToken);
+  updateAuthTokens(accessToken);
   debug('Login tokens set successfully');
 };
 
@@ -906,11 +1403,9 @@ export const clearAuthTokens = () => {
   debug('Clearing all auth tokens');
   
   Cookies.remove("accessToken");
-  Cookies.remove("refreshToken");
   Cookies.remove("session");
 
   if (typeof window !== "undefined") {
-    localStorage.removeItem("refreshToken");
     localStorage.removeItem("userinfo");
   }
 
@@ -922,20 +1417,16 @@ export const clearAuthTokens = () => {
 // Auth status check
 export const isAuthenticated = () => {
   const accessToken = getAccessToken();
-  const refreshToken = getRefreshToken();
   
-  const hasValidAccess = accessToken && !isTokenExpired(accessToken, 0); // No buffer for authentication check
-  const hasValidRefresh = refreshToken && !isTokenExpired(refreshToken, 60); // 1 minute buffer for refresh
+  const hasValidAccess = accessToken && !isTokenExpired(accessToken, 0);
   
   debug('Authentication status check', {
     hasAccessToken: !!accessToken,
-    hasRefreshToken: !!refreshToken,
     hasValidAccess,
-    hasValidRefresh,
-    isAuthenticated: hasValidAccess || hasValidRefresh
+    isAuthenticated: hasValidAccess
   });
   
-  return hasValidAccess || hasValidRefresh;
+  return hasValidAccess;
 };
 
 // Get user info
@@ -957,23 +1448,17 @@ export const getCurrentUser = () => {
 // Get token expiration status
 export const getTokenExpirationStatus = () => {
   const accessToken = getAccessToken();
-  const refreshToken = getRefreshToken();
 
   debug('Checking token expiration status', {
-    hasAccessToken: !!accessToken,
-    hasRefreshToken: !!refreshToken
+    hasAccessToken: !!accessToken
   });
 
-  if (!accessToken && !refreshToken) {
-    return { status: "no_tokens", message: "No tokens available" };
+  if (!accessToken) {
+    return { status: "no_tokens", message: "No access token available" };
   }
 
-  if (!refreshToken || isTokenExpired(refreshToken, 60)) {
-    return { status: "all_expired", message: "All tokens expired" };
-  }
-
-  if (!accessToken || isTokenExpired(accessToken, 0)) {
-    return { status: "access_expired", message: "Access token expired, refresh token available" };
+  if (isTokenExpired(accessToken, 0)) {
+    return { status: "access_expired", message: "Access token expired" };
   }
 
   if (isTokenExpired(accessToken, 300)) { // 5 minutes buffer
@@ -983,42 +1468,43 @@ export const getTokenExpirationStatus = () => {
   return { status: "valid", message: "Access token is valid" };
 };
 
-// Enhanced auth status check with automatic token swap
+// Enhanced auth status check with automatic token refresh
 export const checkAuthStatus = async () => {
   const tokenStatus = getTokenExpirationStatus();
   debug('Checking auth status', tokenStatus);
   
-  if (tokenStatus.status === 'no_tokens' || tokenStatus.status === 'all_expired') {
-    return false;
+  if (tokenStatus.status === 'no_tokens' || tokenStatus.status === 'access_expired') {
+    debug('Attempting token refresh due to expired/missing token');
+    const refreshed = await refreshTokens();
+    debug('Token refresh result:', { success: refreshed });
+    return refreshed;
   }
   
-  if (tokenStatus.status === 'access_expired' || tokenStatus.status === 'about_to_expire') {
-    debug('Attempting token swap due to expiration status');
-    const swapped = await refreshTokens();
-    debug('Token swap result:', { success: swapped });
-    return swapped;
+  if (tokenStatus.status === 'about_to_expire') {
+    debug('Attempting token refresh due to expiration status');
+    const refreshed = await refreshTokens();
+    debug('Token refresh result:', { success: refreshed });
+    return refreshed || isAuthenticated(); // Fall back to current token if refresh fails
   }
   
   return true;
 };
 
-// Get fresh access token (ensures we have a valid token via swap if needed)
+// Get fresh access token
 export const getFreshAccessToken = async () => {
   debug('Requesting fresh access token');
   
   const accessToken = getAccessToken();
   
-  // If we have a valid access token, return it
   if (accessToken && !isTokenExpired(accessToken, 60)) { // 1 minute buffer
     debug('Current access token is still fresh');
     return accessToken;
   }
   
-  // Try to swap tokens
-  const swapped = await refreshTokens();
-  if (swapped) {
+  const refreshed = await refreshTokens();
+  if (refreshed) {
     const newToken = getAccessToken();
-    debug('Fresh access token obtained via token swap');
+    debug('Fresh access token obtained via API refresh');
     return newToken;
   }
   
@@ -1026,7 +1512,7 @@ export const getFreshAccessToken = async () => {
   return null;
 };
 
-// Request Interceptor - with token swap logic
+// Request Interceptor
 api.interceptors.request.use(
   async (config) => {
     debug('Request interceptor triggered', { 
@@ -1034,26 +1520,27 @@ api.interceptors.request.use(
       method: config.method 
     });
     
-    // Skip auth for login and other public endpoints
+    // Skip auth for public endpoints
     if (config.url?.includes('/auth/login') || 
         config.url?.includes('/auth/register') ||
-        config.url?.includes('/auth/forgot-password')) {
+        config.url?.includes('/auth/forgot-password') ||
+        config.url?.includes('/auth/refresh')) {
       debug('Skipping auth for public endpoint');
       return config;
     }
 
     let token = getAccessToken();
 
-    // If token is expired or about to expire, swap it with refresh token
+    // Check if token needs refresh
     if (!token || isTokenExpired(token, 60)) { // 1 minute buffer
-      debug('Access token missing or expired, attempting token swap');
-      const swapped = await refreshTokens();
-      if (swapped) {
+      debug('Access token missing or expires soon, attempting refresh');
+      const refreshed = await refreshTokens();
+      if (refreshed) {
         token = getAccessToken();
-        debug('Successfully swapped token for request');
+        debug('Successfully refreshed token for request');
       } else {
-        debug('Failed to swap token for request');
-        // Let the request proceed - response interceptor will handle 401s
+        debug('Failed to refresh token for request');
+        // Don't block the request, let the response interceptor handle 401
       }
     }
 
@@ -1072,7 +1559,7 @@ api.interceptors.request.use(
   }
 );
 
-// Response Interceptor - with token swap retry logic
+// Response Interceptor
 api.interceptors.response.use(
   (response) => {
     debug('Response received', { 
@@ -1092,19 +1579,19 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      debug("401 detected, attempting token swap...");
+      debug("401 detected, attempting token refresh...");
 
       const success = await refreshTokens();
       if (success) {
         const token = getAccessToken();
         if (token) {
           originalRequest.headers["Authorization"] = `Bearer ${token}`;
-          debug("Retrying request with swapped token");
+          debug("Retrying request with refreshed token");
           return api(originalRequest);
         }
       }
       
-      debug("Token swap failed or no token available, handling expiration");
+      debug("Token refresh failed or no token available, handling expiration");
       handleTokenExpiration();
       return Promise.reject(error);
     }
@@ -1118,38 +1605,38 @@ api.interceptors.response.use(
   }
 );
 
-// Periodic token check with proactive swapping (runs every 3 minutes)
+// Periodic token check (every 2 minutes)
 if (typeof window !== "undefined") {
   const startPeriodicTokenCheck = () => {
-    debug('Starting periodic token check with swap strategy');
+    debug('Starting periodic token check with API refresh strategy');
     
     const checkInterval = setInterval(async () => {
       const status = getTokenExpirationStatus();
       debug("Periodic token status check:", status);
 
       if (status.status === "about_to_expire") {
-        debug("Proactively swapping token");
+        debug("Proactively refreshing token via API");
         await refreshTokens();
       } else if (status.status === "access_expired") {
-        debug("Access token expired, swapping with refresh token");
-        const swapped = await refreshTokens();
-        if (!swapped) {
-          debug("Token swap failed, clearing interval and handling expiration");
+        debug("Access token expired, refreshing via API");
+        const refreshed = await refreshTokens();
+        if (!refreshed) {
+          debug("Token refresh failed, clearing interval and handling expiration");
           clearInterval(checkInterval);
           handleTokenExpiration();
         }
-      } else if (status.status === "all_expired" || status.status === "no_tokens") {
-        debug("All tokens expired, clearing interval and handling expiration");
+      } else if (status.status === "no_tokens") {
+        debug("No tokens, clearing interval and handling expiration");
         clearInterval(checkInterval);
         handleTokenExpiration();
       }
-    }, 3 * 60 * 1000); // 3 minutes (more frequent since we're doing direct swaps)
+    }, 2 * 60 * 1000); // Check every 2 minutes
 
     return checkInterval;
   };
 
-  // Start the periodic check
-  startPeriodicTokenCheck();
+  // Start periodic check after a short delay to ensure page is loaded
+  setTimeout(startPeriodicTokenCheck, 1000);
 }
 
 export default api;
