@@ -1041,7 +1041,7 @@ const submitForm = async (status) => {
         pillarId: selectedPillarId,
         // Remove coverImage and tags - not expected by API
         author: "System Admin",
-        // coverImage: coverImage,
+        coverImage: coverImage,
         content: articleBody, 
         description,          
         duration: duration.toString(), 

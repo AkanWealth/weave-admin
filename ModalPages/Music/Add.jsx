@@ -923,6 +923,39 @@ import api from "@/lib/api";
 import { useToastContext } from "@/contexts/toast";
 
 // Cloudinary upload function
+// const uploadToCloudinary = async (file, resourceType = "auto") => {
+//   const formData = new FormData();
+//   formData.append("file", file);
+  
+//   const uploadPreset = "founder_thrive"; 
+//   formData.append("upload_preset", uploadPreset);
+//   formData.append("cloud_name", "dhjx1ncqg");
+  
+//   console.log("Using upload preset:", uploadPreset); // Debug log
+  
+//   try {
+//     const response = await fetch(
+//       `https://api.cloudinary.com/v1_1/dhjx1ncqg/${resourceType}/upload`,
+//       {
+//         method: "POST",
+//         body: formData,
+//       }
+//     );
+    
+//     if (!response.ok) {
+//       const errorData = await response.json();
+//       console.error("Cloudinary error response:", errorData);
+//       throw new Error(`Upload failed: ${response.statusText} - ${JSON.stringify(errorData)}`);
+//     }
+    
+//     const data = await response.json();
+//     return data.secure_url;
+//   } catch (error) {
+//     console.error("Cloudinary upload error:", error);
+//     throw error;
+//   }
+// };
+
 const uploadToCloudinary = async (file, resourceType = "auto") => {
   const formData = new FormData();
   formData.append("file", file);
@@ -949,7 +982,19 @@ const uploadToCloudinary = async (file, resourceType = "auto") => {
     }
     
     const data = await response.json();
-    return data.secure_url;
+    console.log("Cloudinary response:", data); // Debug log to see all available fields
+    
+    // Return an object with all the metadata we need
+    return {
+      url: data.secure_url,
+      bytes: data.bytes || 0, // File size in bytes
+      duration: data.duration || 0, // Duration in seconds (for audio/video)
+      format: data.format || '', // File format
+      resource_type: data.resource_type || '', // audio, video, image, etc.
+      width: data.width || 0, // For images/videos
+      height: data.height || 0, // For images/videos
+      public_id: data.public_id || '', // Cloudinary public ID
+    };
   } catch (error) {
     console.error("Cloudinary upload error:", error);
     throw error;
@@ -1010,130 +1055,261 @@ function AddMusic() {
   };
 
   // Handle single upload
-  const handleSingleUpload = async () => {
-    if (!coverImage || !songFile || !singleFormData.title || !singleFormData.artiste || !singleFormData.pillarId) {
-      showMessage("Missing Fields", "Please fill in all required fields", "error");
-      return;
+  // const handleSingleUpload = async () => {
+  //   if (!coverImage || !songFile || !singleFormData.title || !singleFormData.artiste || !singleFormData.pillarId) {
+  //     showMessage("Missing Fields", "Please fill in all required fields", "error");
+  //     return;
+  //   }
+
+  //   if (!isValidUUID(singleFormData.pillarId)) {
+  //     showMessage("Invalid Pillar ID", "Please select a valid pillar", "error");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   setUploadProgress({ coverImage: 0, songFile: 0 });
+
+  //   try {
+  //     // Upload cover image to Cloudinary
+  //     showMessage("Uploading", "Uploading cover image...", "info");
+  //     setUploadProgress(prev => ({ ...prev, coverImage: 50 }));
+  //     const coverImageUrl = await uploadToCloudinary(coverImage, "image");
+  //     setUploadProgress(prev => ({ ...prev, coverImage: 100 }));
+
+  //     // Upload song file to Cloudinary
+  //     showMessage("Uploading", "Uploading audio file...", "info");
+  //     setUploadProgress(prev => ({ ...prev, songFile: 50 }));
+  //     const songFileUrl = await uploadToCloudinary(songFile, "video"); // Use "video" for audio files in Cloudinary
+  //     setUploadProgress(prev => ({ ...prev, songFile: 100 }));
+
+  //     // Send data to your API with URLs - using coverImage and songFile field names
+  //     const requestData = {
+  //       title: singleFormData.title,
+  //       artiste: singleFormData.artiste,
+  //       pillarId: singleFormData.pillarId,
+  //       status: singleFormData.status,
+  //       coverImage: coverImageUrl,  // Changed from coverImageUrl to coverImage
+  //       songFile: songFileUrl,      // Changed from songFileUrl to songFile
+  //     };
+
+  //     console.log("Sending data to API:", requestData);
+
+  //     const response = await api.post("/songs/url-upload/song", requestData, {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       timeout: 60000,
+  //     });
+
+  //     if (response.status === 200 || response.status === 201) {
+  //       showMessage("Success", "Song uploaded successfully!", "success");
+  //       setTimeout(() => {
+  //         router.push("/contentsManagement?refresh=" + Date.now());
+  //       }, 1000);
+  //     } else {
+  //       showMessage("Upload Failed", "Failed to upload song", "error");
+  //     }
+  //   } catch (error) {
+  //     console.error("Upload error:", error);
+  //     showMessage("Upload Error", error.message || "An error occurred while uploading", "error");
+  //   } finally {
+  //     setLoading(false);
+  //     setUploadProgress({});
+  //   }
+  // };
+
+  // // Handle save as draft for single upload
+  // const handleSingleSaveAsDraft = async () => {
+  //   if (!singleFormData.title || !singleFormData.artiste) {
+  //     showMessage("Missing Fields", "Please fill in at least title and artist name", "error");
+  //     return;
+  //   }
+
+  //   if (singleFormData.pillarId && !isValidUUID(singleFormData.pillarId)) {
+  //     showMessage("Invalid Pillar ID", "Please select a valid pillar", "error");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+
+  //   try {
+  //     let coverImageUrl = null;
+  //     let songFileUrl = null;
+
+  //     // Upload cover image if present
+  //     if (coverImage) {
+  //       showMessage("Uploading", "Uploading cover image...", "info");
+  //       coverImageUrl = await uploadToCloudinary(coverImage, "image");
+  //     }
+
+  //     // Upload song file if present
+  //     if (songFile) {
+  //       showMessage("Uploading", "Uploading audio file...", "info");
+  //       songFileUrl = await uploadToCloudinary(songFile, "video");
+  //     }
+
+  //     const requestData = {
+  //       title: singleFormData.title,
+  //       artiste: singleFormData.artiste,
+  //       pillarId: singleFormData.pillarId || "",
+  //       status: "draft",
+  //       ...(coverImage && { coverImage: coverImageUrl }),  // Changed field name
+  //       ...(songFile && { songFile: songFileUrl }),        // Changed field name
+  //     };
+
+  //     console.log("Sending draft data to API:", requestData);
+
+  //     const response = await api.post("songs/url-upload/song", requestData, {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       timeout: 60000,
+  //     });
+
+  //     if (response.status === 200 || response.status === 201) {
+  //       showMessage("Draft Saved", "Song saved as draft successfully!", "success");
+  //       setTimeout(() => {
+  //         router.back();
+  //       }, 1000);
+  //     }
+  //   } catch (error) {
+  //     console.error("Save draft error:", error);
+  //     showMessage("Save Error", error.message || "An error occurred while saving", "error");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+const handleSingleUpload = async () => {
+  if (!coverImage || !songFile || !singleFormData.title || !singleFormData.artiste || !singleFormData.pillarId) {
+    showMessage("Missing Fields", "Please fill in all required fields", "error");
+    return;
+  }
+
+  if (!isValidUUID(singleFormData.pillarId)) {
+    showMessage("Invalid Pillar ID", "Please select a valid pillar", "error");
+    return;
+  }
+
+  setLoading(true);
+  setUploadProgress({ coverImage: 0, songFile: 0 });
+
+  try {
+    // Upload cover image to Cloudinary
+    showMessage("Uploading", "Uploading cover image...", "info");
+    setUploadProgress(prev => ({ ...prev, coverImage: 50 }));
+    const coverImageResponse = await uploadToCloudinary(coverImage, "image");
+    setUploadProgress(prev => ({ ...prev, coverImage: 100 }));
+
+    // Upload song file to Cloudinary
+    showMessage("Uploading", "Uploading audio file...", "info");
+    setUploadProgress(prev => ({ ...prev, songFile: 50 }));
+    const songFileResponse = await uploadToCloudinary(songFile, "video"); // Use "video" for audio files in Cloudinary
+    setUploadProgress(prev => ({ ...prev, songFile: 100 }));
+
+    // Send data to your API with URLs and metadata
+    const requestData = {
+      title: singleFormData.title,
+      artiste: singleFormData.artiste,
+      pillarId: singleFormData.pillarId,
+      status: singleFormData.status,
+      coverImage: coverImageResponse.url,
+      songFile: songFileResponse.url,
+      songFileSize: songFileResponse.bytes, // File size in bytes
+      songDuration: songFileResponse.duration, // Duration in seconds
+    };
+
+    console.log("Sending data to API:", requestData);
+
+    const response = await api.post("/songs/url-upload/song", requestData, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      timeout: 60000,
+    });
+
+    if (response.status === 200 || response.status === 201) {
+      showMessage("Success", "Song uploaded successfully!", "success");
+      setTimeout(() => {
+        router.push("/contentsManagement?refresh=" + Date.now());
+      }, 1000);
+    } else {
+      showMessage("Upload Failed", "Failed to upload song", "error");
     }
+  } catch (error) {
+    console.error("Upload error:", error);
+    showMessage("Upload Error", error.message || "An error occurred while uploading", "error");
+  } finally {
+    setLoading(false);
+    setUploadProgress({});
+  }
+};
 
-    if (!isValidUUID(singleFormData.pillarId)) {
-      showMessage("Invalid Pillar ID", "Please select a valid pillar", "error");
-      return;
-    }
+// Updated save as draft function for single upload
+const handleSingleSaveAsDraft = async () => {
+  if (!singleFormData.title || !singleFormData.artiste) {
+    showMessage("Missing Fields", "Please fill in at least title and artist name", "error");
+    return;
+  }
 
-    setLoading(true);
-    setUploadProgress({ coverImage: 0, songFile: 0 });
+  if (singleFormData.pillarId && !isValidUUID(singleFormData.pillarId)) {
+    showMessage("Invalid Pillar ID", "Please select a valid pillar", "error");
+    return;
+  }
 
-    try {
-      // Upload cover image to Cloudinary
+  setLoading(true);
+
+  try {
+    let coverImageResponse = null;
+    let songFileResponse = null;
+
+    // Upload cover image if present
+    if (coverImage) {
       showMessage("Uploading", "Uploading cover image...", "info");
-      setUploadProgress(prev => ({ ...prev, coverImage: 50 }));
-      const coverImageUrl = await uploadToCloudinary(coverImage, "image");
-      setUploadProgress(prev => ({ ...prev, coverImage: 100 }));
+      coverImageResponse = await uploadToCloudinary(coverImage, "image");
+    }
 
-      // Upload song file to Cloudinary
+    // Upload song file if present
+    if (songFile) {
       showMessage("Uploading", "Uploading audio file...", "info");
-      setUploadProgress(prev => ({ ...prev, songFile: 50 }));
-      const songFileUrl = await uploadToCloudinary(songFile, "video"); // Use "video" for audio files in Cloudinary
-      setUploadProgress(prev => ({ ...prev, songFile: 100 }));
-
-      // Send data to your API with URLs - using coverImage and songFile field names
-      const requestData = {
-        title: singleFormData.title,
-        artiste: singleFormData.artiste,
-        pillarId: singleFormData.pillarId,
-        status: singleFormData.status,
-        coverImage: coverImageUrl,  // Changed from coverImageUrl to coverImage
-        songFile: songFileUrl,      // Changed from songFileUrl to songFile
-      };
-
-      console.log("Sending data to API:", requestData);
-
-      const response = await api.post("/songs/url-upload/song", requestData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        timeout: 60000,
-      });
-
-      if (response.status === 200 || response.status === 201) {
-        showMessage("Success", "Song uploaded successfully!", "success");
-        setTimeout(() => {
-          router.push("/contentsManagement?refresh=" + Date.now());
-        }, 1000);
-      } else {
-        showMessage("Upload Failed", "Failed to upload song", "error");
-      }
-    } catch (error) {
-      console.error("Upload error:", error);
-      showMessage("Upload Error", error.message || "An error occurred while uploading", "error");
-    } finally {
-      setLoading(false);
-      setUploadProgress({});
-    }
-  };
-
-  // Handle save as draft for single upload
-  const handleSingleSaveAsDraft = async () => {
-    if (!singleFormData.title || !singleFormData.artiste) {
-      showMessage("Missing Fields", "Please fill in at least title and artist name", "error");
-      return;
+      songFileResponse = await uploadToCloudinary(songFile, "video");
     }
 
-    if (singleFormData.pillarId && !isValidUUID(singleFormData.pillarId)) {
-      showMessage("Invalid Pillar ID", "Please select a valid pillar", "error");
-      return;
+    const requestData = {
+      title: singleFormData.title,
+      artiste: singleFormData.artiste,
+      pillarId: singleFormData.pillarId || "",
+      status: "draft",
+      ...(coverImage && { coverImage: coverImageResponse.url }),
+      ...(songFile && { 
+        songFile: songFileResponse.url,
+        songFileSize: songFileResponse.bytes,
+        songDuration: songFileResponse.duration,
+      }),
+    };
+
+    console.log("Sending draft data to API:", requestData);
+
+    const response = await api.post("songs/url-upload/song", requestData, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      timeout: 60000,
+    });
+
+    if (response.status === 200 || response.status === 201) {
+      showMessage("Draft Saved", "Song saved as draft successfully!", "success");
+      setTimeout(() => {
+        router.back();
+      }, 1000);
     }
-
-    setLoading(true);
-
-    try {
-      let coverImageUrl = null;
-      let songFileUrl = null;
-
-      // Upload cover image if present
-      if (coverImage) {
-        showMessage("Uploading", "Uploading cover image...", "info");
-        coverImageUrl = await uploadToCloudinary(coverImage, "image");
-      }
-
-      // Upload song file if present
-      if (songFile) {
-        showMessage("Uploading", "Uploading audio file...", "info");
-        songFileUrl = await uploadToCloudinary(songFile, "video");
-      }
-
-      const requestData = {
-        title: singleFormData.title,
-        artiste: singleFormData.artiste,
-        pillarId: singleFormData.pillarId || "",
-        status: "draft",
-        ...(coverImage && { coverImage: coverImageUrl }),  // Changed field name
-        ...(songFile && { songFile: songFileUrl }),        // Changed field name
-      };
-
-      console.log("Sending draft data to API:", requestData);
-
-      const response = await api.post("songs/url-upload/song", requestData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        timeout: 60000,
-      });
-
-      if (response.status === 200 || response.status === 201) {
-        showMessage("Draft Saved", "Song saved as draft successfully!", "success");
-        setTimeout(() => {
-          router.back();
-        }, 1000);
-      }
-    } catch (error) {
-      console.error("Save draft error:", error);
-      showMessage("Save Error", error.message || "An error occurred while saving", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error("Save draft error:", error);
+    showMessage("Save Error", error.message || "An error occurred while saving", "error");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleBulkFileSelect = (e) => {
     const files = Array.from(e.target.files);
@@ -1189,171 +1365,341 @@ function AddMusic() {
   };
 
   // Handle bulk upload with Cloudinary
+  // const handleBulkUpload = async () => {
+  //   if (bulkFiles.length === 0) {
+  //     showMessage("No Files", "Please select files to upload", "error");
+  //     return;
+  //   }
+
+  //   // Validate all forms
+  //   const isValid = Object.values(bulkFormsData).every(
+  //     (data) =>
+  //       data.title &&
+  //       data.artiste &&
+  //       data.pillarId &&
+  //       isValidUUID(data.pillarId) &&
+  //       (useSharedCover ? sharedCoverImage : data.coverImage)
+  //   );
+
+  //   if (!isValid) {
+  //     showMessage("Missing Fields", "Please fill in all required fields and valid pillar IDs for all songs", "error");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+
+  //   try {
+  //     let sharedCoverImageUrl = null;
+
+  //     // Upload shared cover image if using shared cover
+  //     if (useSharedCover && sharedCoverImage) {
+  //       showMessage("Uploading", "Uploading shared cover image...", "info");
+  //       sharedCoverImageUrl = await uploadToCloudinary(sharedCoverImage, "image");
+  //     }
+
+  //     // Process each song
+  //     const songsData = await Promise.all(
+  //       bulkFiles.map(async (file, index) => {
+  //         const songData = bulkFormsData[index];
+          
+  //         showMessage("Uploading", `Uploading song ${index + 1}/${bulkFiles.length}...`, "info");
+          
+  //         // Upload audio file
+  //         const songFileUrl = await uploadToCloudinary(file, "video");
+          
+  //         // Upload individual cover image if not using shared cover
+  //         let coverImageUrl = sharedCoverImageUrl;
+  //         if (!useSharedCover && songData.coverImage) {
+  //           coverImageUrl = await uploadToCloudinary(songData.coverImage, "image");
+  //         }
+
+  //         return {
+  //           title: songData.title,
+  //           artiste: songData.artiste,
+  //           pillarId: songData.pillarId,
+  //           status: songData.status,
+  //           songFile: songFileUrl,      // Changed field name
+  //           coverImage: coverImageUrl,  // Changed field name
+  //         };
+  //       })
+  //     );
+
+  //     console.log("Bulk upload data:", { songs: songsData });
+
+  //     const response = await api.post("/songs/url-upload/bulk", { songs: songsData }, {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+
+  //     if (response.status === 200 || response.status === 201) {
+  //       showMessage("Success", "All songs uploaded successfully!", "success");
+  //       setTimeout(() => {
+  //         router.push("/contentsManagement?refresh=" + Date.now());
+  //       }, 1000);
+  //     } else {
+  //       showMessage("Upload Failed", "Failed to upload songs", "error");
+  //     }
+  //   } catch (error) {
+  //     console.error("Bulk upload error:", error);
+  //     showMessage("Upload Error", error.message || "An error occurred during bulk upload", "error");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // // Handle bulk save as draft with Cloudinary
+  // const handleBulkSaveAsDraft = async () => {
+  //   if (bulkFiles.length === 0) {
+  //     showMessage("No Files", "Please select files to save", "error");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+
+  //   try {
+  //     let sharedCoverImageUrl = null;
+
+  //     // Upload shared cover image if using shared cover
+  //     if (useSharedCover && sharedCoverImage) {
+  //       showMessage("Uploading", "Uploading shared cover image...", "info");
+  //       sharedCoverImageUrl = await uploadToCloudinary(sharedCoverImage, "image");
+  //     }
+
+  //     // Process each song
+  //     const songsData = await Promise.all(
+  //       bulkFiles.map(async (file, index) => {
+  //         const songData = bulkFormsData[index] || {};
+          
+  //         // Only process songs with at least title or artist
+  //         if (!songData.title && !songData.artiste) {
+  //           return null;
+  //         }
+
+  //         showMessage("Uploading", `Processing song ${index + 1}/${bulkFiles.length}...`, "info");
+          
+  //         // Upload audio file
+  //         const songFileUrl = await uploadToCloudinary(file, "video");
+          
+  //         // Upload individual cover image if not using shared cover
+  //         let coverImageUrl = sharedCoverImageUrl;
+  //         if (!useSharedCover && songData.coverImage) {
+  //           coverImageUrl = await uploadToCloudinary(songData.coverImage, "image");
+  //         }
+
+  //         return {
+  //           title: songData.title || "",
+  //           artiste: songData.artiste || "",
+  //           pillarId: songData.pillarId || "",
+  //           status: "draft",
+  //           songFile: songFileUrl,                    // Changed field name
+  //           ...(coverImageUrl && { coverImage: coverImageUrl }),  // Changed field name
+  //         };
+  //       })
+  //     );
+
+  //     // Filter out null values
+  //     const validSongsData = songsData.filter(song => song !== null);
+
+  //     if (validSongsData.length === 0) {
+  //       showMessage("No Data", "Please fill in at least title or artist for songs to save as draft", "error");
+  //       setLoading(false);
+  //       return;
+  //     }
+
+  //     console.log("Bulk draft save data:", { songs: validSongsData });
+
+  //     const response = await api.post("/songs/url-upload/bulk", { songs: validSongsData }, {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+
+  //     if (response.status === 200 || response.status === 201) {
+  //       showMessage("Drafts Saved", "Songs saved as drafts successfully!", "success");
+  //       setTimeout(() => {
+  //         router.push("/contentsManagement?refresh=" + Date.now());
+  //       }, 1000);
+  //     } else {
+  //       showMessage("Save Failed", "Failed to save songs as drafts", "error");
+  //     }
+  //   } catch (error) {
+  //     console.error("Save drafts error:", error);
+  //     showMessage("Save Error", error.message || "An error occurred while saving drafts", "error");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleBulkUpload = async () => {
-    if (bulkFiles.length === 0) {
-      showMessage("No Files", "Please select files to upload", "error");
-      return;
+  if (bulkFiles.length === 0) {
+    showMessage("No Files", "Please select files to upload", "error");
+    return;
+  }
+
+  // Validate all forms
+  const isValid = Object.values(bulkFormsData).every(
+    (data) =>
+      data.title &&
+      data.artiste &&
+      data.pillarId &&
+      isValidUUID(data.pillarId) &&
+      (useSharedCover ? sharedCoverImage : data.coverImage)
+  );
+
+  if (!isValid) {
+    showMessage("Missing Fields", "Please fill in all required fields and valid pillar IDs for all songs", "error");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    let sharedCoverImageResponse = null;
+
+    // Upload shared cover image if using shared cover
+    if (useSharedCover && sharedCoverImage) {
+      showMessage("Uploading", "Uploading shared cover image...", "info");
+      sharedCoverImageResponse = await uploadToCloudinary(sharedCoverImage, "image");
     }
 
-    // Validate all forms
-    const isValid = Object.values(bulkFormsData).every(
-      (data) =>
-        data.title &&
-        data.artiste &&
-        data.pillarId &&
-        isValidUUID(data.pillarId) &&
-        (useSharedCover ? sharedCoverImage : data.coverImage)
+    // Process each song
+    const songsData = await Promise.all(
+      bulkFiles.map(async (file, index) => {
+        const songData = bulkFormsData[index];
+        
+        showMessage("Uploading", `Uploading song ${index + 1}/${bulkFiles.length}...`, "info");
+        
+        // Upload audio file
+        const songFileResponse = await uploadToCloudinary(file, "video");
+        
+        // Upload individual cover image if not using shared cover
+        let coverImageResponse = sharedCoverImageResponse;
+        if (!useSharedCover && songData.coverImage) {
+          coverImageResponse = await uploadToCloudinary(songData.coverImage, "image");
+        }
+
+        return {
+          title: songData.title,
+          artiste: songData.artiste,
+          pillarId: songData.pillarId,
+          status: songData.status,
+          songFile: songFileResponse.url,
+          songFileSize: songFileResponse.bytes, // File size in bytes
+          songDuration: songFileResponse.duration, // Duration in seconds
+          coverImage: coverImageResponse?.url || null,
+        };
+      })
     );
 
-    if (!isValid) {
-      showMessage("Missing Fields", "Please fill in all required fields and valid pillar IDs for all songs", "error");
+    console.log("Bulk upload data:", { songs: songsData });
+
+    const response = await api.post("/songs/url-upload/bulk", { songs: songsData }, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status === 200 || response.status === 201) {
+      showMessage("Success", "All songs uploaded successfully!", "success");
+      setTimeout(() => {
+        router.push("/contentsManagement?refresh=" + Date.now());
+      }, 1000);
+    } else {
+      showMessage("Upload Failed", "Failed to upload songs", "error");
+    }
+  } catch (error) {
+    console.error("Bulk upload error:", error);
+    showMessage("Upload Error", error.message || "An error occurred during bulk upload", "error");
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Updated bulk save as draft function
+const handleBulkSaveAsDraft = async () => {
+  if (bulkFiles.length === 0) {
+    showMessage("No Files", "Please select files to save", "error");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    let sharedCoverImageResponse = null;
+
+    // Upload shared cover image if using shared cover
+    if (useSharedCover && sharedCoverImage) {
+      showMessage("Uploading", "Uploading shared cover image...", "info");
+      sharedCoverImageResponse = await uploadToCloudinary(sharedCoverImage, "image");
+    }
+
+    // Process each song
+    const songsData = await Promise.all(
+      bulkFiles.map(async (file, index) => {
+        const songData = bulkFormsData[index] || {};
+        
+        // Only process songs with at least title or artist
+        if (!songData.title && !songData.artiste) {
+          return null;
+        }
+
+        showMessage("Uploading", `Processing song ${index + 1}/${bulkFiles.length}...`, "info");
+        
+        // Upload audio file
+        const songFileResponse = await uploadToCloudinary(file, "video");
+        
+        // Upload individual cover image if not using shared cover
+        let coverImageResponse = sharedCoverImageResponse;
+        if (!useSharedCover && songData.coverImage) {
+          coverImageResponse = await uploadToCloudinary(songData.coverImage, "image");
+        }
+
+        return {
+          title: songData.title || "",
+          artiste: songData.artiste || "",
+          pillarId: songData.pillarId || "",
+          status: "draft",
+          songFile: songFileResponse.url,
+          songFileSize: songFileResponse.bytes, // File size in bytes
+          songDuration: songFileResponse.duration, // Duration in seconds
+          ...(coverImageResponse && { coverImage: coverImageResponse.url }),
+        };
+      })
+    );
+
+    // Filter out null values
+    const validSongsData = songsData.filter(song => song !== null);
+
+    if (validSongsData.length === 0) {
+      showMessage("No Data", "Please fill in at least title or artist for songs to save as draft", "error");
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
+    console.log("Bulk draft save data:", { songs: validSongsData });
 
-    try {
-      let sharedCoverImageUrl = null;
+    const response = await api.post("/songs/url-upload/bulk", { songs: validSongsData }, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-      // Upload shared cover image if using shared cover
-      if (useSharedCover && sharedCoverImage) {
-        showMessage("Uploading", "Uploading shared cover image...", "info");
-        sharedCoverImageUrl = await uploadToCloudinary(sharedCoverImage, "image");
-      }
-
-      // Process each song
-      const songsData = await Promise.all(
-        bulkFiles.map(async (file, index) => {
-          const songData = bulkFormsData[index];
-          
-          showMessage("Uploading", `Uploading song ${index + 1}/${bulkFiles.length}...`, "info");
-          
-          // Upload audio file
-          const songFileUrl = await uploadToCloudinary(file, "video");
-          
-          // Upload individual cover image if not using shared cover
-          let coverImageUrl = sharedCoverImageUrl;
-          if (!useSharedCover && songData.coverImage) {
-            coverImageUrl = await uploadToCloudinary(songData.coverImage, "image");
-          }
-
-          return {
-            title: songData.title,
-            artiste: songData.artiste,
-            pillarId: songData.pillarId,
-            status: songData.status,
-            songFile: songFileUrl,      // Changed field name
-            coverImage: coverImageUrl,  // Changed field name
-          };
-        })
-      );
-
-      console.log("Bulk upload data:", { songs: songsData });
-
-      const response = await api.post("/songs/url-upload/bulk", { songs: songsData }, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.status === 200 || response.status === 201) {
-        showMessage("Success", "All songs uploaded successfully!", "success");
-        setTimeout(() => {
-          router.push("/contentsManagement?refresh=" + Date.now());
-        }, 1000);
-      } else {
-        showMessage("Upload Failed", "Failed to upload songs", "error");
-      }
-    } catch (error) {
-      console.error("Bulk upload error:", error);
-      showMessage("Upload Error", error.message || "An error occurred during bulk upload", "error");
-    } finally {
-      setLoading(false);
+    if (response.status === 200 || response.status === 201) {
+      showMessage("Drafts Saved", "Songs saved as drafts successfully!", "success");
+      setTimeout(() => {
+        router.push("/contentsManagement?refresh=" + Date.now());
+      }, 1000);
+    } else {
+      showMessage("Save Failed", "Failed to save songs as drafts", "error");
     }
-  };
-
-  // Handle bulk save as draft with Cloudinary
-  const handleBulkSaveAsDraft = async () => {
-    if (bulkFiles.length === 0) {
-      showMessage("No Files", "Please select files to save", "error");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      let sharedCoverImageUrl = null;
-
-      // Upload shared cover image if using shared cover
-      if (useSharedCover && sharedCoverImage) {
-        showMessage("Uploading", "Uploading shared cover image...", "info");
-        sharedCoverImageUrl = await uploadToCloudinary(sharedCoverImage, "image");
-      }
-
-      // Process each song
-      const songsData = await Promise.all(
-        bulkFiles.map(async (file, index) => {
-          const songData = bulkFormsData[index] || {};
-          
-          // Only process songs with at least title or artist
-          if (!songData.title && !songData.artiste) {
-            return null;
-          }
-
-          showMessage("Uploading", `Processing song ${index + 1}/${bulkFiles.length}...`, "info");
-          
-          // Upload audio file
-          const songFileUrl = await uploadToCloudinary(file, "video");
-          
-          // Upload individual cover image if not using shared cover
-          let coverImageUrl = sharedCoverImageUrl;
-          if (!useSharedCover && songData.coverImage) {
-            coverImageUrl = await uploadToCloudinary(songData.coverImage, "image");
-          }
-
-          return {
-            title: songData.title || "",
-            artiste: songData.artiste || "",
-            pillarId: songData.pillarId || "",
-            status: "draft",
-            songFile: songFileUrl,                    // Changed field name
-            ...(coverImageUrl && { coverImage: coverImageUrl }),  // Changed field name
-          };
-        })
-      );
-
-      // Filter out null values
-      const validSongsData = songsData.filter(song => song !== null);
-
-      if (validSongsData.length === 0) {
-        showMessage("No Data", "Please fill in at least title or artist for songs to save as draft", "error");
-        setLoading(false);
-        return;
-      }
-
-      console.log("Bulk draft save data:", { songs: validSongsData });
-
-      const response = await api.post("/songs/url-upload/bulk", { songs: validSongsData }, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.status === 200 || response.status === 201) {
-        showMessage("Drafts Saved", "Songs saved as drafts successfully!", "success");
-        setTimeout(() => {
-          router.push("/contentsManagement?refresh=" + Date.now());
-        }, 1000);
-      } else {
-        showMessage("Save Failed", "Failed to save songs as drafts", "error");
-      }
-    } catch (error) {
-      console.error("Save drafts error:", error);
-      showMessage("Save Error", error.message || "An error occurred while saving drafts", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error("Save drafts error:", error);
+    showMessage("Save Error", error.message || "An error occurred while saving drafts", "error");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div>
