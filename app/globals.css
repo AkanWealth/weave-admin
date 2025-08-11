@@ -45,3 +45,14 @@ body {
     src: url(../assets/fonts/Rubik-Bold.ttf) format("woff2");
   }
 }
+
+/* Hide scrollbar for Webkit browsers (Chrome, Safari, Edge) */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox and ensure scrollable */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* Internet Explorer and Edge */
+  scrollbar-width: none; /* Firefox */
+}

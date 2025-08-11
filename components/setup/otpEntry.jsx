@@ -204,7 +204,7 @@ export default function OtpVerification() {
       }
     } catch (err) {
       console.log(err);
-      if (err.response.status === 400) router.push("/setup/message");
+      if (err.response.status === 400) 
       showMessage("OTP Expired", "Click on resend otp", "error");
       setIsError(true);
     } finally {

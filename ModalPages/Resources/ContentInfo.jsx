@@ -1026,6 +1026,83 @@ const fetchPillars = async () => {
 
 
 
+// const submitForm = async (status) => {
+//   setIsSubmitting(true);
+
+//   let btn = document.getElementById(`${status.toLowerCase()}-btn`);
+//   let btnTitle = btn.textContent;
+//   btn.disabled = true;
+//   btn.textContent = "Please wait...";
+
+//   try {
+//     if (contentType === "article") {
+//       const resp = await api.post("/resource-library/article", {
+//         title,
+//         pillarId: selectedPillarId,
+//         // Remove coverImage and tags - not expected by API
+//         author: "System Admin",
+//         coverImage: coverImage,
+//         content: articleBody, 
+//         description,          
+//         duration: duration.toString(), 
+//         sessionTime: sessionTime, // Add sessionTime field
+//         status,
+//       });
+
+//       showMessage(resp.data.message, "", "success");
+
+//       setTimeout(() => {
+//         router.push("/contentsManagement?refresh=" + Date.now());
+//       }, 100);
+//     } else {
+//       let formdata = new FormData();
+//       formdata.append("file", fileUploadContent);
+//       formdata.append("title", title);
+//       formdata.append("pillarId", selectedPillarId);
+//       formdata.append("coverImage", coverImage);
+//       formdata.append("author", "System Admin");
+//       formdata.append("description", description); 
+//       formdata.append("duration", duration.toString()); 
+//       formdata.append("sessionTime", sessionTime); 
+//       formdata.append("resourceType", contentType);
+//       formdata.append("status", status);
+//       // Don't append content field for media files
+
+//       if (transcript) {
+//         formdata.append("transcriptFile", transcript);
+//       }
+
+//       const response = await fetch(`${baseUrl}/resource-library`, {
+//         method: "POST",
+//         body: formdata,
+//         headers: {
+//           contentType: "multipart/formdata",
+//           Authorization: `Bearer ${accessToken}`,
+//         },
+//       });
+//       const respbody = await response.json();
+//       const respstatus = response.status;
+
+//       if (response.ok || response.status === 201  ) {
+//         showMessage(respbody.message || "Content uploaded successfully", "", "success");
+
+//         setTimeout(() => {
+//           router.push("/contentsManagement?refresh=" + Date.now());
+//         }, 100);
+//       } else {
+//         showMessage(respbody.message || "Error uploading content", "", "error");
+//       }
+//     }
+//   } catch (err) {
+//     console.log(err);
+//     showMessage("Error uploading content", "", "error");
+//   } finally {
+//     setIsSubmitting(false);
+//     btn.disabled = false;
+//     btn.textContent = btnTitle;
+//   }
+// };
+
 const submitForm = async (status) => {
   setIsSubmitting(true);
 
@@ -1036,37 +1113,54 @@ const submitForm = async (status) => {
 
   try {
     if (contentType === "article") {
-      const resp = await api.post("/resource-library/article", {
-        title,
-        pillarId: selectedPillarId,
-        // Remove coverImage and tags - not expected by API
-        author: "System Admin",
-        coverImage: coverImage,
-        content: articleBody, 
-        description,          
-        duration: duration.toString(), 
-        sessionTime: sessionTime, // Add sessionTime field
-        status,
+      // Use FormData for articles to handle file uploads
+      let formdata = new FormData();
+      formdata.append("title", title);
+      formdata.append("pillarId", selectedPillarId);
+      formdata.append("author", "System Admin");
+      if (coverImage) {
+        formdata.append("coverImage", coverImage);
+      }
+      formdata.append("content", articleBody);
+      formdata.append("description", description);
+      formdata.append("duration", duration.toString());
+      formdata.append("sessionTime", sessionTime);
+      formdata.append("status", status);
+
+      const response = await fetch(`${baseUrl}/resource-library/article`, {
+        method: "POST",
+        body: formdata,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          // Don't set Content-Type header - let browser set it with boundary for FormData
+        },
       });
 
-      showMessage(resp.data.message, "", "success");
-
-      setTimeout(() => {
-        router.push("/contentsManagement?refresh=" + Date.now());
-      }, 100);
+      const respBody = await response.json();
+      
+      if (response.ok) {
+        showMessage(respBody.message || "Article created successfully", "", "success");
+        setTimeout(() => {
+          router.push("/contentsManagement?refresh=" + Date.now());
+        }, 100);
+      } else {
+        showMessage(respBody.message || "Error creating article", "", "error");
+      }
     } else {
+      // Keep existing logic for other content types
       let formdata = new FormData();
       formdata.append("file", fileUploadContent);
       formdata.append("title", title);
       formdata.append("pillarId", selectedPillarId);
-      formdata.append("coverImage", coverImage);
+      if (coverImage) {
+        formdata.append("coverImage", coverImage);
+      }
       formdata.append("author", "System Admin");
-      formdata.append("description", description); 
-      formdata.append("duration", duration.toString()); 
-      formdata.append("sessionTime", sessionTime); 
+      formdata.append("description", description);
+      formdata.append("duration", duration.toString());
+      formdata.append("sessionTime", sessionTime);
       formdata.append("resourceType", contentType);
       formdata.append("status", status);
-      // Don't append content field for media files
 
       if (transcript) {
         formdata.append("transcriptFile", transcript);
@@ -1081,11 +1175,9 @@ const submitForm = async (status) => {
         },
       });
       const respbody = await response.json();
-      const respstatus = response.status;
 
-      if (response.ok || response.status === 201  ) {
+      if (response.ok || response.status === 201) {
         showMessage(respbody.message || "Content uploaded successfully", "", "success");
-
         setTimeout(() => {
           router.push("/contentsManagement?refresh=" + Date.now());
         }, 100);

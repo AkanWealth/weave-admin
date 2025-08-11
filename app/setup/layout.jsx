@@ -7,7 +7,7 @@ function Layout({ children }) {
   return (
     <Suspense>
       <main className="fixed w-full h-full flex justify-center font-rubikRegular text-sm">
-        <div className="w-10/12 max-w-[500px] min-h-[400px] m-auto">
+        <div className="w-10/12 max-w-[500px] max-h-[80vh] overflow-y-auto hide-scrollbar m-auto">
           <Image src={logo} className="w-[200px] m-auto" alt="Weave logo" />
           {children}
           <ToastContainer
