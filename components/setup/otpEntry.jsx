@@ -222,7 +222,7 @@ export default function OtpVerification() {
   const resendOtp = async () => {
     setSendingOtp(true);
     try {
-      const response = await api.post("/auth/resend-otp", {
+      const response = await api.post("/super-admin/resend-otp", {
         email,
       });
       showMessage(response?.data.message, "", "success");

@@ -59,10 +59,10 @@ function PasswordForm() {
         router.push(`/login`);
         return;
       }
-      showMessage(resp.data.message, "error");
+      showMessage(resp.data.message,"", "error");
     } catch (err) {
       console.log(err);
-      showMessage("Error setting up password, please retry", "error");
+      showMessage("Wrong Passord input", "","error");
     } finally {
       setIsLoading(false);
     }
