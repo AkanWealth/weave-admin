@@ -26,12 +26,12 @@ export default function OtpVerification() {
 
     try {
       if (usage === "signup" || usage === "reset-password") {
-        const resp = await api.post("/auth/validate-otp", {
+        const resp = await api.post("/super-admin/validate-otp", {
           email,
           otp,
         });
 
-        if (resp.status === 200) {
+        if (resp.status === 200|| resp.status===201) {
           if (usage == "signup") {
             router.push("/welcome");
           } else if (usage == "reset-password") {
@@ -39,14 +39,14 @@ export default function OtpVerification() {
           }
         }
       } else {
-        const resp = await api.post("/auth/validate-otp", {
+        const resp = await api.post("/super-admin/validate-otp", {
           email,
           otp,
           
         });
 
         console.log(resp);
-        if (resp.status === 200) {
+        if (resp.status === 200|| resp.status===201) {
           showMessage(resp.data.message, "","success");
           router.push(
             `/setup/password?&email=${email}`

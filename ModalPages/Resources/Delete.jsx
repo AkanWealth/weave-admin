@@ -24,7 +24,7 @@ function DeleteResource() {
   const deleteResource = async () => {
     setDeleting(true);
     try {
-      const response = await api.delete(`/resource-library/${itemId}`);
+      const response = await api.delete(`/resource-library/${itemId} `);
       showMessage(response.data.message, "success");
       setTimeout(() => {
         router.push("/contentsManagement?refresh=" + Date.now());

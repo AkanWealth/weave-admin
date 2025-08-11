@@ -120,57 +120,113 @@ const IssueResolutionModal = ({ isOpen, onClose, issueData, onStatusUpdate }) =>
     { id: 3, name: "Closed" }
   ];
 
+  // const handleSubmitResponse = async () => {
+  //   if (!response.trim()) return;
+
+  //   setLoading(true);
+  //   try {
+  //     // Prepare the request payload
+  //     const payload = {
+  //       response: response.trim(),
+  //       sendInAppNotification: notificationType
+  //     };
+  //     console.log("payload", payload);
+  //     console.log("token", localStorage.getItem('token'));
+  //     const token = Cookies.get("accessToken");
+
+  //     // Make the API call to respond to the issue
+  //     const result = await api.post(`/help-support/respond-to-issue/${issueData.userId}`, payload, {
+  //       // headers: {
+  //       //   'Authorization': `Bearer ${token}`,
+  //       //   'Content-Type': 'application/json'
+  //       // }
+  //     });
+
+  //     console.log("result", result);
+
+  //     if (result.status === 201) {
+  //       showMessage("Response sent successfully", "", "success");
+  //       router.push("/user-reported-Issue?refresh=" + Date.now());
+
+  //       // Update conversation history
+  //       setConversations(prev => [
+  //         ...prev,
+  //         {
+  //           id: prev.length + 1,
+  //           message: response,
+  //           timestamp: new Date().toLocaleString(),
+  //           isUser: false
+  //         }
+  //       ]);
+
+  //       setResponse("");
+  //       onClose();
+  //     } else {
+  //       showMessage("Failed to send response", "", "error");
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     showMessage("Failed to send response", error.response?.data?.message || "An error occurred", "error");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
   const handleSubmitResponse = async () => {
-    if (!response.trim()) return;
+  if (!response.trim()) return;
 
-    setLoading(true);
-    try {
-      // Prepare the request payload
-      const payload = {
-        response: response.trim(),
-        sendInAppNotification: notificationType
-      };
-      console.log("payload", payload);
-      console.log("token", localStorage.getItem('token'));
-      const token = Cookies.get("accessToken");
+  setLoading(true);
+  try {
+    // Prepare the request payload with status included
+    const payload = {
+      issueId: issueData.userId, // Using userId as issueId based on your current structure
+      response: response.trim(),
+      status: status, // Include the current status
+      sendInAppNotification: notificationType
+    };
+    
+    console.log("payload", payload);
+    console.log("token", localStorage.getItem('token'));
+    const token = Cookies.get("accessToken");
 
-      // Make the API call to respond to the issue
-      const result = await api.post(`/help-support/respond-to-issue/${issueData.userId}`, payload, {
-        // headers: {
-        //   'Authorization': `Bearer ${token}`,
-        //   'Content-Type': 'application/json'
-        // }
-      });
+    // Make the API call to respond to the issue
+    const result = await api.post(`/help-support/respond-to-issue/${issueData.userId}`, payload, {
+      // headers: {
+      //   'Authorization': `Bearer ${token}`,
+      //   'Content-Type': 'application/json'
+      // }
+    });
 
-      console.log("result", result);
+    console.log("result", result);
 
-      if (result.status === 201) {
-        showMessage("Response sent successfully", "", "success");
-        router.push("/user-reported-Issue?refresh=" + Date.now());
+    if (result.status === 201) {
+      showMessage("Response sent successfully", "", "success");
+      router.push("/user-reported-Issue?refresh=" + Date.now());
 
-        // Update conversation history
-        setConversations(prev => [
-          ...prev,
-          {
-            id: prev.length + 1,
-            message: response,
-            timestamp: new Date().toLocaleString(),
-            isUser: false
-          }
-        ]);
+      // Update conversation history
+      setConversations(prev => [
+        ...prev,
+        {
+          id: prev.length + 1,
+          message: response,
+          timestamp: new Date().toLocaleString(),
+          isUser: false
+        }
+      ]);
 
-        setResponse("");
-        onClose();
-      } else {
-        showMessage("Failed to send response", "", "error");
-      }
-    } catch (error) {
-      console.error(error);
-      showMessage("Failed to send response", error.response?.data?.message || "An error occurred", "error");
-    } finally {
-      setLoading(false);
+      setResponse("");
+      onClose();
+    } else {
+      showMessage("Failed to send response", "", "error");
     }
-  };
+  } catch (error) {
+    console.error(error);
+    showMessage("Failed to send response", error.response?.data?.message || "An error occurred", "error");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleStatusChange = async (newStatus) => {
     setStatus(newStatus);

@@ -7,8 +7,8 @@ function Nav({ active }) {
             <Link href='/setup/verify-otp' className={(active === 'otp' ? 'font-rubikMedium ' : '') + 'mx-2'}>Verify Otp</Link>
             {'>'}
             <Link href='/setup/password' className={(active === 'password' ? 'font-rubikMedium ' : '') + 'mx-2'}>Set password</Link>
-            {'>'}
-            <Link href='/setup/profile' className={(active === 'profile' ? 'font-rubikMedium ' : '') + 'mx-2'}>Profile</Link>
+            {/* {'>'}
+            <Link href='/setup/profile' className={(active === 'profile' ? 'font-rubikMedium ' : '') + 'mx-2'}>Profile</Link> */}
         </div>
     )
 }
