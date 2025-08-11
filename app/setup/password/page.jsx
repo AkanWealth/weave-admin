@@ -140,7 +140,7 @@ import { ToastContext, useMessageContext } from "@/contexts/toast";
 import Nav from "@/components/setup/Nav";
 import PasswordField from "@/components/elements/PasswordField";
 import PasswordStrengthMeter from "@/components/elements/passwordStrenghtMeter";
-import api from "@/lib/api";
+import api, { clearAuthTokens } from "@/lib/api";
 
 function PasswordSetup() {
   return (
@@ -168,33 +168,6 @@ function PasswordForm() {
   const email = params.get("email"); // Extract email from the URL
   const router = useRouter();
 
-  // Function to clear all tokens/auth data
-  const clearAllTokens = () => {
-    // Clear localStorage
-    localStorage.removeItem("token");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("admin");
-    localStorage.removeItem("user");
-    
-    // Clear sessionStorage
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("accessToken");
-    sessionStorage.removeItem("refreshToken");
-    sessionStorage.removeItem("authToken");
-    sessionStorage.removeItem("admin");
-    sessionStorage.removeItem("user");
-    
-    // Clear any cookies (if you're using cookies for tokens)
-    document.cookie.split(";").forEach(function(c) { 
-      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-    });
-    
-    // If you have an API method to invalidate tokens on the server
-    // api.post("/auth/logout").catch(() => {}); // Silent fail if needed
-  };
-
   const savePassword = async () => {
     try {
       if (!temporaryPassword) {
@@ -217,8 +190,8 @@ function PasswordForm() {
       if (resp.status === 200) {
         showMessage(resp.data.message, " ","success");
 
-        // Clear all tokens before navigation
-        clearAllTokens();
+        // Clear all authentication tokens using the proper API method
+        clearAuthTokens();
 
         // Navigate to the login page
         router.push(`/login`);
