@@ -28,7 +28,6 @@ export default function PaymentSuccess() {
     try {
       window.close();
     } catch (e) {
-      // Do nothing if window.close() fails; rely on user to close manually
     }
   };
 
