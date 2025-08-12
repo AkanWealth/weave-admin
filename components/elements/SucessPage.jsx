@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckCircle, ArrowRight, Home } from "lucide-react";
+import { CheckCircle, Home } from "lucide-react";
 
 export default function PaymentSuccess() {
   const [isVisible, setIsVisible] = useState(false);
@@ -16,7 +16,6 @@ export default function PaymentSuccess() {
     if (!session_id) {
       setError("No payment session ID provided");
       setIsLoading(false);
-      setTimeout(() => router.push("/"), 2000);
       return;
     }
 
@@ -25,12 +24,12 @@ export default function PaymentSuccess() {
     setTimeout(() => setIsVisible(true), 100);
   }, [searchParams, router]);
 
-  const handleGoToDashboard = () => {
-    router.push("/dashboard");
-  };
-
   const handleGoHome = () => {
-    router.push("/");
+    try {
+      window.close();
+    } catch (e) {
+      // Do nothing if window.close() fails; rely on user to close manually
+    }
   };
 
   if (isLoading) {
@@ -54,8 +53,11 @@ export default function PaymentSuccess() {
                        transition-all duration-300 hover:scale-105 font-medium"
           >
             <Home className="w-5 h-5 mr-2" />
-            Go Home
+            Close
           </button>
+          <p className="text-sm text-gray-500 mt-4">
+            If the window does not close, please close this tab manually.
+          </p>
         </div>
       </div>
     );
@@ -87,51 +89,24 @@ export default function PaymentSuccess() {
               Payment Confirmed!
             </h1>
             <p className="text-xl text-gray-600 mb-6">
-              Your subscription payment was successful. 
+              Your subscription payment was successful.
             </p>
-            {/* <div className="bg-green-50 border border-green-200 rounded-lg p-2 mb-6">
-              <p className="text-green-800 font-medium text-xs">
-                Payment Session ID: <span className="font-mono">{sessionId}</span>
-              </p>
-            </div> */}
-          </div>
-
-          {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button
-              onClick={handleGoToDashboard}
-              className="flex items-center justify-center px-6 py-3 bg-gradient-to-r 
-                         from-green-500 to-blue-500 text-white rounded-lg hover:from-green-600 
-                         hover:to-blue-600 transition-all duration-300 hover:scale-105 hover:shadow-md 
-                         font-medium"
-            >
-              Go to Dashboard
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </button>
             <button
               onClick={handleGoHome}
+              aria-label="Close this page"
               className="flex items-center justify-center px-6 py-3 bg-gray-100 
                          border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-200 
                          transition-all duration-300 hover:scale-105 font-medium"
             >
               <Home className="w-5 h-5 mr-2" />
-              Go Home
+              Close
             </button>
-          </div> */}
-
-          {/* <div className="text-center mt-6 text-gray-500 text-sm">
-            <p>
-              Questions? Reach out to{" "}
-              <a
-                href="mailto:support@founderthrive.com"
-                className="text-blue-600 hover:underline"
-              >
-                support@founderthrive.com
-              </a>
+            <p className="text-sm text-gray-500 mt-4">
+              If the window does not close, please close this tab manually.
             </p>
-          </div> */}
+          </div>
         </div>
       </div>
     </div>
-    
   );
 }

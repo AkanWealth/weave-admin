@@ -29,8 +29,11 @@ export default function PaymentCancel() {
 //     router.push("/payment"); // Adjust to your payment page route
 //   };
 
-  const handleGoHome = () => {
-    // router.push("/");
+   const handleGoHome = () => {
+    try {
+      window.close();
+    } catch (e) {
+    }
   };
 
   if (isLoading) {
@@ -91,6 +94,16 @@ export default function PaymentCancel() {
             <p className="text-xl text-gray-600 mb-6">
               Your payment process was canceled. No charges were made.
             </p>
+            <button
+              onClick={handleGoHome}
+              aria-label="Go to home page"
+              className="flex items-center justify-center px-6 py-3 bg-gray-100 
+                         border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-200 
+                         transition-all duration-300 hover:scale-105 font-medium"
+            >
+              <Home className="w-5 h-5 mr-2" />
+              Go Home
+            </button>
             {/* {sessionId && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                 <p className="text-blue-800 font-medium text-sm">
@@ -112,16 +125,7 @@ export default function PaymentCancel() {
               Retry Payment
               <ArrowLeft className="w-5 h-5 ml-2" />
             </button>
-            <button
-              onClick={handleGoHome}
-              aria-label="Go to home page"
-              className="flex items-center justify-center px-6 py-3 bg-gray-100 
-                         border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-200 
-                         transition-all duration-300 hover:scale-105 font-medium"
-            >
-              <Home className="w-5 h-5 mr-2" />
-              Go Home
-            </button>
+            
           </div> */}
 
           {/* <div className="text-center mt-6 text-gray-500 text-sm">
