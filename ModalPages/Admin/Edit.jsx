@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import InputField from "@/components/elements/TextField";
-import Button from "@/components/elements/Button";
-import axios from "axios";
+// import Button from "@/components/elements/Button";
+// import axios from "axios";
 import api from "@/lib/api";
 import Image from "next/image";
 import avatar from "@/assets/images/3d_avatar_1.png";
@@ -224,7 +224,7 @@ function EditAdmin({ userData, onSave, onCancel }) {
   };
   
   // Handle individual checkbox changes
-  const handlePermissionChange = (section, action, value) => {
+  const   qhandlePermissionChange = (section, action, value) => {
     setPermissions(prevPermissions => ({
       ...prevPermissions,
       [section]: {

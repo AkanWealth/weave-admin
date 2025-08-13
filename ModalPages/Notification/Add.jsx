@@ -127,7 +127,9 @@ const { closeModal } = useModalContext();
           {/* <span className="text-gray-500">Select Notification Type</span> */}
           <option value="">Select Notification Type</option>
           <option value="email">Email</option>
+          <option value="in-app">In app</option>
           {/* <option value="push">Push Notification</option> */}
+
         </select>
 
         <h6 className="font-rubikMedium my-2">Select Recipient</h6>
@@ -138,7 +140,7 @@ const { closeModal } = useModalContext();
         >
           {/* <span className="text-gray-500">Select Notification Type</span> */}
           <option value="">Select Recipient Group </option>
-          {/* <option value="users">App Users</option> */}
+          <option value="users">App Users</option>
           <option value="admin">Admin Users</option>
         </select>
         {/* <div className="border border-black p-2 rounded-md">

@@ -122,7 +122,7 @@ function AdminList() {
       setFetchingUsers(true);
       // Fetch complete user details by ID
       const response = await api.get(`/users/profile/${user.id}`);
-      console.log(response);
+      console.log("response",response);
 
       if (response.status === 200) {
         // Combine fetched data with complete role object
@@ -314,3 +314,6 @@ function AdminList() {
 }
 
 export default AdminList;
+
+
+

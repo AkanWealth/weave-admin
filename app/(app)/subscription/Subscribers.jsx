@@ -58,24 +58,48 @@ function Subscriber() {
     return  subscriber.email || "N/A";
   };
 
-  const filteredSubscribers = useMemo(() => {
-    let filtered = [...subscribers];
-    if (searchKey.trim()) {
-      filtered = filtered.filter((subscriber) => {
-        const name = getUserDisplayName(subscriber).toLowerCase();
-        const email = getUserEmail(subscriber).toLowerCase();
-        const searchTerm = searchKey.toLowerCase();
-        return name.includes(searchTerm) || email.includes(searchTerm);
-      });
-    }
-    if (filterStatus !== "all") {
-      filtered = filtered.filter(
-        (subscriber) => subscriber.status.toLowerCase() === filterStatus.toLowerCase()
-      );
-    }
-    return filtered;
-  }, [subscribers, searchKey, filterStatus]);
+  // const filteredSubscribers = useMemo(() => {
+  //   let filtered = [...subscribers];
+  //   if (searchKey.trim()) {
+  //     filtered = filtered.filter((subscriber) => {
+  //       const name = getUserDisplayName(subscriber).toLowerCase();
+  //       const email = getUserEmail(subscriber).toLowerCase();
+  //       const searchTerm = searchKey.toLowerCase();
+  //       return name.includes(searchTerm) || email.includes(searchTerm);
+  //     });
+  //   }
+  //   if (filterStatus !== "all") {
+  //     filtered = filtered.filter(
+  //       (subscriber) => subscriber.status.toLowerCase() === filterStatus.toLowerCase()
+  //     );
+  //   }
+  //   return filtered;
+  // }, [subscribers, searchKey, filterStatus]);
 
+
+  const filteredSubscribers = useMemo(() => {
+  let filtered = [...subscribers].sort((a, b) => {
+    // Sort by startDate in descending order (latest first)
+    return new Date(b.startDate) - new Date(a.startDate);
+  });
+
+  if (searchKey.trim()) {
+    filtered = filtered.filter((subscriber) => {
+      const name = getUserDisplayName(subscriber).toLowerCase();
+      const email = getUserEmail(subscriber).toLowerCase();
+      const searchTerm = searchKey.toLowerCase();
+      return name.includes(searchTerm) || email.includes(searchTerm);
+    });
+  }
+
+  if (filterStatus !== "all") {
+    filtered = filtered.filter(
+      (subscriber) => subscriber.status.toLowerCase() === filterStatus.toLowerCase()
+    );
+  }
+
+  return filtered;
+}, [subscribers, searchKey, filterStatus]);
   const totalItems = filteredSubscribers.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
