@@ -223,7 +223,7 @@ function Notifications() {
     setIsFetching(true);
 
     try {
-      const response = await api.get("/notification/admin");
+      const response = await api.get("/notification/notifications/unread");
       if (response.status === 200) {
         setNotifications(response.data.notifications);
         return;
