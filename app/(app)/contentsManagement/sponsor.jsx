@@ -22,7 +22,7 @@ function SponsorsRender() {
   const getSponsors = async () => {
     setIsLoading(true);
     try {
-      const response = await api.get("/sponsors");
+      const response = await api.get("/sponsors/admin");
       if (response.status === 200) {
         setSponsors(response.data);
         setFilteredSponsors(response.data);
@@ -109,13 +109,16 @@ function SponsorsRender() {
   };
 
   const formatTime = (dateString) => {
-    const date = new Date(dateString);
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const displayHours = hours % 12 || 12;
-    return `${String(displayHours).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${ampm}`;
-  };
+  if (!dateString) return "Time not available";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "Invalid time";
+  console.log("Parsed Date:", date, "Timezone Offset:", date.getTimezoneOffset());
+  const hours = date.getHours(); // or getUTCHours() for UTC
+  const minutes = date.getMinutes(); // or getUTCMinutes() for UTC
+  const ampm = hours >= 12 ? "PM" : "AM";
+  const displayHours = hours % 12 || 12;
+  return `${String(displayHours).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${ampm}`;
+};
 
   const getSponsorColor = (sponsorName) => {
     // Generate a color based on the sponsor name hash
@@ -328,9 +331,9 @@ const formatDuration = (durationStr) => {
                     <span className="block text-gray-600">
                       {formatDate(sponsor.endDate)}
                     </span>
-                    <span className="block text-gray-600 text-xs">
+                    {/* <span className="block text-gray-600 text-xs">
                       {formatTime(sponsor.endDate)}
-                    </span>
+                    </span> */}
                   </div>
                 </td>
                 <td className="px-4 py-3">

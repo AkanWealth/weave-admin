@@ -24,12 +24,20 @@ export default function PaymentSuccess() {
     setTimeout(() => setIsVisible(true), 100);
   }, [searchParams, router]);
 
-  const handleGoHome = () => {
+ const handleGoHome = () => {
+  try {
+ 
+    window.location.href = "founderthrive://";
+  } catch (e) {
+    console.error("Deep link failed:", e);
+
     try {
       window.close();
-    } catch (e) {
+    } catch (closeError) {
+      window.close();
     }
-  };
+  }
+};
 
   if (isLoading) {
     return (

@@ -24,7 +24,7 @@ function ViewDetail({ onClose, sponsorId }) {
     }
 
     try {
-      const response = await api.get(`/sponsors/${currentSponsorId}`);
+      const response = await api.get(`/sponsors/admin/${currentSponsorId}`);
       if (response.status === 200) {
         setSponsorData(response.data);
       }
