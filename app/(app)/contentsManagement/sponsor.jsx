@@ -282,6 +282,8 @@ const formatDuration = (durationStr) => {
                 <th className="text-left px-4 py-3 font-rubikMedium">Days Left</th>
                 <th className="text-left px-4 py-3 font-rubikMedium">Duration</th>
                 <th className="text-left px-4 py-3 font-rubikMedium">Expires</th>
+                {/* <th className="text-left px-4 py-3 font-rubikMedium">Start date</th> */}
+
                 <th className="text-left px-4 py-3 font-rubikMedium">Status</th>
                 <th className="text-left px-4 py-3 font-rubikMedium">Price</th>
                 <th className="text-left px-4 py-3 font-rubikMedium">Actions</th>
@@ -327,7 +329,7 @@ const formatDuration = (durationStr) => {
   <span className="text-gray-600">{formatDuration(sponsor.duration)}</span>
 </td>
                 <td className="px-4 py-3">
-                  <div className="text-sm">
+                  <div className="text-xs">
                     <span className="block text-gray-600">
                       {formatDate(sponsor.endDate)}
                     </span>
@@ -336,6 +338,16 @@ const formatDuration = (durationStr) => {
                     </span> */}
                   </div>
                 </td>
+                {/* <td className="px-4 py-3">
+                  <div className="text-xs">
+                    <span className="block text-gray-600">
+                      {formatDate(sponsor.startDate)}
+                    </span>
+                    {/* <span className="block text-gray-600 text-xs">
+                      {formatTime(sponsor.endDate)}
+                    </span> 
+                  </div>
+                </td> */}
                 <td className="px-4 py-3">
                   <button
                     className={`${
