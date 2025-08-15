@@ -23,7 +23,7 @@ export default function Dashboard() {
 
 
   return (
-    <div>
+    <div className="text-gray-800 ">
       <h1 className="text-2xl flex items-center mb-4">
         <span className="inline-flex items-center justify-center mr-4">
           <PentagonWithCircleIcon className="bg-[#e8e8e8] text-weave-primary rounded-full p-3" />

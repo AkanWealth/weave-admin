@@ -9,7 +9,7 @@ import AuditLogs from "./auditLogs";
 export default function Page() {
   return (
     <Suspense>
-      <div>
+      <div className="text-gray-800 ">
         <h1 className="text-2xl">
           <i className="fa fa-tag mr-4 text-xl bg-[#e8e8e8] rounded-full p-3"></i>
           Audit Logs

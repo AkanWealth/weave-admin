@@ -6,7 +6,7 @@ import LoginImage from "@/assets/images/loginImg.png";
 function AuthLayout({ children }) {
   return (
     <Suspense>
-      <main className="fixed w-full h-full flex justify-center font-rubikRegular">
+      <main className="bg-white fixed w-full h-full flex justify-center font-rubikRegular">
         {/* Modified banner div with smaller width and centered image */}
         <div className="w-[1100px] h-full banner relative">
           <Image 

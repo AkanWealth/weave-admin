@@ -35,8 +35,8 @@ function Analytics() {
       <div className="flex space-x-8 w-full my-4">
         <div className="w-1/4 bg-[#f8cf84] p-4 px-6 rounded-2xl">
           <div>
-            <h5 className="text-gray-500 mb-1">Super Admin</h5>
-            <h6 className="font-rubikMedium text-2xl">
+            <h5 className="text-gray-700 mb-1">Super Admin</h5>
+            <h6 className="font-rubikMedium text-gray-800  text-2xl">
               {analytics ? analytics.super_admin : 0}
             </h6>
           </div>
@@ -44,8 +44,8 @@ function Analytics() {
 
         <div className="w-1/4 bg-[#f8cf84] p-4 px-6 rounded-2xl">
           <div>
-            <h5 className="text-gray-500 mb-1">Admin</h5>
-            <h6 className="font-rubikMedium text-2xl">
+            <h5 className="text-gray-700 mb-1">Admin</h5>
+            <h6 className="font-rubikMedium text-gray-800  text-2xl">
               {analytics ? analytics.admin : 0}
             </h6>
           </div>
@@ -53,8 +53,8 @@ function Analytics() {
 
         <div className="w-1/4 bg-[#f8cf84] p-4 px-6 rounded-2xl">
           <div>
-            <h5 className="text-gray-500 mb-1">Content Manager</h5>
-            <h6 className="font-rubikMedium text-2xl">
+            <h5 className="text-gray-700 mb-1">Content Manager</h5>
+            <h6 className="font-rubikMedium text-gray-800  text-2xl">
               {analytics ? analytics.content_manager : 0}
             </h6>
           </div>
@@ -62,8 +62,8 @@ function Analytics() {
 
         <div className="w-1/4 bg-[#f8cf84] p-4 px-6 rounded-2xl">
           <div>
-            <h5 className="text-gray-500 mb-1">Other Manager</h5>
-            <h6 className="font-rubikMedium text-2xl">
+            <h5 className="text-gray-700 mb-1">Other Manager</h5>
+            <h6 className="font-rubikMedium text-gray-800  text-2xl">
               {analytics ? analytics.other_manager : 0}
             </h6>
           </div>

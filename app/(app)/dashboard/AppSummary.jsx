@@ -135,7 +135,7 @@ function AppSummary() {
   };
 
   return (
-    <div className="grid grid-cols-4 gap-6 w-full my-4">
+    <div className="grid grid-cols-4 text-black gap-6 w-full my-4">
       <div className="bg-base-white p-6 rounded-2xl">
         <div className="flex justify-between items-start mb-4">
           <div className="whitespace-nowrap">
@@ -150,7 +150,7 @@ function AppSummary() {
         {renderPercentageChange(AllUserAveragemonthly, "last month")}
       </div>
 
-      <div className="bg-base-white p-6 rounded-2xl">
+      <div className="bg-base-white p-6 text-black rounded-2xl">
         <div className="flex justify-between items-start mb-4">
           <div className="whitespace-nowrap">
             <h5 className="text-gray-500 mb-2 text-sm">App User</h5>
@@ -164,7 +164,7 @@ function AppSummary() {
         {renderPercentageChange(AllAppUserAveragemonthly, "last month")}
       </div>
 
-      <div className="bg-base-white p-6 rounded-2xl">
+      <div className="bg-base-white text-black p-6 rounded-2xl">
         <div className="flex justify-between items-start mb-4">
           <div className="whitespace-nowrap">
             <h5 className="text-gray-500 mb-2 text-sm">Internal User</h5>
@@ -178,7 +178,7 @@ function AppSummary() {
         {renderPercentageChange(AllInternalUserAveragemonthly, "last month")}
       </div>
 
-      <div className="bg-base-white p-6 rounded-2xl">
+      <div className="bg-base-white text-black p-6 rounded-2xl">
         <div className="flex justify-between items-start mb-4">
           <div className="whitespace-nowrap">
             <h5 className="text-gray-500 mb-2 text-sm">Average Check-In</h5>

@@ -12,7 +12,7 @@ function InputField({
 }) {
   return (
     <div className={`flex-column space-y-2 ${className && className}`}>
-      <label htmlFor={label} className="capitalize font-rubikMedium">
+      <label htmlFor={label} className="text-gray-800  capitalize font-rubikMedium">
         {label}<span className="text-red-500">*</span>
       </label>
       <input

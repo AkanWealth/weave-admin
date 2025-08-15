@@ -23,8 +23,8 @@ function Page() {
     }
   }, [refreshParam]);
   return (
-    <div>
-      <h3 className="text-2xl flex items-center">
+    <div className="text-gray-800 ">
+      <h3 className="text-2xl text-gray-800  flex items-center">
         <span className="mr-4 bg-[#e8e8e8] rounded-full p-3 flex items-center justify-center">
           <User className="w-7 h-7 text-weave-primary" />
         </span>
@@ -32,14 +32,14 @@ function Page() {
         <div className="ml-auto">
           <Link
             href={"/users/manage-roles"}
-            className="px-4 p-2 border border-black text-sm rounded-md mr-4"
+            className="px-4 p-2 text-gray-800  border border-black text-sm rounded-md mr-4"
           >
             Manage Roles
           </Link>
 
           <Link
             href={"?modal=add-admin"}
-            className="px-4 p-2 border border-weave-primary bg-weave-primary text-base-white text-sm rounded-md"
+            className="px-4 p-2  border border-weave-primary bg-weave-primary text-base-white text-sm rounded-md"
           >
             Add Admin User
           </Link>

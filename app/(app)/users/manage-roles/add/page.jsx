@@ -8,7 +8,7 @@ import { ToastContext } from "@/contexts/toast";
 
 function Page() {
   return (
-    <div className="relative">
+    <div className="text-gray-800  relative">
       <h1 className="text-xl my-2">
         <Link href={"/users"} className="text-gray-500">
           User Management

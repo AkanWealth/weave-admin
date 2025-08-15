@@ -692,7 +692,7 @@ function Login() {
       <h1 className="text-3xl font-rubikBold text-gray-900">
         Login as the FounderThrive Admin
       </h1>
-      <p className="text-md my-4 mb-8">
+      <p className="text-md my-4 text-gray-800  mb-8">
         Enter your account correct login details below
       </p>
       

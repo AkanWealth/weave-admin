@@ -277,10 +277,10 @@ function AdminList() {
             )}
             renderTitle={() => (
               <tr className="bg-[#f5f6fa] ">
-                <th className="text-left px-16">Username</th>
-                <th className="text-left">Role</th>
-                <th className="text-left">Date</th>
-                <th className="text-left">Status</th>
+                <th className="text-left text-gray-800  px-16">Username</th>
+                <th className="text-left text-gray-800 ">Role</th>
+                <th className="text-left text-gray-800 ">Date</th>
+                <th className="text-left text-gray-800 ">Status</th>
                 <th className="text-left"></th>
               </tr>
             )}

@@ -61,7 +61,7 @@ function Layout({ children }) {
     }, []);
 
     return (
-      <div className="relative flex items-center" ref={dropdownRef}>
+      <div className=" relative flex items-center" ref={dropdownRef}>
         <div className="mr-2 flex items-center">
           <Image
             src={Usaflag}
@@ -104,7 +104,7 @@ function Layout({ children }) {
     <Suspense>
       <ToastContext>
         <div className="bg-[#F5F6FA]">
-          <nav className="w-[280px] fixed left-0 top-0 bottom-0 font-rubikRegular">
+          <nav className="w-[280px] bg-white fixed left-0 top-0 bottom-0 font-rubikRegular">
             <div className="border-b-2 border-gray-100 flex p-4 py-4 justify-center item=center">
               <Image src={logo} className="w-[100px]" alt="Weave Logo" />
             </div>
@@ -113,7 +113,7 @@ function Layout({ children }) {
                 href={"/dashboard"}
                 className={
                   (pathname.startsWith("/dashboard")
-                    ? "bg-weave-primary text-base-white "
+                    ? "bg-weave-primary text-base-white"
                     : "text-gray-600") + "rounded-md p-3 px-5"
                 }
               >

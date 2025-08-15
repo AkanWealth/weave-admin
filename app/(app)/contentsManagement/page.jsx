@@ -44,7 +44,7 @@ useEffect(() => {
     <Suspense>
       {/* <ToastContext> */}
         {/* Use the key prop to force the entire component tree to re-render */}
-        <div key={key}>
+        <div key={key} className="text-gray-800 ">
           {/* Header Section */}
           <div className="flex items-center justify-between">
             {/* Title with Icon */}

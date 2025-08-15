@@ -50,7 +50,7 @@ function ResetPassword() {
   };
 
   return (
-    <div className="flex-col space-y-12">
+    <div className="flex-col space-y-12 text-gray-800 ">
       <h1 className="text-4xl font-rubikBold">Reset Password</h1>
 
       <div className="flex-column space-y-6">

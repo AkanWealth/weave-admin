@@ -33,10 +33,10 @@ function PasswordReset() {
   };
 
   return (
-    <div>
-      <h1 className="text-4xl font-rubikBold"> Forgot Password </h1>
-      <h1 className="text-4xl font-rubikRegular"> No worries </h1>
-      <p className="text-md my-4 mb-8">
+    <div className=" ">
+      <h1 className="text- text-gray-800  font-rubikBold"> Forgot Password </h1>
+      <h1 className="text-4xl text-gray-600 font-rubikRegular"> No worries </h1>
+      <p className="text-md text-gray-500 my-4 mb-8">
         Enter the email associated with your account and we'll send an email
         with instructions to reset your password.
       </p>

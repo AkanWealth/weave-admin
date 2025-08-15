@@ -116,10 +116,10 @@ function UserRender({ info, date, resendInvite, onEditClick }) {
         </div>
       </td>
       <td className="text-left">
-        <h6 className="capitalize">{role}</h6>
+        <h6 className="text-gray-800 capitalize">{role}</h6>
       </td>
-      <td className="text-left">
-        <h6>{dateStr}</h6>
+      <td className="text-gray-800  text-left">
+        <h6 >{dateStr}</h6>
         <h6>{timeStr}</h6>
       </td>
       <td className="text-left">

@@ -25,9 +25,9 @@ export default function Dashboard() {
 
 
   return (
-    <div>
-      <h1 className="text-2xl flex items-center mb-4">
-        <span className="inline-flex items-center justify-center mr-4">
+    <div className="text-gray-800 ">
+      <h1 className=" text-black text-2xl flex items-center mb-4">
+        <span className=" inline-flex items-center justify-center mr-4">
           <PentagonWithCircleIcon className="bg-[#e8e8e8] text-weave-primary rounded-full p-3" />
         </span>
         Dashboard
@@ -38,14 +38,14 @@ export default function Dashboard() {
 
       {/* chart section */}
       <div className="rounded-2xl bg-white p-4 my-6">
-        <h3 className="text-xl font-rubikMedium">User Growth</h3>
+        <h3 className="text-xl font-rubikMedium text-black">User Growth</h3>
 
         <GrowthChart />
       </div>
 
       {/* sign up activity tab */}
       <div className="rounded-2xl bg-white p-4 my-6">
-        <h3 className="text-xl font-rubikMedium">
+        <h3 className="text-xl font-rubikMedium text-black">
           New Signup
           <Link
             href={"/dashboard/users"}

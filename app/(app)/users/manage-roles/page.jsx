@@ -149,7 +149,7 @@ function Page() {
   };
 
   return (
-    <div>
+    <div className="text-gray-800 ">
       <h1 className="text-xl font-rubikMedium my-2">
         <Link href={"/users"} className="text-gray-500">
           {" "}

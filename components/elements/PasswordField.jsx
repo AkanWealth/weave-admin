@@ -4,7 +4,7 @@ function PasswordField({ label, placeholder, value, setValue, error }) {
   let [isVisible, setIsVisible] = useState(false);
   return (
     <div className="flex-column space-y-2 relative">
-      <label htmlFor={label} className="capitalize font-rubikMedium">
+      <label htmlFor={label} className="text-gray-800 capitalize font-rubikMedium">
         {label}
       </label>
       <input
@@ -15,7 +15,7 @@ function PasswordField({ label, placeholder, value, setValue, error }) {
           (error && error !== ""
             ? "border-red-500 focus:border-red-500 "
             : "focus:border-weave-primary ") +
-          "w-full p-2 border border-base-black  focus:outline-none rounded-md font-rubikRegular"
+          "w-full p-2 border border-base-black text-gray-800  focus:outline-none rounded-md font-rubikRegular"
         }
         value={value}
         onChange={(e) => setValue(e.target.value)}

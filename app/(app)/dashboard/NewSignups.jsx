@@ -49,13 +49,13 @@ function NewSignups() {
         <table className="my-4 w-full">
           <tbody>
             <tr className="bg-[#f5f6fa]">
-              <th className="py-3 px-4 text-left font-medium">User ID</th>
-              <th className="py-3 px-4 text-left font-medium">Username</th>
-              <th className="py-3 px-4 text-left font-medium">Date</th>
-              <th className="py-3 px-4 text-left font-medium">Status</th>
+              <th className="py-3 px-4 text-left text-gray-800 font-medium">User ID</th>
+              <th className="py-3 px-4 text-left text-gray-800  font-medium">Username</th>
+              <th className="py-3 px-4 text-left text-gray-800  font-medium">Date</th>
+              <th className="py-3 px-4 text-left  text-gray-800 font-medium">Status</th>
               {/* <th className="py-3 px-4 text-left font-medium">Device</th> */}
-              <th className="py-3 px-4 text-left font-medium">Last Login</th>
-              <th className="py-3 px-4 text-left font-medium"></th>
+              <th className="py-3 px-4 text-left text-gray-800  font-medium">Last Login</th>
+              <th className="py-3 px-4 text-left text-gray-800  font-medium"></th>
             </tr>
 
             {newSignups.map((user) => {

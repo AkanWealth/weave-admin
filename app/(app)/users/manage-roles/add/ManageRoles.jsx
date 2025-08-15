@@ -93,7 +93,7 @@ function ManageRoles() {
 
   return (
     <>
-      <div className="max-w-[300px]">
+      <div className="text-gray-800  max-w-[300px]">
         <InputField
           label={"Role"}
           placeholder={"Data Analyst"}
