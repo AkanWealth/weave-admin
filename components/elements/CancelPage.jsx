@@ -29,12 +29,20 @@ export default function PaymentCancel() {
 //     router.push("/payment"); // Adjust to your payment page route
 //   };
 
-   const handleGoHome = () => {
+    const handleGoHome = () => {
+  try {
+ 
+    window.location.href = "founderthrive://";
+  } catch (e) {
+    console.error("Deep link failed:", e);
+
     try {
       window.close();
-    } catch (e) {
+    } catch (closeError) {
+      window.close();
     }
-  };
+  }
+};
 
   if (isLoading) {
     return (

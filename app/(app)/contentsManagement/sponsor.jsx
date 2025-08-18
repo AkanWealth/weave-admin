@@ -69,7 +69,7 @@ function SponsorsRender() {
     }
 
     // Sort by startDate in descending order
-    result.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+    result.sort((a, b) => new Date(b.createdAt) - new Date(a.startDate));
     setFilteredSponsors(result);
   }, [tierFilter, statusFilter, searchKey, sponsors]);
 
