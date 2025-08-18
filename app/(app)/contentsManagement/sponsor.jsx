@@ -40,38 +40,39 @@ function SponsorsRender() {
   }, []);
 
   useEffect(() => {
-    let result = [...sponsors];
+  let result = [...sponsors];
 
-    // Apply tier filter
-    if (tierFilter) {
-      setSearchKey(""); // Clear search when filter is applied
-      result = result.filter((sponsor) => sponsor.sponsorshipTier === tierFilter);
+  // Apply tier filter
+  if (tierFilter) {
+    setSearchKey(""); // Clear search when filter is applied
+    result = result.filter((sponsor) => sponsor.sponsorshipTier === tierFilter);
+  }
+
+  // Apply status filter
+  if (statusFilter) {
+    setSearchKey(""); // Clear search when filter is applied
+    if (statusFilter === "Active") {
+      result = result.filter((sponsor) => sponsor.isActive === true);
+    } else if (statusFilter === "Inactive") {
+      result = result.filter((sponsor) => sponsor.isActive === false);
     }
+  }
 
-    // Apply status filter
-    if (statusFilter) {
-      setSearchKey(""); // Clear search when filter is applied
-      if (statusFilter === "Active") {
-        result = result.filter((sponsor) => sponsor.isActive === true);
-      } else if (statusFilter === "Inactive") {
-        result = result.filter((sponsor) => sponsor.isActive === false);
-      }
-    }
+  // Apply search filter
+  if (searchKey) {
+    result = result.filter((sponsor) =>
+      Object.values(sponsor)
+        .join(" ")
+        .toLowerCase()
+        .includes(searchKey.toLowerCase())
+    );
+  }
 
-    // Apply search filter
-    if (searchKey) {
-      result = result.filter((sponsor) =>
-        Object.values(sponsor)
-          .join(" ")
-          .toLowerCase()
-          .includes(searchKey.toLowerCase())
-      );
-    }
+  // Sort by createdAt in descending order (newest first)
+  result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    // Sort by startDate in descending order
-    result.sort((a, b) => new Date(b.createdAt) - new Date(a.startDate));
-    setFilteredSponsors(result);
-  }, [tierFilter, statusFilter, searchKey, sponsors]);
+  setFilteredSponsors(result);
+}, [tierFilter, statusFilter, searchKey, sponsors]);
 
   // Calculate days left
   const calculateDaysLeft = (endDate) => {
