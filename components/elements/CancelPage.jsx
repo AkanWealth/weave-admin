@@ -32,7 +32,9 @@ export default function PaymentCancel() {
     const handleGoHome = () => {
   try {
  
-    window.location.href = "founderthrive://";
+    // window.location.href = "founderthrive://";
+
+    window.close();
   } catch (e) {
     console.error("Deep link failed:", e);
 

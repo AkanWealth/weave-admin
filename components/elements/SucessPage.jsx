@@ -27,7 +27,9 @@ export default function PaymentSuccess() {
  const handleGoHome = () => {
   try {
  
-    window.location.href = "founderthrive://";
+    // window.location.href = "founderthrive://";
+
+    window.close();
   } catch (e) {
     console.error("Deep link failed:", e);
 
