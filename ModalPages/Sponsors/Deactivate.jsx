@@ -200,7 +200,7 @@ const [sponsorData, setSponsorData] = useState(null);
         {/* Footer */}
         <div className="flex gap-3">
           <button 
-            onClick={onClose}
+            onClick={() => router.back()}
             disabled={isDeactivating}
             className="flex-1 bg-white border border-gray-300 text-gray-700 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
