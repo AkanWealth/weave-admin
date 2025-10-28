@@ -694,7 +694,7 @@ function EditMusic() {
 
       console.log("Sending draft data to API:", requestData);
 
-      const response = await api.patch(`/songs/${resourceId}`, requestData, {
+      const response = await api.patch(`/songs/url-upload/song/${resourceId}`, requestData, {
         headers: {
           "Content-Type": "application/json",
         },
